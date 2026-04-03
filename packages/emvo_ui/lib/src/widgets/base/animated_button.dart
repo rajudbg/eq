@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../theme/emvo_animations.dart';
 import '../../theme/emvo_colors.dart';
@@ -34,15 +35,23 @@ class _AnimatedButtonState extends State<AnimatedButton> {
     final fgSecondary = scheme.primary;
 
     return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapDown: (_) {
+        HapticFeedback.lightImpact();
+        setState(() => _isPressed = true);
+      },
       onTapUp: (_) => setState(() => _isPressed = false),
       onTapCancel: () => setState(() => _isPressed = false),
-      onTap: widget.isLoading ? null : widget.onPressed,
+      onTap: widget.isLoading
+          ? null
+          : () {
+              HapticFeedback.mediumImpact();
+              widget.onPressed();
+            },
       child: AnimatedContainer(
         duration: EmvoAnimations.fast,
         curve: EmvoAnimations.spring,
         width: widget.width,
-        transform: Matrix4.identity()..scale(_isPressed ? 0.97 : 1.0),
+        transform: Matrix4.identity()..scale(_isPressed ? 0.96 : 1.0),
         child: widget.isSecondary
             ? _secondaryBody(context, fgSecondary)
             : _primaryBody(context),

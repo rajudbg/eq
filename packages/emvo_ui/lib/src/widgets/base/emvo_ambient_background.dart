@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../../theme/emvo_colors.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 /// Soft gradient + blurred “blobs” behind glass UI (matches logo energy).
 class EmvoAmbientBackground extends StatelessWidget {
@@ -99,16 +100,36 @@ class _BlurBlob extends StatelessWidget {
 
     // ImageFiltered + blur is a frequent source of view/layer bugs on Flutter web
     // when the tree rebuilds (e.g. light/dark toggle).
+    Widget blob;
     if (kIsWeb) {
-      return Opacity(
+      blob = Opacity(
         opacity: 0.92,
+        child: circle,
+      );
+    } else {
+      blob = ImageFiltered(
+        imageFilter: ImageFilter.blur(sigmaX: 64, sigmaY: 64),
         child: circle,
       );
     }
 
-    return ImageFiltered(
-      imageFilter: ImageFilter.blur(sigmaX: 64, sigmaY: 64),
-      child: circle,
-    );
+    // Pseudo-randomize based on diameter to avoid them moving in unison
+    final int durationSec = 10 + (diameter % 8).toInt();
+    final double moveOffset = diameter / 4;
+
+    return blob
+        .animate(onPlay: (controller) => controller.repeat(reverse: true))
+        .move(
+          begin: Offset(-moveOffset, -moveOffset / 2),
+          end: Offset(moveOffset, moveOffset / 2),
+          duration: durationSec.seconds,
+          curve: Curves.easeInOutSine,
+        )
+        .scale(
+          begin: const Offset(0.9, 0.95),
+          end: const Offset(1.1, 1.05),
+          duration: (durationSec + 2).seconds,
+          curve: Curves.easeInOutSine,
+        );
   }
 }

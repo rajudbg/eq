@@ -40,7 +40,18 @@ class GlassContainer extends StatelessWidget {
     final fill = Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: defaultFill,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color.lerp(defaultFill, Colors.white, isDark ? 0.08 : 0.6) ??
+                defaultFill,
+            defaultFill,
+            Color.lerp(defaultFill, Colors.black, isDark ? 0.2 : 0.05) ??
+                defaultFill,
+          ],
+          stops: const [0.0, 0.5, 1.0],
+        ),
         borderRadius: BorderRadius.circular(borderRadius),
       ),
       child: child,
