@@ -10,7 +10,8 @@ class MockAssessmentRepository extends Mock implements AssessmentRepository {}
 
 class MockCoachingRepository extends Mock implements CoachingRepository {}
 
-class MockSubscriptionRepository extends Mock implements SubscriptionRepository {}
+class MockSubscriptionRepository extends Mock
+    implements SubscriptionRepository {}
 
 /// Creates a [ProviderContainer] with mocked dependencies.
 ProviderContainer createMockContainer({

@@ -28,7 +28,9 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
       if (!mounted) return;
       final r = ref.read(assessmentNotifierProvider).result;
       if (r != null) {
-        await ref.read(assessmentCompletionProvider.notifier).completeAssessment();
+        await ref
+            .read(assessmentCompletionProvider.notifier)
+            .completeAssessment();
       }
       if (mounted) {
         ref.read(mascotProvider.notifier).celebrate();

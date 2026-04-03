@@ -68,12 +68,15 @@ class HomeScreen extends ConsumerWidget {
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: context.emvoOnSurface(0.6),
                       ),
-                ),
+                ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.2, end: 0),
                 const SizedBox(height: 4),
                 Text(
                   'Ready to grow?',
                   style: Theme.of(context).textTheme.headlineLarge,
-                ),
+                )
+                    .animate()
+                    .fadeIn(duration: 400.ms, delay: 100.ms)
+                    .slideY(begin: 0.2, end: 0),
                 const SizedBox(height: 24),
                 latestResultAsync.when(
                   data: (result) => result != null
@@ -120,7 +123,8 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
                 historyAsync.when(
-                  data: (history) => _buildProgressSection(context, history, isPremium),
+                  data: (history) =>
+                      _buildProgressSection(context, history, isPremium),
                   loading: () => const SizedBox.shrink(),
                   error: (_, __) => const SizedBox.shrink(),
                 ),
@@ -142,7 +146,10 @@ class HomeScreen extends ConsumerWidget {
                         label: 'Retake\nAssessment',
                         color: EmvoColors.primary,
                         onTap: () => context.go(Routes.assessment),
-                      ),
+                      )
+                          .animate()
+                          .scale(delay: 200.ms, begin: const Offset(0.9, 0.9))
+                          .fadeIn(),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -151,7 +158,10 @@ class HomeScreen extends ConsumerWidget {
                         label: 'Talk to\nCoach',
                         color: EmvoColors.secondary,
                         onTap: () => context.go(Routes.coach),
-                      ),
+                      )
+                          .animate()
+                          .scale(delay: 300.ms, begin: const Offset(0.9, 0.9))
+                          .fadeIn(),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -161,10 +171,15 @@ class HomeScreen extends ConsumerWidget {
                         color: EmvoColors.tertiary,
                         onTap: () => {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Opening AI Scenario Simulator...')),
+                            const SnackBar(
+                                content:
+                                    Text('Opening AI Scenario Simulator...')),
                           )
                         },
-                      ),
+                      )
+                          .animate()
+                          .scale(delay: 400.ms, begin: const Offset(0.9, 0.9))
+                          .fadeIn(),
                     ),
                   ],
                 ),
@@ -219,10 +234,13 @@ class HomeScreen extends ConsumerWidget {
       children: [
         EqRadarChart(
           selfAwareness: result.dimensionScores[EQDimension.selfAwareness] ?? 0,
-          selfManagement: result.dimensionScores[EQDimension.selfRegulation] ?? 0,
-          socialAwareness: result.dimensionScores[EQDimension.socialSkills] ?? 0,
-          relationshipManagement: result.dimensionScores[EQDimension.empathy] ?? 0,
-        ).animate().fadeIn(duration: 800.ms).slideY(begin: 0.1, end: 0),
+          selfManagement:
+              result.dimensionScores[EQDimension.selfRegulation] ?? 0,
+          socialAwareness:
+              result.dimensionScores[EQDimension.socialSkills] ?? 0,
+          relationshipManagement:
+              result.dimensionScores[EQDimension.empathy] ?? 0,
+        ), // Radar chart defines its own internal entry animation now
         const SizedBox(height: 16),
         GlassContainer(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -422,9 +440,12 @@ class HomeScreen extends ConsumerWidget {
       );
     }
 
-    final limitedHistory = isPremium ? history : (history.length > 3 ? history.sublist(history.length - 3) : history);
-    final recent =
-        limitedHistory.length > 8 ? limitedHistory.sublist(limitedHistory.length - 8) : limitedHistory;
+    final limitedHistory = isPremium
+        ? history
+        : (history.length > 3 ? history.sublist(history.length - 3) : history);
+    final recent = limitedHistory.length > 8
+        ? limitedHistory.sublist(limitedHistory.length - 8)
+        : limitedHistory;
     final spots = <FlSpot>[];
     for (var i = 0; i < recent.length; i++) {
       spots.add(FlSpot(i.toDouble(), recent[i].overallScore));
@@ -455,11 +476,13 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              isPremium 
-                  ? 'Overall score across recent assessments' 
+              isPremium
+                  ? 'Overall score across recent assessments'
                   : 'Showing last 3 scores. Unlock Premium for full history.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: isPremium ? context.emvoOnSurface(0.65) : EmvoColors.primary,
+                    color: isPremium
+                        ? context.emvoOnSurface(0.65)
+                        : EmvoColors.primary,
                     fontWeight: isPremium ? FontWeight.normal : FontWeight.bold,
                   ),
             ),
@@ -556,8 +579,6 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  }
-
   Widget _buildInsightCard(
     BuildContext context, {
     required IconData icon,
@@ -606,15 +627,15 @@ class _DailyCheckInCardState extends ConsumerState<_DailyCheckInCard> {
 
   Future<void> _submitDailyCheckIn(String label) async {
     await ref.read(dailyCheckInProvider.notifier).recordMood(label);
-    
+
     // Check for App Store Review eligibility
     final history = ref.read(assessmentHistoryProvider).valueOrNull ?? [];
     final streak = _dailyStreakFromHistory(history);
-    
+
     if (!mounted) return;
     FocusScope.of(context).unfocus();
     _noteController.clear();
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -701,7 +722,8 @@ class _DailyCheckInCardState extends ConsumerState<_DailyCheckInCard> {
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
             maxLines: 2,
             minLines: 1,

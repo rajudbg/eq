@@ -18,7 +18,8 @@ class LocalQuestionDataSource {
       final questionsJson = jsonMap['questions'] as List<dynamic>;
 
       return questionsJson
-          .map((q) => QuestionModel.fromJson(Map<String, dynamic>.from(q as Map)))
+          .map((q) =>
+              QuestionModel.fromJson(Map<String, dynamic>.from(q as Map)))
           .toList();
     } on Object {
       return _getFallbackQuestions();

@@ -18,8 +18,7 @@ const _kOpenRouterAllowBrowser = bool.fromEnvironment(
 /// built-in template there unless [OPENROUTER_ALLOW_BROWSER] is enabled.
 final assessmentNarrativeProvider =
     FutureProvider.autoDispose<AssessmentAiNarrative?>((ref) async {
-  final AssessmentResult? result =
-      ref.watch(assessmentNotifierProvider).result;
+  final AssessmentResult? result = ref.watch(assessmentNotifierProvider).result;
   if (result == null) return null;
 
   // Avoid autoDispose dropping an in-flight request when the widget tree flickers

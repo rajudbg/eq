@@ -39,6 +39,7 @@ class MascotNotifier extends StateNotifier<MascotState> {
   }
 }
 
-final mascotProvider = StateNotifierProvider<MascotNotifier, MascotState>((ref) {
+final mascotProvider =
+    StateNotifierProvider<MascotNotifier, MascotState>((ref) {
   return MascotNotifier();
 });

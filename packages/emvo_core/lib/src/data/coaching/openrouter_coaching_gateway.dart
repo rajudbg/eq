@@ -95,15 +95,16 @@ the check-in only for tone when it is clearly relevant.
           'role': 'system',
           'content':
               'You summarize coaching chat themes. Reply with ONLY valid JSON: '
-              '{"insights":[{"title":"short title","description":"1-2 sentences","relatedDimension":"selfAwareness|selfRegulation|empathy|socialSkills|null"}]} '
-              'Use 1-3 insights max. No markdown.',
+                  '{"insights":[{"title":"short title","description":"1-2 sentences","relatedDimension":"selfAwareness|selfRegulation|empathy|socialSkills|null"}]} '
+                  'Use 1-3 insights max. No markdown.',
         },
         {
           'role': 'user',
           'content': 'Recent user messages:\n$recent',
         },
       ]);
-      final decoded = jsonDecode(_stripMarkdownJson(raw)) as Map<String, dynamic>;
+      final decoded =
+          jsonDecode(_stripMarkdownJson(raw)) as Map<String, dynamic>;
       final list = decoded['insights'] as List<dynamic>? ?? [];
       final out = <CoachingInsight>[];
       for (final item in list.take(3)) {
@@ -138,7 +139,18 @@ the check-in only for tone when it is clearly relevant.
       final d = userContext['dailyCheckIn'];
       if (d is Map && d['moodLabel'] != null) {
         final label = d['moodLabel'].toString().toLowerCase().trim();
-        const neutral = {'ok', 'okay', 'fine', 'neutral', 'alright', 'all right', 'meh', 'average', 'so-so', 'normal'};
+        const neutral = {
+          'ok',
+          'okay',
+          'fine',
+          'neutral',
+          'alright',
+          'all right',
+          'meh',
+          'average',
+          'so-so',
+          'normal'
+        };
         if (!neutral.contains(label)) {
           ctxLine +=
               '\nThey checked in today as: ${d['moodLabel']}. You may reflect that lightly in one starter if it fits; do not make every starter about mood.';
@@ -149,12 +161,11 @@ the check-in only for tone when it is clearly relevant.
           'role': 'system',
           'content':
               'Reply with exactly 4 short first-person coaching prompts (one sentence each), '
-              'each on its own line. No numbering or bullets. Tailor lightly to their EQ context when provided.',
+                  'each on its own line. No numbering or bullets. Tailor lightly to their EQ context when provided.',
         },
         {
           'role': 'user',
-          'content':
-              'Suggest 4 starters.\n$ctxLine',
+          'content': 'Suggest 4 starters.\n$ctxLine',
         },
       ]);
       final lines = raw

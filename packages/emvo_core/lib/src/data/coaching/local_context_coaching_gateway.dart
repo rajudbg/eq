@@ -9,7 +9,8 @@ import '../../domain/failures/failure.dart';
 /// Evidence-style local coach when no API key: uses assessment context + varied
 /// reflective prompts (no brittle single-keyword routing).
 class LocalContextCoachingAiGateway implements CoachingAiGateway {
-  LocalContextCoachingAiGateway({Random? random}) : _random = random ?? Random();
+  LocalContextCoachingAiGateway({Random? random})
+      : _random = random ?? Random();
 
   final Random _random;
 
@@ -44,7 +45,8 @@ class LocalContextCoachingAiGateway implements CoachingAiGateway {
     required CoachingSession session,
     required Message userMessage,
   }) async {
-    await Future<void>.delayed(Duration(milliseconds: 400 + _random.nextInt(500)));
+    await Future<void>.delayed(
+        Duration(milliseconds: 400 + _random.nextInt(500)));
 
     final ctx = session.context ?? {};
     final coachReplies =
@@ -92,12 +94,18 @@ class LocalContextCoachingAiGateway implements CoachingAiGateway {
     if (userTexts.trim().isEmpty) return const Right([]);
 
     final themes = <String, String>{
-      'stress': 'You have been naming pressure and overload—building regulation skills here will compound.',
-      'work': 'Work themes are showing up; small boundary experiments often beat big confrontations.',
-      'relationship': 'Relationships are central in this thread—clarity on needs may unlock next steps.',
-      'family': 'Family dynamics can activate deep patterns; self-compassion is part of the work.',
-      'angry': 'Intensity has appeared; pacing responses and naming underlying needs can help.',
-      'anxious': 'Worry has surfaced; grounding and shrinking the horizon to the next right step can help.',
+      'stress':
+          'You have been naming pressure and overload—building regulation skills here will compound.',
+      'work':
+          'Work themes are showing up; small boundary experiments often beat big confrontations.',
+      'relationship':
+          'Relationships are central in this thread—clarity on needs may unlock next steps.',
+      'family':
+          'Family dynamics can activate deep patterns; self-compassion is part of the work.',
+      'angry':
+          'Intensity has appeared; pacing responses and naming underlying needs can help.',
+      'anxious':
+          'Worry has surfaced; grounding and shrinking the horizon to the next right step can help.',
     };
 
     final insights = <CoachingInsight>[];

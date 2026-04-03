@@ -36,12 +36,13 @@ class ErrorLogger {
     String message, {
     Object? error,
     StackTrace? stackTrace,
-  }) => log(
-    message,
-    level: LogLevel.error,
-    error: error,
-    stackTrace: stackTrace,
-  );
+  }) =>
+      log(
+        message,
+        level: LogLevel.error,
+        error: error,
+        stackTrace: stackTrace,
+      );
 
   static void _reportError(
     String message,

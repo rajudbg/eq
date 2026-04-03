@@ -39,8 +39,7 @@ class MockAIService implements AIService {
         lowerMessage.contains('good')) {
       response =
           "That's wonderful! Let's savor this moment. What specifically contributed to this feeling? Understanding your wins helps replicate them.";
-    } else if (lowerMessage.contains('work') ||
-        lowerMessage.contains('boss')) {
+    } else if (lowerMessage.contains('work') || lowerMessage.contains('boss')) {
       response =
           "Workplace dynamics can be complex. Based on your EQ profile, you have strong self-regulation. How might you use that strength in this situation?";
     } else {

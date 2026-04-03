@@ -63,9 +63,8 @@ class AssessmentState {
       questions.isNotEmpty && currentQuestionIndex >= questions.length - 1;
   Question? get currentQuestion =>
       questions.isEmpty ? null : questions[currentQuestionIndex];
-  double get progress => questions.isEmpty
-      ? 0
-      : (currentQuestionIndex + 1) / questions.length;
+  double get progress =>
+      questions.isEmpty ? 0 : (currentQuestionIndex + 1) / questions.length;
 }
 
 class AssessmentNotifier extends StateNotifier<AssessmentState> {

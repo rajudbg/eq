@@ -98,9 +98,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   color: Colors.white,
                   size: 40,
                 ),
-              )
-                  .animate()
-                  .scale(
+              ).animate().scale(
                     duration: EmvoAnimations.slow,
                     curve: EmvoAnimations.spring,
                   ),
@@ -140,8 +138,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   child: GlassContainer(
                     color: isSelected
                         ? Theme.of(context).colorScheme.primary.withValues(
-                            alpha: 0.12,
-                          )
+                              alpha: 0.12,
+                            )
                         : null,
                     border: isSelected
                         ? Border.all(
@@ -165,7 +163,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                     shape: BoxShape.circle,
                                     border: Border.all(
                                       color: isSelected
-                                          ? Theme.of(context).colorScheme.primary
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .primary
                                           : context.emvoOnSurface(0.28),
                                       width: 2,
                                     ),
@@ -286,9 +286,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             children: [
               AnimatedButton(
                 text: isLoading ? 'Processing...' : 'Start Free Trial',
-                onPressed: isLoading
-                    ? () {}
-                    : () => _purchase(plans[safeIndex]),
+                onPressed:
+                    isLoading ? () {} : () => _purchase(plans[safeIndex]),
                 isLoading: isLoading,
                 width: double.infinity,
               ),

@@ -4,6 +4,7 @@ import '../../theme/emvo_colors.dart';
 import '../../theme/emvo_text_theme.dart';
 import '../../theme/emvo_theme_context.dart';
 import '../base/glass_container.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class EqRadarChart extends StatelessWidget {
   final double selfAwareness;
@@ -75,49 +76,89 @@ class EqRadarChart extends StatelessWidget {
           Text(
             'EQ Profile',
             style: EmvoTextTheme.get(context).headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
             textAlign: TextAlign.center,
-          ),
+          ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.3, end: 0),
           const SizedBox(height: 32),
-          SizedBox(
-            height: 250,
-            child: RadarChart(
-              RadarChartData(
-                dataSets: dataSets,
-                radarBackgroundColor: Colors.transparent,
-                radarBorderData: const BorderData(show: false),
-                radarShape: RadarShape.polygon,
-                titlePositionMultiplier: 1.3,
-                tickCount: 5,
-                ticksTextStyle: const TextStyle(color: Colors.transparent, fontSize: 10),
-                tickBorderData: BorderData(show: false),
-                gridBorderData: BorderSide(
-                  color: isDark ? Colors.white12 : Colors.black12,
-                  width: 1,
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              // Subtle animated background glow
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.withValues(alpha: 0.15),
+                      blurRadius: 80,
+                      spreadRadius: 40,
+                    ),
+                  ],
                 ),
-                titleTextStyle: EmvoTextTheme.get(context).labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white70 : Colors.black54,
+              )
+                  .animate(
+                      onPlay: (controller) => controller.repeat(reverse: true))
+                  .scale(
+                      begin: const Offset(0.9, 0.9),
+                      end: const Offset(1.1, 1.1),
+                      duration: 3.seconds)
+                  .fade(begin: 0.6, end: 1.0),
+
+              SizedBox(
+                height: 250,
+                child: RadarChart(
+                  RadarChartData(
+                    dataSets: dataSets,
+                    radarBackgroundColor: Colors.transparent,
+                    radarBorderData: const BorderData(show: false),
+                    radarShape: RadarShape.polygon,
+                    titlePositionMultiplier: 1.3,
+                    tickCount: 5,
+                    ticksTextStyle: const TextStyle(
+                        color: Colors.transparent, fontSize: 10),
+                    tickBorderData: BorderData(show: false),
+                    gridBorderData: BorderSide(
+                      color: isDark ? Colors.white12 : Colors.black12,
+                      width: 1,
+                    ),
+                    titleTextStyle:
+                        EmvoTextTheme.get(context).labelMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white70 : Colors.black54,
+                            ),
+                    getTitle: (index, angle) {
+                      switch (index) {
+                        case 0:
+                          return const RadarChartTitle(
+                              text: 'Self-Awareness', angle: 0);
+                        case 1:
+                          return const RadarChartTitle(
+                              text: 'Self-Management', angle: 0);
+                        case 2:
+                          return const RadarChartTitle(
+                              text: 'Social Awareness', angle: 0);
+                        case 3:
+                          return const RadarChartTitle(
+                              text: 'Relationship Mgmt', angle: 0);
+                        default:
+                          return const RadarChartTitle(text: '', angle: 0);
+                      }
+                    },
+                  ),
+                  swapAnimationDuration: const Duration(milliseconds: 600),
+                  swapAnimationCurve: Curves.easeInOut,
                 ),
-                getTitle: (index, angle) {
-                  switch (index) {
-                    case 0:
-                      return const RadarChartTitle(text: 'Self-Awareness', angle: 0);
-                    case 1:
-                      return const RadarChartTitle(text: 'Self-Management', angle: 0);
-                    case 2:
-                      return const RadarChartTitle(text: 'Social Awareness', angle: 0);
-                    case 3:
-                      return const RadarChartTitle(text: 'Relationship Mgmt', angle: 0);
-                    default:
-                      return const RadarChartTitle(text: '', angle: 0);
-                  }
-                },
-              ),
-              swapAnimationDuration: const Duration(milliseconds: 600),
-              swapAnimationCurve: Curves.easeInOut,
-            ),
+              )
+                  .animate()
+                  .scale(
+                      delay: 200.ms,
+                      curve: Curves.easeOutQuart,
+                      duration: 800.ms)
+                  .fadeIn(),
+            ],
           ),
         ],
       ),

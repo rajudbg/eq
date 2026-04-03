@@ -46,8 +46,7 @@ class AssessmentRepositoryImpl implements AssessmentRepository {
       );
     });
 
-    final overallScore =
-        normalizedScores.values.reduce((a, b) => a + b) / 4;
+    final overallScore = normalizedScores.values.reduce((a, b) => a + b) / 4;
 
     final insights = _generateInsights(normalizedScores);
     final recommendations = _generateRecommendations(normalizedScores);
@@ -125,9 +124,8 @@ class AssessmentRepositoryImpl implements AssessmentRepository {
   }
 
   List<String> _generateRecommendations(Map<EQDimension, double> scores) {
-    final lowestDimension = scores.entries
-        .reduce((a, b) => a.value < b.value ? a : b)
-        .key;
+    final lowestDimension =
+        scores.entries.reduce((a, b) => a.value < b.value ? a : b).key;
 
     return [
       'Focus on ${lowestDimension.displayName} this week',

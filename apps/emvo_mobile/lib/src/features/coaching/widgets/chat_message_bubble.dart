@@ -69,10 +69,12 @@ class ChatMessageBubble extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: scheme.onPrimary,
                               height: 1.45,
-                              fontSize:
-                                  (Theme.of(context).textTheme.bodyMedium?.fontSize ??
-                                          14) *
-                                      1.02,
+                              fontSize: (Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.fontSize ??
+                                      14) *
+                                  1.02,
                             ),
                       ),
                     ),

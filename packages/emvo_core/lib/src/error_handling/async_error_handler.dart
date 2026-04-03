@@ -35,7 +35,8 @@ mixin SafeAsyncOperations<T extends StatefulWidget> on State<T> {
     try {
       await operation();
     } catch (e, stackTrace) {
-      ErrorLogger.error('Safe operation failed', error: e, stackTrace: stackTrace);
+      ErrorLogger.error('Safe operation failed',
+          error: e, stackTrace: stackTrace);
     }
   }
 

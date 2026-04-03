@@ -20,28 +20,28 @@ class EmvoDimensions {
 
   // Shadows
   static List<BoxShadow> get shadowSm => [
-    BoxShadow(
-      color: EmvoColors.primary.withOpacity(0.1),
-      blurRadius: 4,
-      offset: const Offset(0, 2),
-    ),
-  ];
+        BoxShadow(
+          color: EmvoColors.primary.withOpacity(0.1),
+          blurRadius: 4,
+          offset: const Offset(0, 2),
+        ),
+      ];
 
   static List<BoxShadow> get shadowMd => [
-    BoxShadow(
-      color: EmvoColors.primary.withOpacity(0.15),
-      blurRadius: 8,
-      offset: const Offset(0, 4),
-    ),
-  ];
+        BoxShadow(
+          color: EmvoColors.primary.withOpacity(0.15),
+          blurRadius: 8,
+          offset: const Offset(0, 4),
+        ),
+      ];
 
   static List<BoxShadow> get shadowLg => [
-    BoxShadow(
-      color: EmvoColors.primary.withOpacity(0.2),
-      blurRadius: 16,
-      offset: const Offset(0, 8),
-    ),
-  ];
+        BoxShadow(
+          color: EmvoColors.primary.withOpacity(0.2),
+          blurRadius: 16,
+          offset: const Offset(0, 8),
+        ),
+      ];
 
   // Padding presets
   static const EdgeInsets paddingScreen = EdgeInsets.all(md);

@@ -6,7 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:emvo_mobile/src/features/welcome/welcome_screen.dart';
 
 void main() {
-  testWidgets('Welcome screen shows logo and buttons', (WidgetTester tester) async {
+  testWidgets('Welcome screen shows logo and buttons',
+      (WidgetTester tester) async {
     final previousDilation = timeDilation;
     try {
       timeDilation = 50;

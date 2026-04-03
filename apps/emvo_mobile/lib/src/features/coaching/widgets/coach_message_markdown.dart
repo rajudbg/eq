@@ -16,8 +16,7 @@ String sanitizeCoachMarkdown(String raw) {
   var s = buf.toString();
   s = s.replaceAll(RegExp(r'<[^>]{0,800}>', multiLine: true), '');
   if (s.length > kCoachMarkdownMaxLength) {
-    s =
-        '${s.substring(0, kCoachMarkdownMaxLength)}\n\n*[Message truncated for safety]*';
+    s = '${s.substring(0, kCoachMarkdownMaxLength)}\n\n*[Message truncated for safety]*';
   }
   return s.trimRight();
 }

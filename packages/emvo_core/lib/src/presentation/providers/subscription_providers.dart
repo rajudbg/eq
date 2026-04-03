@@ -17,7 +17,8 @@ final subscriptionPlansProvider =
 
 /// Initial snapshot from [SubscriptionRepository.getCurrentSubscription], then
 /// live updates from [SubscriptionRepository.subscriptionStatusStream].
-final currentSubscriptionProvider = StreamProvider<UserSubscription>((ref) async* {
+final currentSubscriptionProvider =
+    StreamProvider<UserSubscription>((ref) async* {
   final repo = ref.watch(subscriptionRepositoryProvider);
   final initial = await repo.getCurrentSubscription();
   yield initial.getOrElse((_) => UserSubscription.free());

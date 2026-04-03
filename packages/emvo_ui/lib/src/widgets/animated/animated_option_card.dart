@@ -37,9 +37,8 @@ class _AnimatedOptionCardState extends State<AnimatedOptionCard> {
         curve: EmvoAnimations.spring,
         transform: Matrix4.diagonal3Values(s, s, 1.0),
         child: GlassContainer(
-          color: widget.isSelected
-              ? scheme.primary.withValues(alpha: 0.15)
-              : null,
+          color:
+              widget.isSelected ? scheme.primary.withValues(alpha: 0.15) : null,
           border: widget.isSelected
               ? Border.all(color: scheme.primary, width: 2)
               : null,

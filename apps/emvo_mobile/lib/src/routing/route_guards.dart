@@ -47,8 +47,7 @@ class RouteGuards {
     final container = ProviderScope.containerOf(context);
     final isAuthenticated = container.read(authProvider);
     final location = state.uri.path;
-    final hasCompletedAssessment =
-        container.read(assessmentCompletionProvider);
+    final hasCompletedAssessment = container.read(assessmentCompletionProvider);
 
     // Guest mode: main tabs + settings/paywall after EQ assessment without sign-in.
     if (_isAllowedAfterAssessment(location) && hasCompletedAssessment) {
@@ -63,8 +62,7 @@ class RouteGuards {
     final container = ProviderScope.containerOf(context);
     final hasCompletedOnboarding = container.read(onboardingProvider);
     final location = state.uri.path;
-    final hasCompletedAssessment =
-        container.read(assessmentCompletionProvider);
+    final hasCompletedAssessment = container.read(assessmentCompletionProvider);
 
     if (_isAllowedAfterAssessment(location) && hasCompletedAssessment) {
       return null;

@@ -32,10 +32,10 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(assessmentNotifierProvider);
     final isPremium = ref.watch(isPremiumProvider);
-    final history = ref.watch(assessmentHistoryProvider).valueOrNull ?? const [];
+    final history =
+        ref.watch(assessmentHistoryProvider).valueOrNull ?? const [];
     final hasCompletedAssessment = history.isNotEmpty;
-    final shouldGateAssessment =
-        !isPremium &&
+    final shouldGateAssessment = !isPremium &&
         hasCompletedAssessment &&
         state.status != AssessmentStatus.inProgress;
 
@@ -71,7 +71,8 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
                     const SizedBox(height: 16),
                     AnimatedButton(
                       text: 'Upgrade to Premium',
-                      onPressed: () => context.push('/paywall?source=assessment'),
+                      onPressed: () =>
+                          context.push('/paywall?source=assessment'),
                       width: double.infinity,
                     ),
                     const SizedBox(height: 8),
@@ -120,14 +121,16 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: EmvoColors.error),
+              const Icon(Icons.error_outline,
+                  size: 64, color: EmvoColors.error),
               const SizedBox(height: 16),
               Text(state.errorMessage ?? 'Something went wrong'),
               const SizedBox(height: 16),
               AnimatedButton(
                 text: 'Try Again',
-                onPressed: () =>
-                    ref.read(assessmentNotifierProvider.notifier).loadQuestions(),
+                onPressed: () => ref
+                    .read(assessmentNotifierProvider.notifier)
+                    .loadQuestions(),
               ),
             ],
           ),
@@ -152,7 +155,8 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
         padding: EmvoDimensions.paddingScreen,
         child: Column(
           children: [
-            AnimatedProgressBar(progress: state.progress, showPercentage: false),
+            AnimatedProgressBar(
+                progress: state.progress, showPercentage: false),
             const SizedBox(height: 8),
             Text(
               'Focus: ${question.primaryDimension.displayName}',
@@ -235,8 +239,9 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
                 padding: const EdgeInsets.only(top: 16),
                 child: AnimatedButton(
                   text: 'Previous',
-                  onPressed: () =>
-                      ref.read(assessmentNotifierProvider.notifier).previousQuestion(),
+                  onPressed: () => ref
+                      .read(assessmentNotifierProvider.notifier)
+                      .previousQuestion(),
                   isSecondary: true,
                 ),
               ),
@@ -288,7 +293,9 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
     if (current.isLastQuestion) {
       await notifier.calculateResult();
       if (!mounted) return;
-      await ref.read(assessmentCompletionProvider.notifier).completeAssessment();
+      await ref
+          .read(assessmentCompletionProvider.notifier)
+          .completeAssessment();
       if (!mounted) return;
       context.go('/results');
     } else {

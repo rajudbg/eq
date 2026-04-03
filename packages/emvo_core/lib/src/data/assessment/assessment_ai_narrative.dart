@@ -25,7 +25,8 @@ class AssessmentAiNarrativeService {
 
   final OpenRouterChatClient? _client;
 
-  factory AssessmentAiNarrativeService.openRouter(OpenRouterChatClient client) =>
+  factory AssessmentAiNarrativeService.openRouter(
+          OpenRouterChatClient client) =>
       AssessmentAiNarrativeService._(client);
 
   factory AssessmentAiNarrativeService.localOnly() =>
@@ -40,8 +41,7 @@ class AssessmentAiNarrativeService {
         final raw = await client.complete([
           {
             'role': 'system',
-            'content':
-                'You write clear, warm EQ results copy for a free tier: one comprehensive analysis. '
+            'content': 'You write clear, warm EQ results copy for a free tier: one comprehensive analysis. '
                 'Output ONLY valid JSON with keys: '
                 'headline (max 12 words, inviting), '
                 'narrative (4–6 short paragraphs, plain text, separate with \\n\\n). The narrative MUST: '
@@ -157,7 +157,8 @@ class AssessmentAiNarrativeService {
         return null;
       }
       while (actions.length < 3) {
-        actions.add('Keep one micro-habit visible on your lock screen this week');
+        actions
+            .add('Keep one micro-habit visible on your lock screen this week');
       }
       return AssessmentAiNarrative(
         headline: headline,

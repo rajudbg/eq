@@ -16,7 +16,8 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Integration smoke', () {
-    testWidgets('Welcome screen shows primary content', (WidgetTester tester) async {
+    testWidgets('Welcome screen shows primary content',
+        (WidgetTester tester) async {
       final previousDilation = timeDilation;
       try {
         timeDilation = 50;

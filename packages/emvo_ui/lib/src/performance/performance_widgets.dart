@@ -78,8 +78,8 @@ class CachedWidget<T> extends ConsumerWidget {
 
     return asyncValue.when(
       data: (data) => builder(context, data),
-      loading:
-          () => loading ?? const Center(child: CircularProgressIndicator()),
+      loading: () =>
+          loading ?? const Center(child: CircularProgressIndicator()),
       error: (err, stack) =>
           error?.call(err, stack) ?? Center(child: Text('Error: $err')),
     );

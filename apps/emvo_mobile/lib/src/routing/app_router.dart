@@ -16,7 +16,8 @@ import '../features/welcome/welcome_screen.dart';
 import 'route_guards.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
-final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> _shellNavigatorKey =
+    GlobalKey<NavigatorState>();
 
 class AppRouter {
   static GoRouter get router => _router;

@@ -132,21 +132,24 @@ class SettingsScreen extends ConsumerWidget {
               GlassContainer(
                 margin: const EdgeInsets.only(bottom: 20),
                 child: SwitchListTile.adaptive(
-                  secondary: Icon(Icons.chat_bubble_outline, color: scheme.primary),
+                  secondary:
+                      Icon(Icons.chat_bubble_outline, color: scheme.primary),
                   title: const Text('Concise replies'),
                   subtitle: const Text(
                     'Shorter coach messages when using the AI (preference only for now).',
                   ),
                   value: concise,
-                  onChanged: (v) =>
-                      ref.read(coachConciseRepliesProvider.notifier).setConcise(v),
+                  onChanged: (v) => ref
+                      .read(coachConciseRepliesProvider.notifier)
+                      .setConcise(v),
                 ),
               ),
               _sectionLabel(context, 'Notifications'),
               GlassContainer(
                 margin: const EdgeInsets.only(bottom: 20),
                 child: SwitchListTile.adaptive(
-                  secondary: Icon(Icons.notifications_outlined, color: scheme.primary),
+                  secondary:
+                      Icon(Icons.notifications_outlined, color: scheme.primary),
                   title: const Text('Reminders & tips'),
                   subtitle: const Text(
                     'EQ nudges and streak reminders (local only until push is wired).',
@@ -163,7 +166,8 @@ class SettingsScreen extends ConsumerWidget {
                 child: Column(
                   children: [
                     ListTile(
-                      leading: Icon(Icons.person_outline, color: scheme.primary),
+                      leading:
+                          Icon(Icons.person_outline, color: scheme.primary),
                       title: const Text('Profile'),
                       subtitle: const Text('Name, goals, and subscription'),
                       trailing: const Icon(Icons.chevron_right),
@@ -172,7 +176,9 @@ class SettingsScreen extends ConsumerWidget {
                         context.go(Routes.profile);
                       },
                     ),
-                    Divider(height: 1, color: scheme.outline.withValues(alpha: 0.2)),
+                    Divider(
+                        height: 1,
+                        color: scheme.outline.withValues(alpha: 0.2)),
                     ListTile(
                       leading: Icon(
                         Icons.workspace_premium_outlined,
@@ -192,7 +198,8 @@ class SettingsScreen extends ConsumerWidget {
                 child: Column(
                   children: [
                     ListTile(
-                      leading: Icon(Icons.privacy_tip_outlined, color: scheme.primary),
+                      leading: Icon(Icons.privacy_tip_outlined,
+                          color: scheme.primary),
                       title: const Text('Privacy'),
                       subtitle: const Text('How we use your data'),
                       onTap: () => _soon(context),

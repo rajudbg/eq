@@ -41,8 +41,8 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
         final result = inMemory ?? persisted;
         if (!mounted || result == null) return;
         ref.read(coachingRepositoryProvider).applyCoachingContext(
-          assessmentToCoachingContext(result),
-        );
+              assessmentToCoachingContext(result),
+            );
         ref.invalidate(coachingSessionProvider);
         ref.invalidate(suggestedPromptsProvider);
       } catch (_) {}
@@ -104,10 +104,9 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
   bool _isAtMessageLimit(WidgetRef ref) {
     final subscription = ref.read(currentSubscriptionProvider).valueOrNull;
     final session = ref.read(coachingSessionProvider).valueOrNull;
-    final messageCount = session?.messages
-            .where((m) => m.sender == MessageSender.user)
-            .length ??
-        0;
+    final messageCount =
+        session?.messages.where((m) => m.sender == MessageSender.user).length ??
+            0;
     final maxMessages =
         subscription?.currentTier.maxCoachingMessagesPerDay ?? 5;
     if (maxMessages == -1) return false;
@@ -121,15 +120,13 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
     final subscription = subscriptionAsync.valueOrNull;
     final session = sessionAsync.valueOrNull;
 
-    final messageCount = session?.messages
-            .where((m) => m.sender == MessageSender.user)
-            .length ??
-        0;
+    final messageCount =
+        session?.messages.where((m) => m.sender == MessageSender.user).length ??
+            0;
     final maxMessages =
         subscription?.currentTier.maxCoachingMessagesPerDay ?? 5;
     final remainingMessages = maxMessages - messageCount;
-    final hasReachedLimit =
-        remainingMessages <= 0 && maxMessages != -1;
+    final hasReachedLimit = remainingMessages <= 0 && maxMessages != -1;
 
     return Scaffold(
       extendBodyBehindAppBar: false,
@@ -184,137 +181,141 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
         child: SizedBox.expand(
           child: Column(
             children: [
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const EmvoMascotEmoji(size: 40),
-                const SizedBox(width: 12),
-                Flexible(
-                  child: Consumer(
-                    builder: (context, ref, _) {
-                      final mascotState = ref.watch(mascotProvider);
-                      return Text(
-                        _getMascotStatus(mascotState, _isTyping),
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                              color: context.emvoOnSurface(0.62),
-                            ),
-                      );
-                    },
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const EmvoMascotEmoji(size: 40),
+                    const SizedBox(width: 12),
+                    Flexible(
+                      child: Consumer(
+                        builder: (context, ref, _) {
+                          final mascotState = ref.watch(mascotProvider);
+                          return Text(
+                            _getMascotStatus(mascotState, _isTyping),
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium
+                                ?.copyWith(
+                                  color: context.emvoOnSurface(0.62),
+                                ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: sessionAsync.when(
+                  data: (session) => _buildMessageList(session),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (_, __) => Center(
+                    child: Padding(
+                      padding: EmvoDimensions.paddingScreen,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: EmvoColors.error,
+                          ),
+                          const SizedBox(height: 16),
+                          const Text('Failed to load conversation'),
+                          const SizedBox(height: 16),
+                          AnimatedButton(
+                            text: 'Retry',
+                            onPressed: () =>
+                                ref.invalidate(coachingSessionProvider),
+                            width: double.infinity,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: sessionAsync.when(
-              data: (session) => _buildMessageList(session),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, __) => Center(
-                child: Padding(
-                  padding: EmvoDimensions.paddingScreen,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 48,
-                        color: EmvoColors.error,
+              ),
+              Consumer(
+                builder: (context, ref, _) {
+                  final s = ref.watch(coachingSessionProvider).valueOrNull;
+                  if (s == null || s.messages.length > 2 || hasReachedLimit) {
+                    return const SizedBox.shrink();
+                  }
+                  final promptsAsync = ref.watch(suggestedPromptsProvider);
+                  return promptsAsync.when(
+                    data: (prompts) => SuggestedPrompts(
+                      prompts: prompts,
+                      onPromptSelected: _sendMessage,
+                    ),
+                    loading: () => const SizedBox(
+                      height: 58,
+                      child: Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      const Text('Failed to load conversation'),
-                      const SizedBox(height: 16),
+                    ),
+                    error: (_, __) => SuggestedPrompts(
+                      prompts: kDefaultSuggestedPrompts,
+                      onPromptSelected: _sendMessage,
+                    ),
+                  );
+                },
+              ),
+              if (hasReachedLimit) ...[
+                GlassContainer(
+                  color: EmvoColors.secondary.withValues(alpha: 0.1),
+                  margin: const EdgeInsets.all(EmvoDimensions.md),
+                  padding: const EdgeInsets.all(EmvoDimensions.md),
+                  child: Column(
+                    children: [
+                      Text(
+                        'You have reached your daily message limit',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: context.emvoScheme.onSurface,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Upgrade to Premium for unlimited coaching',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: context.emvoOnSurface(0.78),
+                            ),
+                      ),
+                      const SizedBox(height: 12),
                       AnimatedButton(
-                        text: 'Retry',
-                        onPressed: () =>
-                            ref.invalidate(coachingSessionProvider),
+                        text: 'Upgrade to Premium',
+                        onPressed: () => context.push(Routes.paywall),
                         width: double.infinity,
                       ),
                     ],
                   ),
                 ),
-              ),
-            ),
-          ),
-          Consumer(
-            builder: (context, ref, _) {
-              final s = ref.watch(coachingSessionProvider).valueOrNull;
-              if (s == null || s.messages.length > 2 || hasReachedLimit) {
-                return const SizedBox.shrink();
-              }
-              final promptsAsync = ref.watch(suggestedPromptsProvider);
-              return promptsAsync.when(
-                data: (prompts) => SuggestedPrompts(
-                  prompts: prompts,
-                  onPromptSelected: _sendMessage,
+              ] else ...[
+                CoachingInput(
+                  controller: _textController,
+                  onSend: _sendMessage,
+                  isTyping: _isTyping,
                 ),
-                loading: () => const SizedBox(
-                  height: 58,
-                  child: Center(
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                if (maxMessages != -1)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: EmvoDimensions.sm),
+                    child: Text(
+                      '$remainingMessages messages remaining today',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: context.emvoOnSurface(0.52),
+                          ),
                     ),
                   ),
-                ),
-                error: (_, __) => SuggestedPrompts(
-                  prompts: kDefaultSuggestedPrompts,
-                  onPromptSelected: _sendMessage,
-                ),
-              );
-            },
-          ),
-          if (hasReachedLimit) ...[
-            GlassContainer(
-              color: EmvoColors.secondary.withValues(alpha: 0.1),
-              margin: const EdgeInsets.all(EmvoDimensions.md),
-              padding: const EdgeInsets.all(EmvoDimensions.md),
-              child: Column(
-                children: [
-                  Text(
-                    'You have reached your daily message limit',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: context.emvoScheme.onSurface,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Upgrade to Premium for unlimited coaching',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: context.emvoOnSurface(0.78),
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  AnimatedButton(
-                    text: 'Upgrade to Premium',
-                    onPressed: () => context.push(Routes.paywall),
-                    width: double.infinity,
-                  ),
-                ],
-              ),
-            ),
-          ] else ...[
-            CoachingInput(
-              controller: _textController,
-              onSend: _sendMessage,
-              isTyping: _isTyping,
-            ),
-            if (maxMessages != -1)
-              Padding(
-                padding: const EdgeInsets.only(bottom: EmvoDimensions.sm),
-                child: Text(
-                  '$remainingMessages messages remaining today',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: context.emvoOnSurface(0.52),
-                      ),
-                ),
-              ),
-          ],
+              ],
             ],
           ),
         ),

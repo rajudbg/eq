@@ -32,11 +32,10 @@ class GlassContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final defaultFill = color ??
-        (isDark ? EmvoColors.glassDark : EmvoColors.glassLight);
-    final strokeColor = isDark
-        ? EmvoColors.glassStrokeDark
-        : EmvoColors.glassStrokeLight;
+    final defaultFill =
+        color ?? (isDark ? EmvoColors.glassDark : EmvoColors.glassLight);
+    final strokeColor =
+        isDark ? EmvoColors.glassStrokeDark : EmvoColors.glassStrokeLight;
 
     final fill = Container(
       padding: padding,
