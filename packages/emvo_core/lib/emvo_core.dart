@@ -1,7 +1,12 @@
 library emvo_core;
 
+export 'src/data/assessment/assessment_ai_narrative.dart';
 export 'src/data/coaching/ai_service.dart';
+export 'src/data/coaching/coaching_ai_factories.dart';
 export 'src/data/coaching/coaching_repository_impl.dart';
+export 'src/data/coaching/local_context_coaching_gateway.dart';
+export 'src/data/coaching/openrouter_chat_client.dart';
+export 'src/data/coaching/openrouter_coaching_gateway.dart';
 export 'src/data/subscription/subscription_repository_impl.dart';
 export 'src/di/injection.dart';
 export 'src/domain/coaching/entities/message.dart';

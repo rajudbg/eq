@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:emvo_core/emvo_core.dart';
 import 'package:emvo_ui/emvo_ui.dart';
+
+import '../../routing/routing.dart';
 
 class PaywallScreen extends ConsumerStatefulWidget {
   final String? source;
@@ -115,7 +116,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               Text(
                 'Get personalized AI coaching and deep insights into your emotional intelligence',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: EmvoColors.onBackground.withValues(alpha: 0.7),
+                      color: context.emvoOnSurface(0.72),
                     ),
                 textAlign: TextAlign.center,
               ),
@@ -138,10 +139,15 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   margin: const EdgeInsets.only(bottom: 12),
                   child: GlassContainer(
                     color: isSelected
-                        ? EmvoColors.primary.withValues(alpha: 0.1)
-                        : EmvoColors.glassWhite,
+                        ? Theme.of(context).colorScheme.primary.withValues(
+                            alpha: 0.12,
+                          )
+                        : null,
                     border: isSelected
-                        ? Border.all(color: EmvoColors.primary, width: 2)
+                        ? Border.all(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2,
+                          )
                         : null,
                     padding: const EdgeInsets.all(EmvoDimensions.md),
                     child: Column(
@@ -159,20 +165,21 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                     shape: BoxShape.circle,
                                     border: Border.all(
                                       color: isSelected
-                                          ? EmvoColors.primary
-                                          : EmvoColors.onBackground
-                                              .withValues(alpha: 0.3),
+                                          ? Theme.of(context).colorScheme.primary
+                                          : context.emvoOnSurface(0.28),
                                       width: 2,
                                     ),
                                     color: isSelected
-                                        ? EmvoColors.primary
+                                        ? Theme.of(context).colorScheme.primary
                                         : Colors.transparent,
                                   ),
                                   child: isSelected
-                                      ? const Icon(
+                                      ? Icon(
                                           Icons.check,
                                           size: 16,
-                                          color: Colors.white,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary,
                                         )
                                       : null,
                                 ),
@@ -224,7 +231,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                       .headlineSmall
                                       ?.copyWith(
                                         fontWeight: FontWeight.bold,
-                                        color: EmvoColors.primary,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
                                       ),
                                 ),
                                 Text(
@@ -233,8 +242,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                       .textTheme
                                       .labelSmall
                                       ?.copyWith(
-                                        color: EmvoColors.onBackground
-                                            .withValues(alpha: 0.6),
+                                        color: context.emvoOnSurface(0.62),
                                       ),
                                 ),
                               ],
@@ -290,7 +298,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 child: Text(
                   'Restore Purchases',
                   style: TextStyle(
-                    color: EmvoColors.onBackground.withValues(alpha: 0.6),
+                    color: context.emvoOnSurface(0.62),
                   ),
                 ),
               ),
@@ -298,7 +306,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               Text(
                 'Cancel anytime. No commitment.',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: EmvoColors.onBackground.withValues(alpha: 0.5),
+                      color: context.emvoOnSurface(0.52),
                     ),
               ),
             ],
@@ -324,7 +332,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         );
       },
       (_) {
-        context.go('/home');
+        context.go(Routes.home);
       },
     );
   }
@@ -346,7 +354,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       },
       (subscription) {
         if (subscription.currentTier != SubscriptionTier.free) {
-          context.go('/home');
+          context.go(Routes.home);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(

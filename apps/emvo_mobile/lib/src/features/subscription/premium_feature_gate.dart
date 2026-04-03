@@ -72,6 +72,7 @@ class _LockedPremiumCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return GlassContainer(
       padding: const EdgeInsets.all(EmvoDimensions.lg),
       child: Column(
@@ -80,13 +81,14 @@ class _LockedPremiumCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.lock_outline, color: EmvoColors.primary, size: 28),
+              Icon(Icons.lock_outline, color: scheme.primary, size: 28),
               const SizedBox(width: EmvoDimensions.sm),
               Expanded(
                 child: Text(
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: scheme.onSurface,
                       ),
                 ),
               ),
@@ -96,7 +98,7 @@ class _LockedPremiumCard extends StatelessWidget {
           Text(
             subtitle,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: EmvoColors.onBackground.withValues(alpha: 0.75),
+                  color: scheme.onSurface.withValues(alpha: 0.8),
                 ),
           ),
           const SizedBox(height: EmvoDimensions.md),

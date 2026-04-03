@@ -16,6 +16,7 @@ class AnimatedScoreRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = context.emvoScheme;
     final clampedScore = score.clamp(0.0, 100.0);
     final color = _getScoreColor(clampedScore);
 
@@ -29,7 +30,7 @@ class AnimatedScoreRing extends StatelessWidget {
           CircularProgressIndicator(
             value: 1,
             strokeWidth: size * 0.08,
-            backgroundColor: EmvoColors.surfaceVariant,
+            backgroundColor: scheme.surfaceContainerHighest,
             valueColor: AlwaysStoppedAnimation<Color>(
               color.withValues(alpha: (color.a * 0.2).clamp(0.0, 1.0)),
             ),
@@ -68,10 +69,7 @@ class AnimatedScoreRing extends StatelessWidget {
               Text(
                 'EQ',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: EmvoColors.onBackground.withValues(
-                        alpha:
-                            (EmvoColors.onBackground.a * 0.6).clamp(0.0, 1.0),
-                      ),
+                      color: context.emvoOnSurface(0.62),
                     ),
               ),
             ],

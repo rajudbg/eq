@@ -21,14 +21,9 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Configure system UI
+  // Nav/status bar colors follow theme via [SystemUiThemeSync] in [EmvoApp].
   SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-      systemNavigationBarColor: Colors.white,
-      systemNavigationBarIconBrightness: Brightness.dark,
-    ),
+    const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
   );
 
   configureDependencies();
@@ -42,8 +37,9 @@ Future<void> main() async {
         assessmentRepositoryProvider.overrideWithValue(
           AssessmentRepositoryImpl(),
         ),
+        // OpenRouter when OPENROUTER_API_KEY is set; else LocalContextCoachingAiGateway.
         coachingRepositoryProvider.overrideWithValue(
-          CoachingRepositoryImpl(MockAIService()),
+          CoachingRepositoryImpl(createCoachingAiGateway()),
         ),
         subscriptionRepositoryProvider.overrideWithValue(
           SubscriptionRepositoryImpl(),

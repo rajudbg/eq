@@ -8,6 +8,7 @@ import 'package:emvo_assessment/emvo_assessment.dart';
 import 'package:emvo_core/emvo_core.dart';
 import 'package:emvo_ui/emvo_ui.dart';
 
+import '../../providers/app_state_providers.dart';
 import '../../providers/assessment_providers.dart';
 
 class AssessmentScreen extends ConsumerStatefulWidget {
@@ -164,10 +165,7 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
             Text(
               question.primaryDimension.description,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: EmvoColors.onBackground.withValues(
-                      alpha: (EmvoColors.onBackground.a * 0.65)
-                          .clamp(0.0, 1.0),
-                    ),
+                    color: context.emvoOnSurface(0.68),
                   ),
               textAlign: TextAlign.center,
             ),
@@ -191,10 +189,7 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
                       _mascotFeedback(mascotState),
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: EmvoColors.onBackground.withValues(
-                              alpha: (EmvoColors.onBackground.a * 0.75)
-                                  .clamp(0.0, 1.0),
-                            ),
+                            color: context.emvoOnSurface(0.78),
                           ),
                     ),
                   ],
@@ -292,6 +287,8 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
 
     if (current.isLastQuestion) {
       await notifier.calculateResult();
+      if (!mounted) return;
+      await ref.read(assessmentCompletionProvider.notifier).completeAssessment();
       if (!mounted) return;
       context.go('/results');
     } else {

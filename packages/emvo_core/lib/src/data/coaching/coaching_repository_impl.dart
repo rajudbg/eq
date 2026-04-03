@@ -3,16 +3,28 @@ import 'dart:async';
 import 'package:fpdart/fpdart.dart';
 
 import '../../domain/coaching/entities/message.dart';
+import '../../domain/coaching/repositories/coaching_ai_gateway.dart';
 import '../../domain/coaching/repositories/coaching_repository.dart';
 import '../../domain/failures/failure.dart';
-import 'ai_service.dart';
 
 class CoachingRepositoryImpl implements CoachingRepository {
-  CoachingRepositoryImpl(this._aiService);
+  CoachingRepositoryImpl(this._gateway);
 
-  final AIService _aiService;
+  final CoachingAiGateway _gateway;
   CoachingSession? _currentSession;
+  Map<String, dynamic>? _pendingContext;
   final _messageController = StreamController<Message>.broadcast();
+
+  @override
+  void applyCoachingContext(Map<String, dynamic> context) {
+    if (context.isEmpty) return;
+    _pendingContext = {...?_pendingContext, ...context};
+    if (_currentSession != null) {
+      _currentSession = _currentSession!.copyWith(
+        context: {...?_currentSession!.context, ...context},
+      );
+    }
+  }
 
   @override
   Future<Either<Failure, CoachingSession>> getActiveSession() async {
@@ -21,7 +33,9 @@ class CoachingRepositoryImpl implements CoachingRepository {
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         startedAt: DateTime.now(),
         messages: [],
+        context: _pendingContext,
       );
+      _pendingContext = null;
       return Right(_currentSession!);
     } catch (e) {
       return Left(ServerFailure('Failed to get session'));
@@ -34,6 +48,7 @@ class CoachingRepositoryImpl implements CoachingRepository {
     return sessionEither.match(
       (failure) async => Left<Failure, Message>(failure),
       (session) async {
+        final previousMessages = session.messages;
         try {
           final userMessage = Message(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -47,21 +62,29 @@ class CoachingRepositoryImpl implements CoachingRepository {
           );
           _messageController.add(userMessage);
 
-          final historyForAi = [...session.messages, userMessage];
-          final aiResponse = await _aiService.sendMessage(
-            userMessage: content,
-            conversationHistory: historyForAi,
-            userContext: {},
+          final turn = await _gateway.completeTurn(
+            session: _currentSession!,
+            userMessage: userMessage,
           );
 
-          _currentSession = _currentSession!.copyWith(
-            messages: [..._currentSession!.messages, aiResponse],
+          return turn.match(
+            (f) {
+              _currentSession = session.copyWith(messages: previousMessages);
+              return Left<Failure, Message>(f);
+            },
+            (aiResponse) {
+              _currentSession = _currentSession!.copyWith(
+                messages: [..._currentSession!.messages, aiResponse],
+              );
+              _messageController.add(aiResponse);
+              return Right<Failure, Message>(aiResponse);
+            },
           );
-          _messageController.add(aiResponse);
-
-          return Right(aiResponse);
         } catch (e) {
-          return Left(ServerFailure('Failed to send message'));
+          _currentSession = session.copyWith(messages: previousMessages);
+          return Left(
+            ServerFailure('Failed to send message: $e'),
+          );
         }
       },
     );
@@ -69,17 +92,22 @@ class CoachingRepositoryImpl implements CoachingRepository {
 
   @override
   Future<Either<Failure, List<String>>> getSuggestedPrompts() async {
-    try {
-      final prompts = await _aiService.getSuggestedPrompts(userContext: {});
-      return Right(prompts);
-    } catch (e) {
-      return Left(ServerFailure('Failed to get prompts'));
-    }
+    final sessionEither = await getActiveSession();
+    return sessionEither.match(
+      (f) async => Left<Failure, List<String>>(f),
+      (session) async => _gateway.suggestConversationStarters(
+        session.context ?? {},
+      ),
+    );
   }
 
   @override
   Future<Either<Failure, List<CoachingInsight>>> getInsights() async {
-    return const Right([]);
+    final sessionEither = await getActiveSession();
+    return sessionEither.match(
+      (f) async => Left<Failure, List<CoachingInsight>>(f),
+      (session) async => _gateway.generateInsights(session: session),
+    );
   }
 
   @override

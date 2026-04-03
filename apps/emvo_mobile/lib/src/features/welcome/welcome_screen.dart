@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:emvo_ui/emvo_ui.dart';
 
 import '../../routing/routing.dart';
+import 'welcome_animated_logo.dart';
 
 class WelcomeScreen extends ConsumerStatefulWidget {
   const WelcomeScreen({super.key});
@@ -13,101 +14,107 @@ class WelcomeScreen extends ConsumerStatefulWidget {
 }
 
 class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
+  bool _emphasizeLogo = false;
+
   @override
   void initState() {
     super.initState();
-    // Mascot starts idle, then celebrates after delay
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        ref.read(mascotProvider.notifier).celebrate();
-      }
+    Future<void>.delayed(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _emphasizeLogo = true);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final mascotState = ref.watch(mascotProvider);
     return Scaffold(
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              padding: EmvoDimensions.paddingScreen,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 16),
-                    Column(
-                      children: [
-                        // Default .scale() begins at (0,0) → invisible; start near 1.0.
-                        EmvoMascotEmoji(size: 160)
-                            .animate()
-                            .scale(
-                              begin: const Offset(0.88, 0.88),
-                              duration: EmvoAnimations.slow,
-                              curve: EmvoAnimations.spring,
+      body: EmvoAmbientBackground(
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: EmvoDimensions.paddingScreen,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 24),
+                      WelcomeAnimatedLogo(emphasize: _emphasizeLogo),
+                      const SizedBox(height: 28),
+                      if (_emphasizeLogo)
+                        Text(
+                          'Welcome to Emvo!',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                        ).animate().fadeIn(duration: 400.ms).slideY(
+                              begin: 0.1,
+                              duration: 450.ms,
+                              curve: Curves.easeOutCubic,
                             ),
-                        const SizedBox(height: 16),
-                        if (mascotState == MascotState.celebrating)
-                          Text(
-                            'Welcome to Emvo!',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(color: EmvoColors.primary),
-                          ).animate().fadeIn().slideY(begin: 0.12),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Emvo',
-                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                            color: EmvoColors.primary,
+                      if (_emphasizeLogo) const SizedBox(height: 12),
+                      GlassContainer(
+                        margin: EdgeInsets.zero,
+                        padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              'Emotional Intelligence,\nIn Motion',
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge
+                                  ?.copyWith(
+                                    color: context.emvoOnSurface(0.78),
+                                    height: 1.4,
+                                  ),
+                            ).animate().fadeIn(
+                                  delay: const Duration(milliseconds: 180),
+                                  duration: 450.ms,
+                                ),
+                            const SizedBox(height: 28),
+                            AnimatedButton(
+                              text: 'Get Started',
+                              onPressed: () {
+                                ref.read(mascotProvider.notifier).encourage();
+                                context.go(Routes.onboarding);
+                              },
+                              width: double.infinity,
+                            ).animate().slideY(
+                                  begin: 0.1,
+                                  duration: EmvoAnimations.normal,
+                                  curve: EmvoAnimations.standard,
+                                ),
+                            const SizedBox(height: 14),
+                            AnimatedButton(
+                              text: 'I Already Have an Account',
+                              onPressed: () => context.go(Routes.assessment),
+                              isSecondary: true,
+                              width: double.infinity,
+                            ).animate().slideY(
+                                  begin: 0.1,
+                                  delay: const Duration(milliseconds: 90),
+                                  duration: EmvoAnimations.normal,
+                                  curve: EmvoAnimations.standard,
+                                ),
+                          ],
+                        ),
+                      ).animate().fadeIn(
+                            delay: const Duration(milliseconds: 120),
+                            duration: 500.ms,
                           ),
-                    ).animate().fadeIn(duration: EmvoAnimations.normal),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Emotional Intelligence,\nIn Motion',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: EmvoColors.onBackground.withValues(
-                              alpha: (EmvoColors.onBackground.a * 0.7)
-                                  .clamp(0.0, 1.0),
-                            ),
-                          ),
-                    ).animate().fadeIn(
-                          delay: const Duration(milliseconds: 200),
-                        ),
-                    const SizedBox(height: 32),
-                    AnimatedButton(
-                      text: 'Get Started',
-                      onPressed: () {
-                        ref.read(mascotProvider.notifier).encourage();
-                        context.go(Routes.onboarding);
-                      },
-                      width: double.infinity,
-                    ).animate().slideY(
-                          begin: 0.12,
-                          duration: EmvoAnimations.normal,
-                        ),
-                    const SizedBox(height: 16),
-                    AnimatedButton(
-                      text: 'I Already Have an Account',
-                      onPressed: () => context.go(Routes.assessment),
-                      isSecondary: true,
-                      width: double.infinity,
-                    ).animate().slideY(
-                          begin: 0.12,
-                          delay: const Duration(milliseconds: 100),
-                        ),
-                    const SizedBox(height: 32),
-                  ],
+                      const SizedBox(height: 28),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

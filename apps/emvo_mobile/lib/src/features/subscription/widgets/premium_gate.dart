@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:emvo_core/emvo_core.dart';
 import 'package:emvo_ui/emvo_ui.dart';
+
+import '../../../routing/routing.dart';
 
 /// Wraps a premium feature with a gate that shows paywall if not subscribed
 class PremiumGate extends ConsumerWidget {
@@ -29,7 +30,7 @@ class PremiumGate extends ConsumerWidget {
     return _LockedFeatureOverlay(
       featureName: featureName ?? 'Premium Feature',
       child: child,
-      onUpgrade: () => context.push('/paywall'),
+      onUpgrade: () => context.push(Routes.paywall),
     );
   }
 }
@@ -47,6 +48,12 @@ class _LockedFeatureOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final scrim = isDark
+        ? Colors.black.withValues(alpha: 0.58)
+        : scheme.surface.withValues(alpha: 0.82);
+
     return Stack(
       fit: StackFit.passthrough,
       children: [
@@ -58,7 +65,7 @@ class _LockedFeatureOverlay extends StatelessWidget {
         ),
         Positioned.fill(
           child: Container(
-            color: Colors.white.withValues(alpha: 0.7),
+            color: scrim,
           ),
         ),
         Center(
@@ -68,23 +75,26 @@ class _LockedFeatureOverlay extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.lock_outline,
                   size: 48,
-                  color: EmvoColors.primary,
+                  color: scheme.primary,
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'Premium Feature',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: scheme.onSurface,
                       ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Upgrade to access $featureName and unlock your full EQ potential',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: scheme.onSurface.withValues(alpha: 0.85),
+                      ),
                 ),
                 const SizedBox(height: 24),
                 AnimatedButton(

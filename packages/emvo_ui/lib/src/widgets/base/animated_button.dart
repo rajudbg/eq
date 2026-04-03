@@ -4,13 +4,6 @@ import '../../theme/emvo_animations.dart';
 import '../../theme/emvo_colors.dart';
 
 class AnimatedButton extends StatefulWidget {
-  final String text;
-  final VoidCallback onPressed;
-  final bool isLoading;
-  final bool isSecondary;
-  final IconData? icon;
-  final double? width;
-
   const AnimatedButton({
     super.key,
     required this.text,
@@ -21,6 +14,13 @@ class AnimatedButton extends StatefulWidget {
     this.width,
   });
 
+  final String text;
+  final VoidCallback onPressed;
+  final bool isLoading;
+  final bool isSecondary;
+  final IconData? icon;
+  final double? width;
+
   @override
   State<AnimatedButton> createState() => _AnimatedButtonState();
 }
@@ -30,9 +30,8 @@ class _AnimatedButtonState extends State<AnimatedButton> {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor =
-        widget.isSecondary ? Colors.transparent : EmvoColors.primary;
-    final fgColor = widget.isSecondary ? EmvoColors.primary : Colors.white;
+    final scheme = Theme.of(context).colorScheme;
+    final fgSecondary = scheme.primary;
 
     return GestureDetector(
       onTapDown: (_) => setState(() => _isPressed = true),
@@ -43,56 +42,86 @@ class _AnimatedButtonState extends State<AnimatedButton> {
         duration: EmvoAnimations.fast,
         curve: EmvoAnimations.spring,
         width: widget.width,
-        transform: Matrix4.identity()..scale(_isPressed ? 0.95 : 1.0),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(12),
-            border: widget.isSecondary
-                ? Border.all(color: EmvoColors.primary, width: 2)
-                : null,
-            boxShadow: _isPressed || widget.isSecondary
-                ? []
-                : [
-                    BoxShadow(
-                      color: EmvoColors.primary.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-          ),
-          child: widget.isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
-              : Row(
-                  mainAxisSize: widget.width != null
-                      ? MainAxisSize.max
-                      : MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (widget.icon != null) ...[
-                      Icon(widget.icon, color: fgColor, size: 20),
-                      const SizedBox(width: 8),
-                    ],
-                    Text(
-                      widget.text,
-                      style: TextStyle(
-                        color: fgColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
+        transform: Matrix4.identity()..scale(_isPressed ? 0.97 : 1.0),
+        child: widget.isSecondary
+            ? _secondaryBody(context, fgSecondary)
+            : _primaryBody(context),
+      ),
+    );
+  }
+
+  Widget _primaryBody(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      decoration: BoxDecoration(
+        gradient: EmvoColors.brandGradient,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: _isPressed
+            ? []
+            : [
+                BoxShadow(
+                  color: EmvoColors.brandMagenta.withValues(alpha: 0.45),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
                 ),
+              ],
+      ),
+      child: widget.isLoading
+          ? const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            )
+          : _labelRow(Colors.white),
+    );
+  }
+
+  Widget _secondaryBody(BuildContext context, Color fg) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: fg.withValues(alpha: 0.55),
+          width: 1.5,
         ),
       ),
+      child: widget.isLoading
+          ? SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(fg),
+              ),
+            )
+          : _labelRow(fg),
+    );
+  }
+
+  Widget _labelRow(Color fg) {
+    return Row(
+      mainAxisSize: widget.width != null ? MainAxisSize.max : MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (widget.icon != null) ...[
+          Icon(widget.icon, color: fg, size: 20),
+          const SizedBox(width: 8),
+        ],
+        Text(
+          widget.text,
+          style: TextStyle(
+            color: fg,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.2,
+          ),
+        ),
+      ],
     );
   }
 }

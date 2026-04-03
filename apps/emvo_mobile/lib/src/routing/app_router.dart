@@ -10,8 +10,10 @@ import '../features/progress/progress_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/results/results_screen.dart';
+import '../features/settings/settings_screen.dart';
 import '../features/subscription/paywall_screen.dart';
 import '../features/welcome/welcome_screen.dart';
+import 'route_guards.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -41,6 +43,11 @@ class AppRouter {
         builder: (context, state) => PaywallScreen(
           source: state.uri.queryParameters['source'],
         ),
+      ),
+      GoRoute(
+        path: '/settings',
+        name: 'settings',
+        builder: (context, state) => const SettingsScreen(),
       ),
 
       // Assessment Flow (horizontal shared axis)
@@ -118,13 +125,8 @@ class AppRouter {
       ),
     ],
 
-    // Redirect logic
-    redirect: (context, state) {
-      // TODO: Add auth state check
-      // If not onboarded, redirect to onboarding
-      // If not assessed, redirect to assessment
-      return null;
-    },
+    // Redirect logic: check auth, onboarding, and assessment state
+    redirect: RouteGuards.checkAll,
 
     // Error handling
     errorBuilder: (context, state) => Scaffold(
@@ -146,4 +148,5 @@ class Routes {
   static const String progress = '/progress';
   static const String profile = '/profile';
   static const String paywall = '/paywall';
+  static const String settings = '/settings';
 }

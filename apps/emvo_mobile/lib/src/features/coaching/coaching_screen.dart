@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:emvo_assessment/emvo_assessment.dart';
 import 'package:emvo_core/emvo_core.dart';
 import 'package:emvo_ui/emvo_ui.dart';
 
+import '../../providers/assessment_providers.dart';
+import '../../routing/routing.dart';
+import '../assessment/assessment_ai_bridge.dart';
 import 'coaching_providers.dart';
 import 'widgets/chat_message_bubble.dart';
 import 'widgets/coaching_input.dart';
@@ -27,9 +30,22 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
     super.initState();
     // Defer: updating providers in initState can run while the tree is still
     // building and triggers Riverpod's "modify provider while building" error.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       ref.read(mascotProvider.notifier).listen();
+      // EQ snapshot was only applied from Results → "Start Coaching"; hydrate from
+      // persisted latest so the Coach tab always has scores when available.
+      try {
+        final inMemory = ref.read(assessmentNotifierProvider).result;
+        final persisted = await ref.read(latestResultProvider.future);
+        final result = inMemory ?? persisted;
+        if (!mounted || result == null) return;
+        ref.read(coachingRepositoryProvider).applyCoachingContext(
+          assessmentToCoachingContext(result),
+        );
+        ref.invalidate(coachingSessionProvider);
+        ref.invalidate(suggestedPromptsProvider);
+      } catch (_) {}
     });
   }
 
@@ -53,6 +69,13 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
   Future<void> _sendMessage(String content) async {
     if (content.trim().isEmpty) return;
     if (_isAtMessageLimit(ref)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Daily message limit reached. Upgrade for more.'),
+          ),
+        );
+      }
       return;
     }
 
@@ -109,15 +132,43 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
         remainingMessages <= 0 && maxMessages != -1;
 
     return Scaffold(
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
         centerTitle: true,
+        elevation: 0,
+        scrolledUnderElevation: 0.5,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                EmvoColors.primary.withValues(alpha: 0.08),
+                EmvoColors.tertiary.withValues(alpha: 0.06),
+                Colors.transparent,
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         title: Column(
           children: [
-            const Text('Coach'),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.bubble_chart_rounded,
+                  size: 20,
+                  color: EmvoColors.primary.withValues(alpha: 0.9),
+                ),
+                const SizedBox(width: 8),
+                const Text('Coach'),
+              ],
+            ),
             Text(
-              'AI-Powered EQ Guidance',
+              'EQ guidance · not therapy',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: EmvoColors.onBackground.withValues(alpha: 0.6),
+                    color: context.emvoOnSurface(0.58),
+                    letterSpacing: 0.2,
                   ),
             ),
           ],
@@ -129,8 +180,10 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
+      body: EmvoAmbientBackground(
+        child: SizedBox.expand(
+          child: Column(
+            children: [
           Container(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Row(
@@ -146,9 +199,7 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
                         _getMascotStatus(mascotState, _isTyping),
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                              color: EmvoColors.onBackground.withValues(
-                                alpha: 0.6,
-                              ),
+                              color: context.emvoOnSurface(0.62),
                             ),
                       );
                     },
@@ -193,8 +244,26 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
               if (s == null || s.messages.length > 2 || hasReachedLimit) {
                 return const SizedBox.shrink();
               }
-              return SuggestedPrompts(
-                onPromptSelected: _sendMessage,
+              final promptsAsync = ref.watch(suggestedPromptsProvider);
+              return promptsAsync.when(
+                data: (prompts) => SuggestedPrompts(
+                  prompts: prompts,
+                  onPromptSelected: _sendMessage,
+                ),
+                loading: () => const SizedBox(
+                  height: 58,
+                  child: Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                ),
+                error: (_, __) => SuggestedPrompts(
+                  prompts: kDefaultSuggestedPrompts,
+                  onPromptSelected: _sendMessage,
+                ),
               );
             },
           ),
@@ -205,19 +274,25 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
               padding: const EdgeInsets.all(EmvoDimensions.md),
               child: Column(
                 children: [
-                  const Text(
+                  Text(
                     'You have reached your daily message limit',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: context.emvoScheme.onSurface,
+                        ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Upgrade to Premium for unlimited coaching',
                     textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: context.emvoOnSurface(0.78),
+                        ),
                   ),
                   const SizedBox(height: 12),
                   AnimatedButton(
                     text: 'Upgrade to Premium',
-                    onPressed: () => context.push('/paywall'),
+                    onPressed: () => context.push(Routes.paywall),
                     width: double.infinity,
                   ),
                 ],
@@ -235,13 +310,14 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
                 child: Text(
                   '$remainingMessages messages remaining today',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color:
-                            EmvoColors.onBackground.withValues(alpha: 0.5),
+                        color: context.emvoOnSurface(0.52),
                       ),
                 ),
               ),
           ],
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -265,7 +341,7 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
               Icon(
                 Icons.chat_bubble_outline,
                 size: 64,
-                color: EmvoColors.onBackground.withValues(alpha: 0.2),
+                color: context.emvoOnSurface(0.22),
               ),
               const SizedBox(height: 16),
               Text(
@@ -277,7 +353,7 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
                 'Share how you are feeling or ask for EQ advice',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: EmvoColors.onBackground.withValues(alpha: 0.6),
+                      color: context.emvoOnSurface(0.62),
                     ),
               ),
             ],
@@ -310,25 +386,40 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
   }
 
   Widget _buildTypingIndicator() {
+    final scheme = Theme.of(context).colorScheme;
+    final inner = scheme.surface.withValues(alpha: 0.92);
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(top: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: EmvoColors.surfaceVariant,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: EmvoColors.primary.withValues(alpha: 0.1),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildDot(0),
-            _buildDot(1),
-            _buildDot(2),
+          borderRadius: BorderRadius.circular(20),
+          gradient: EmvoColors.brandGradient,
+          boxShadow: [
+            BoxShadow(
+              color: EmvoColors.primary.withValues(alpha: 0.15),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
           ],
+        ),
+        padding: const EdgeInsets.all(1.5),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: inner,
+            borderRadius: BorderRadius.circular(18.5),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildDot(0),
+                _buildDot(1),
+                _buildDot(2),
+              ],
+            ),
+          ),
         ),
       ),
     );

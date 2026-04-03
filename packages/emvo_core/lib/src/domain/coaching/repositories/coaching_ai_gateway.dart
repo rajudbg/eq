@@ -22,4 +22,9 @@ abstract class CoachingAiGateway {
   Future<Either<Failure, List<CoachingInsight>>> generateInsights({
     required CoachingSession session,
   });
+
+  /// Conversation starters tailored to optional user context (e.g. assessment scores).
+  Future<Either<Failure, List<String>>> suggestConversationStarters(
+    Map<String, dynamic> userContext,
+  );
 }

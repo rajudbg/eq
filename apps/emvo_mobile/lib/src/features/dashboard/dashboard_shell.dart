@@ -1,17 +1,32 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:emvo_ui/emvo_ui.dart';
 
+import '../../providers/daily_checkin_provider.dart';
 import '../../routing/routing.dart';
 
-class DashboardShell extends StatelessWidget {
+class DashboardShell extends ConsumerStatefulWidget {
   const DashboardShell({
     super.key,
     required this.child,
   });
 
   final Widget child;
+
+  @override
+  ConsumerState<DashboardShell> createState() => _DashboardShellState();
+}
+
+class _DashboardShellState extends ConsumerState<DashboardShell> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(dailyCheckInProvider.notifier).refreshFromStorage();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,16 +49,17 @@ class DashboardShell extends StatelessWidget {
         },
         child: KeyedSubtree(
           key: ValueKey<String>(location),
-          child: child,
+          child: widget.child,
         ),
       ),
       bottomNavigationBar: SafeArea(
         child: NavigationBar(
           selectedIndex: selectedIndex,
           onDestinationSelected: (index) => _onItemTapped(index, context),
-          backgroundColor: EmvoColors.surface,
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
           elevation: 0,
-          indicatorColor: EmvoColors.primary.withValues(alpha: 0.2),
+          indicatorColor:
+              Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
           animationDuration: EmvoAnimations.normal,
           destinations: const [
             NavigationDestination(

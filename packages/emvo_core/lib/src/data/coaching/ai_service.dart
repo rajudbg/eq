@@ -14,7 +14,8 @@ abstract class AIService {
   });
 }
 
-/// Mock implementation for development; swap for a real [AIService] later.
+/// Lightweight mock for **unit tests** of code that still depends on [AIService].
+/// The app uses [CoachingAiGateway] via [createCoachingAiGateway] instead.
 class MockAIService implements AIService {
   @override
   Future<Message> sendMessage({

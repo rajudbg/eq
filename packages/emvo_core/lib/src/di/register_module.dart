@@ -1,8 +1,9 @@
 import 'package:injectable/injectable.dart';
 
-import '../data/coaching/ai_service.dart';
+import '../data/coaching/coaching_ai_factories.dart';
 import '../data/coaching/coaching_repository_impl.dart';
 import '../data/subscription/subscription_repository_impl.dart';
+import '../domain/coaching/repositories/coaching_ai_gateway.dart';
 import '../domain/coaching/repositories/coaching_repository.dart';
 import '../domain/subscription/repositories/subscription_repository.dart';
 import 'injection.dart';
@@ -10,11 +11,11 @@ import 'injection.dart';
 @module
 abstract class RegisterModule {
   @lazySingleton
-  AIService get aiService => MockAIService();
+  CoachingAiGateway get coachingAiGateway => createCoachingAiGateway();
 
   @lazySingleton
   CoachingRepository get coachingRepository =>
-      CoachingRepositoryImpl(getIt<AIService>());
+      CoachingRepositoryImpl(getIt<CoachingAiGateway>());
 
   @lazySingleton
   SubscriptionRepository get subscriptionRepository =>

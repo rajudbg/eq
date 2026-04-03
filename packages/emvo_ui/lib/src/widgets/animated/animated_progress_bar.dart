@@ -16,12 +16,13 @@ class AnimatedProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = context.emvoScheme;
     return Column(
       children: [
         Container(
           height: height,
           decoration: BoxDecoration(
-            color: EmvoColors.surfaceVariant,
+            color: scheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(height / 2),
           ),
           child: LayoutBuilder(

@@ -28,9 +28,11 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-
-        expect(find.text('Emvo'), findsOneWidget);
         expect(find.text('Get Started'), findsOneWidget);
+
+        await tester.pump(const Duration(seconds: 3));
+        await tester.pumpAndSettle();
+        expect(find.text('Welcome to Emvo!'), findsOneWidget);
       } finally {
         timeDilation = previousDilation;
       }

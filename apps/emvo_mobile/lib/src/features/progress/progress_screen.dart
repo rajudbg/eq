@@ -5,6 +5,7 @@ import 'package:emvo_assessment/emvo_assessment.dart';
 import 'package:emvo_ui/emvo_ui.dart';
 
 import '../../providers/assessment_providers.dart';
+import '../../routing/routing.dart';
 
 class ProgressScreen extends ConsumerWidget {
   const ProgressScreen({super.key});
@@ -14,29 +15,37 @@ class ProgressScreen extends ConsumerWidget {
     final historyAsync = ref.watch(assessmentHistoryProvider);
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Your Progress'),
       ),
-      body: SafeArea(
-        child: historyAsync.when(
-          data: (history) => _buildContent(context, history),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, __) => Center(
-            child: Padding(
-              padding: EmvoDimensions.paddingScreen,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: EmvoColors.error),
-                  const SizedBox(height: 16),
-                  const Text('Failed to load history'),
-                  const SizedBox(height: 16),
-                  AnimatedButton(
-                    text: 'Retry',
-                    onPressed: () => ref.invalidate(assessmentHistoryProvider),
-                    width: double.infinity,
-                  ),
-                ],
+      body: EmvoAmbientBackground(
+        child: SafeArea(
+          child: historyAsync.when(
+            data: (history) => _buildContent(context, history),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (_, __) => Center(
+              child: Padding(
+                padding: EmvoDimensions.paddingScreen,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: EmvoColors.error,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('Failed to load history'),
+                    const SizedBox(height: 16),
+                    AnimatedButton(
+                      text: 'Retry',
+                      onPressed: () =>
+                          ref.invalidate(assessmentHistoryProvider),
+                      width: double.infinity,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -56,7 +65,7 @@ class ProgressScreen extends ConsumerWidget {
               Icon(
                 Icons.trending_up,
                 size: 64,
-                color: EmvoColors.onBackground.withValues(alpha: 0.3),
+                color: context.emvoOnSurface(0.32),
               ),
               const SizedBox(height: 16),
               Text(
@@ -68,8 +77,14 @@ class ProgressScreen extends ConsumerWidget {
                 'Complete your first assessment to see progress',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: EmvoColors.onBackground.withValues(alpha: 0.6),
+                      color: context.emvoOnSurface(0.62),
                     ),
+              ),
+              const SizedBox(height: 24),
+              AnimatedButton(
+                text: 'Take assessment',
+                onPressed: () => context.go(Routes.assessment),
+                width: double.infinity,
               ),
             ],
           ),
@@ -91,7 +106,7 @@ class ProgressScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           SizedBox(
             height: 200,
-            child: _buildTrendChart(history),
+            child: _buildTrendChart(context, history),
           ),
           const SizedBox(height: 32),
           Text(
@@ -116,10 +131,16 @@ class ProgressScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTrendChart(List<AssessmentResult> history) {
+  Widget _buildTrendChart(
+    BuildContext context,
+    List<AssessmentResult> history,
+  ) {
     final spots = history.asMap().entries.map((entry) {
       return FlSpot(entry.key.toDouble(), entry.value.overallScore);
     }).toList();
+
+    final scheme = context.emvoScheme;
+    final dotStroke = scheme.surface;
 
     return LineChart(
       LineChartData(
@@ -129,7 +150,7 @@ class ProgressScreen extends ConsumerWidget {
           horizontalInterval: 20,
           getDrawingHorizontalLine: (value) {
             return FlLine(
-              color: EmvoColors.onBackground.withValues(alpha: 0.05),
+              color: context.emvoOnSurface(0.06),
               strokeWidth: 1,
             );
           },
@@ -144,7 +165,7 @@ class ProgressScreen extends ConsumerWidget {
                 return Text(
                   value.toInt().toString(),
                   style: TextStyle(
-                    color: EmvoColors.onBackground.withValues(alpha: 0.5),
+                    color: context.emvoOnSurface(0.52),
                     fontSize: 12,
                   ),
                 );
@@ -180,7 +201,7 @@ class ProgressScreen extends ConsumerWidget {
                   radius: 6,
                   color: EmvoColors.primary,
                   strokeWidth: 2,
-                  strokeColor: Colors.white,
+                  strokeColor: dotStroke,
                 );
               },
             ),
@@ -228,7 +249,8 @@ class ProgressScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
                     value: entry.value / 100,
-                    backgroundColor: EmvoColors.surfaceVariant,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       _getDimensionColor(entry.key),
                     ),
@@ -289,9 +311,15 @@ class _HistoryCard extends StatelessWidget {
             ),
           ),
         ),
-        title: Text('Assessment $formattedDate'),
+        title: Text(
+          'Assessment $formattedDate',
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
         subtitle: Text(
           '${result.dimensionScores.length} dimensions measured',
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         trailing: const Icon(Icons.chevron_right),
       ),

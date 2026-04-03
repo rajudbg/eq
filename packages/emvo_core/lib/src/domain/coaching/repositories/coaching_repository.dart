@@ -4,6 +4,9 @@ import '../../failures/failure.dart';
 import '../entities/message.dart';
 
 abstract class CoachingRepository {
+  /// Merge assessment / profile data into the active (or next) coaching session.
+  void applyCoachingContext(Map<String, dynamic> context);
+
   /// Get or create active session
   Future<Either<Failure, CoachingSession>> getActiveSession();
 

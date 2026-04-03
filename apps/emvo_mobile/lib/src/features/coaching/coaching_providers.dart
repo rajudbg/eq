@@ -1,6 +1,24 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:emvo_core/emvo_core.dart';
 
+/// Shown when suggested-prompt API fails or returns empty.
+const kDefaultSuggestedPrompts = <String>[
+  "I'm feeling overwhelmed today",
+  'Help me prepare for a difficult conversation',
+  'Why do I react so strongly to criticism?',
+  'Teach me a quick calming technique',
+];
+
+/// Loads starter prompts from the active coaching backend (OpenRouter or mock).
+final suggestedPromptsProvider = FutureProvider<List<String>>((ref) async {
+  final repo = ref.watch(coachingRepositoryProvider);
+  final result = await repo.getSuggestedPrompts();
+  return result.fold(
+    (_) => kDefaultSuggestedPrompts,
+    (prompts) => prompts.isEmpty ? kDefaultSuggestedPrompts : prompts,
+  );
+});
+
 final coachingSessionProvider = FutureProvider<CoachingSession>((ref) async {
   final repo = ref.watch(coachingRepositoryProvider);
   final result = await repo.getActiveSession();

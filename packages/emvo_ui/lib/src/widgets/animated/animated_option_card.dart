@@ -25,6 +25,7 @@ class _AnimatedOptionCardState extends State<AnimatedOptionCard> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = context.emvoScheme;
     final s = _isPressed ? 0.98 : 1.0;
     return GestureDetector(
       onTapDown: (_) => setState(() => _isPressed = true),
@@ -37,12 +38,10 @@ class _AnimatedOptionCardState extends State<AnimatedOptionCard> {
         transform: Matrix4.diagonal3Values(s, s, 1.0),
         child: GlassContainer(
           color: widget.isSelected
-              ? EmvoColors.primary.withValues(
-                  alpha: (EmvoColors.primary.a * 0.15).clamp(0.0, 1.0),
-                )
-              : EmvoColors.glassWhite,
+              ? scheme.primary.withValues(alpha: 0.15)
+              : null,
           border: widget.isSelected
-              ? Border.all(color: EmvoColors.primary, width: 2)
+              ? Border.all(color: scheme.primary, width: 2)
               : null,
           padding: const EdgeInsets.all(EmvoDimensions.md),
           child: Row(
@@ -51,11 +50,8 @@ class _AnimatedOptionCardState extends State<AnimatedOptionCard> {
                 Icon(
                   widget.icon,
                   color: widget.isSelected
-                      ? EmvoColors.primary
-                      : EmvoColors.onBackground.withValues(
-                          alpha:
-                              (EmvoColors.onBackground.a * 0.6).clamp(0.0, 1.0),
-                        ),
+                      ? scheme.primary
+                      : context.emvoOnSurface(0.58),
                 ),
                 const SizedBox(width: EmvoDimensions.md),
               ],
@@ -64,8 +60,8 @@ class _AnimatedOptionCardState extends State<AnimatedOptionCard> {
                   widget.text,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: widget.isSelected
-                            ? EmvoColors.primary
-                            : EmvoColors.onBackground,
+                            ? scheme.primary
+                            : scheme.onSurface,
                         fontWeight: widget.isSelected
                             ? FontWeight.w600
                             : FontWeight.normal,
@@ -73,7 +69,7 @@ class _AnimatedOptionCardState extends State<AnimatedOptionCard> {
                 ),
               ),
               if (widget.isSelected)
-                const Icon(Icons.check_circle, color: EmvoColors.primary)
+                Icon(Icons.check_circle, color: scheme.primary)
                     .animate()
                     .scale(duration: EmvoAnimations.fast),
             ],

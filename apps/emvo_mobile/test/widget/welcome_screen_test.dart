@@ -17,11 +17,12 @@ void main() {
           ),
         ),
       );
-      // Speeds up flutter_animate + WelcomeScreen's delayed mascot callback.
       await tester.pumpAndSettle();
-
-      expect(find.text('Emvo'), findsOneWidget);
       expect(find.text('Emotional Intelligence,\nIn Motion'), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+      expect(find.text('Welcome to Emvo!'), findsOneWidget);
 
       expect(find.text('Get Started'), findsOneWidget);
       expect(find.text('I Already Have an Account'), findsOneWidget);
