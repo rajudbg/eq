@@ -1,0 +1,34 @@
+# Dart / Flutter
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+build/
+
+# Root lockfile only
+/pubspec.lock
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/launch.json
+*.iml
+
+# macOS
+.DS_Store
+
+# Android
+**/android/.gradle/
+**/android/local.properties
+**/android/captures/
+
+# iOS
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Runner.xcworkspace/
+
+# Logs
+*.log

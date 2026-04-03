@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Emvo Dev",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "apps/emvo_mobile",
+      "program": "lib/main.dart",
+      "toolArgs": ["--flavor", "dev", "--dart-define=FLAVOR=dev"]
+    },
+    {
+      "name": "Emvo Staging",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "apps/emvo_mobile",
+      "program": "lib/main.dart",
+      "toolArgs": ["--flavor", "staging", "--dart-define=FLAVOR=staging"]
+    },
+    {
+      "name": "Emvo Prod",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "apps/emvo_mobile",
+      "program": "lib/main.dart",
+      "toolArgs": ["--flavor", "prod", "--dart-define=FLAVOR=prod"]
+    }
+  ]
+}

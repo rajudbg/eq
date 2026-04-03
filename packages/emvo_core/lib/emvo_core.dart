@@ -1,0 +1,19 @@
+library emvo_core;
+
+export 'src/data/coaching/ai_service.dart';
+export 'src/data/coaching/coaching_repository_impl.dart';
+export 'src/data/subscription/subscription_repository_impl.dart';
+export 'src/di/injection.dart';
+export 'src/domain/coaching/entities/message.dart';
+export 'src/domain/coaching/repositories/coaching_ai_gateway.dart';
+export 'src/domain/coaching/repositories/coaching_repository.dart';
+export 'src/domain/coaching/usecases/get_coaching_response.dart';
+export 'src/error_handling/error_logger.dart';
+export 'src/error_handling/async_error_handler.dart';
+export 'src/domain/failure.dart';
+export 'src/domain/subscription/entities/subscription_plan.dart';
+export 'src/domain/subscription/entities/subscription_status.dart';
+export 'src/domain/subscription/repositories/subscription_repository.dart';
+export 'src/presentation/providers/coaching_providers.dart';
+export 'src/presentation/providers/subscription_providers.dart';
+export 'src/emvo_core_placeholder.dart';

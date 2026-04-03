@@ -1,0 +1,43 @@
+name: emvo
+
+packages:
+  - apps/**
+  - packages/**
+
+scripts:
+  bootstrap:
+    run: $HOME/.pub-cache/bin/melos bootstrap
+    description: Bootstrap all packages
+  clean:
+    run: $HOME/.pub-cache/bin/melos clean
+    description: Clean all package artifacts
+  test:
+    run: $HOME/.pub-cache/bin/melos exec -- flutter test
+    description: Run tests across all packages
+  analyze:
+    run: $HOME/.pub-cache/bin/melos exec -- flutter analyze
+    description: Analyze all packages
+  build_runner:build:
+    run: $HOME/.pub-cache/bin/melos exec --scope="emvo_core" -- dart run build_runner build --delete-conflicting-outputs && $HOME/.pub-cache/bin/melos exec --scope="emvo_assessment" -- dart run build_runner build --delete-conflicting-outputs
+    description: Run code generation (emvo_core first, then emvo_assessment — avoids parallel race on generated emvo_core assets)
+  run-mobile:
+    run: cd apps/emvo_mobile && flutter run -d chrome
+    description: Run Emvo app in Chrome (avoids multi-device prompt; use -d macos/-d <id> locally)
+  run-mobile-dev:
+    run: cd apps/emvo_mobile && flutter run -d chrome --dart-define=FLAVOR=dev
+    description: Run Emvo in Chrome with dev Dart flavor (use run-android-dev for Android --flavor)
+  run-android-dev:
+    run: cd apps/emvo_mobile && flutter run --flavor dev --dart-define=FLAVOR=dev
+    description: Run on attached device/emulator with Android dev flavor + Dart FLAVOR=dev
+  test:all:
+    run: $HOME/.pub-cache/bin/melos run test:unit && $HOME/.pub-cache/bin/melos run test:widget && $HOME/.pub-cache/bin/melos run test:integration
+    description: Run unit, widget, and integration tests
+  test:unit:
+    run: $HOME/.pub-cache/bin/melos exec --concurrency=1 --dir-exists="test/unit" -- flutter test test/unit
+    description: Run unit tests (packages with test/unit only)
+  test:widget:
+    run: $HOME/.pub-cache/bin/melos exec --concurrency=1 --dir-exists="test/widget" -- flutter test test/widget
+    description: Run widget tests (packages with test/widget only)
+  test:integration:
+    run: cd apps/emvo_mobile && flutter test integration_test -d flutter-tester
+    description: Run integration tests (headless flutter-tester; avoids multi-device prompt)

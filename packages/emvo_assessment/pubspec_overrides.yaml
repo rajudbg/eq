@@ -1,0 +1,8 @@
+# melos_managed_dependency_overrides: emvo_core,emvo_ui,emvo_assets
+dependency_overrides:
+  emvo_assets:
+    path: ../emvo_assets
+  emvo_core:
+    path: ../emvo_core
+  emvo_ui:
+    path: ../emvo_ui

@@ -1,0 +1,213 @@
+{
+  "version": "1.0.0",
+  "questions": [
+    {
+      "id": "sa_001",
+      "scenario": "You wake up feeling off but cannot name the emotion. You...",
+      "primaryDimension": "selfAwareness",
+      "context": "personal",
+      "difficulty": 1,
+      "options": [
+        {"id": "a", "text": "Ignore it and start your day", "scores": {"selfAwareness": 1, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Try to push through the feeling", "scores": {"selfAwareness": 2, "selfRegulation": 1}, "emotionalTone": "neutral"},
+        {"id": "c", "text": "Pause and scan your body for clues", "scores": {"selfAwareness": 5, "selfRegulation": 3}, "emotionalTone": "positive"},
+        {"id": "d", "text": "Journal what might be causing it", "scores": {"selfAwareness": 4, "selfRegulation": 4}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sa_002",
+      "scenario": "During a meeting, you notice your heart racing. You realize...",
+      "primaryDimension": "selfAwareness",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "You are anxious about presenting", "scores": {"selfAwareness": 5, "selfRegulation": 3}, "emotionalTone": "positive"},
+        {"id": "b", "text": "The room is too hot", "scores": {"selfAwareness": 2, "selfRegulation": 2}, "emotionalTone": "neutral"},
+        {"id": "c", "text": "Someone is wrong and you want to correct them", "scores": {"selfAwareness": 3, "selfRegulation": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "You do not notice anything", "scores": {"selfAwareness": 1, "selfRegulation": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "sr_001",
+      "scenario": "You receive an angry email from a client. Your first instinct is to fire back. You...",
+      "primaryDimension": "selfRegulation",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Write a draft immediately to vent", "scores": {"selfAwareness": 2, "selfRegulation": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Wait 24 hours before responding", "scores": {"selfAwareness": 3, "selfRegulation": 5}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Call them to discuss immediately", "scores": {"selfAwareness": 3, "selfRegulation": 3, "socialSkills": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Forward to your manager to handle", "scores": {"selfAwareness": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "sr_002",
+      "scenario": "You are stuck in traffic and will be late. You feel frustration rising. You...",
+      "primaryDimension": "selfRegulation",
+      "context": "personal",
+      "difficulty": 1,
+      "options": [
+        {"id": "a", "text": "Honk and yell at other drivers", "scores": {"selfRegulation": 1, "selfAwareness": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Accept you cannot control traffic", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Complain to someone on the phone", "scores": {"selfRegulation": 2, "socialSkills": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Take deep breaths and notify who is waiting", "scores": {"selfRegulation": 4, "socialSkills": 4}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "em_001",
+      "scenario": "A colleague is quieter than usual. You suspect something is wrong. You...",
+      "primaryDimension": "empathy",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Ignore it - they will share if they want to", "scores": {"empathy": 2, "socialSkills": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Ask directly if they are okay", "scores": {"empathy": 4, "socialSkills": 3}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Offer specific help based on what you know", "scores": {"empathy": 5, "socialSkills": 4}, "emotionalTone": "positive"},
+        {"id": "d", "text": "Tell others you think they are struggling", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "aggressive"}
+      ]
+    },
+    {
+      "id": "em_002",
+      "scenario": "Your friend shares good news but you are having a bad day. You...",
+      "primaryDimension": "empathy",
+      "context": "social",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Force enthusiasm you do not feel", "scores": {"empathy": 3, "selfAwareness": 2}, "emotionalTone": "neutral"},
+        {"id": "b", "text": "Be honest that you are struggling to celebrate", "scores": {"empathy": 4, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Change subject to your own problems", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Take a moment to genuinely feel happy for them", "scores": {"empathy": 5, "selfRegulation": 4}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "ss_001",
+      "scenario": "Two friends are arguing and both vent to you. You...",
+      "primaryDimension": "socialSkills",
+      "context": "social",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Take sides with whoever is closer to you", "scores": {"socialSkills": 1, "empathy": 2}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Listen but do not get involved", "scores": {"socialSkills": 3, "empathy": 3}, "emotionalTone": "neutral"},
+        {"id": "c", "text": "Help them see each other's perspectives", "scores": {"socialSkills": 5, "empathy": 5}, "emotionalTone": "positive"},
+        {"id": "d", "text": "Suggest they talk directly to each other", "scores": {"socialSkills": 4, "empathy": 4}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "ss_002",
+      "scenario": "You need to disagree with your boss in a meeting. You...",
+      "primaryDimension": "socialSkills",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Stay silent to avoid conflict", "scores": {"socialSkills": 1, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Say you disagree without explanation", "scores": {"socialSkills": 2, "selfRegulation": 1}, "emotionalTone": "aggressive"},
+        {"id": "c", "text": "Privately share concerns after the meeting", "scores": {"socialSkills": 4, "selfRegulation": 4}, "emotionalTone": "positive"},
+        {"id": "d", "text": "Frame it as a question: 'Have we considered...'", "scores": {"socialSkills": 5, "selfRegulation": 4}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sa_003",
+      "scenario": "You keep procrastinating on an important task. You realize the real emotion is...",
+      "primaryDimension": "selfAwareness",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Laziness", "scores": {"selfAwareness": 2}, "emotionalTone": "neutral"},
+        {"id": "b", "text": "Fear of not doing it perfectly", "scores": {"selfAwareness": 5, "selfRegulation": 3}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Boredom with the task", "scores": {"selfAwareness": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "You just need more discipline", "scores": {"selfAwareness": 1, "selfRegulation": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "sr_003",
+      "scenario": "Someone cuts in front of you in a long queue. You...",
+      "primaryDimension": "selfRegulation",
+      "context": "social",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Confront them immediately", "scores": {"selfRegulation": 1, "socialSkills": 2}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Let it go - not worth the stress", "scores": {"selfRegulation": 4, "selfAwareness": 3}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Make a loud comment to shame them", "scores": {"selfRegulation": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Calmly point out the queue", "scores": {"selfRegulation": 5, "socialSkills": 4}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "em_003",
+      "scenario": "Your partner seems distant. When you ask, they say 'nothing is wrong.' You...",
+      "primaryDimension": "empathy",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Press until they tell you", "scores": {"empathy": 2, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Give space and check in later", "scores": {"empathy": 5, "selfRegulation": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Assume they are lying and withdraw", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Share that you feel disconnected", "scores": {"empathy": 4, "selfAwareness": 4, "socialSkills": 4}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "ss_003",
+      "scenario": "You are at a party and do not know anyone. You feel awkward. You...",
+      "primaryDimension": "socialSkills",
+      "context": "social",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Leave early", "scores": {"socialSkills": 1, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Stand in corner on your phone", "scores": {"socialSkills": 1, "selfRegulation": 1}, "emotionalTone": "avoidant"},
+        {"id": "c", "text": "Find someone else alone and introduce yourself", "scores": {"socialSkills": 5, "selfRegulation": 4}, "emotionalTone": "positive"},
+        {"id": "d", "text": "Join a group and listen before speaking", "scores": {"socialSkills": 4, "empathy": 4}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sa_004",
+      "scenario": "You feel a sudden urge to buy something expensive. You pause and realize...",
+      "primaryDimension": "selfAwareness",
+      "context": "personal",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "You actually need it", "scores": {"selfAwareness": 2}, "emotionalTone": "neutral"},
+        {"id": "b", "text": "You are stressed and seeking comfort", "scores": {"selfAwareness": 5, "selfRegulation": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Everyone has one", "scores": {"selfAwareness": 1}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "You deserve a treat", "scores": {"selfAwareness": 2}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "sr_004",
+      "scenario": "You are about to send a message you know you will regret. You...",
+      "primaryDimension": "selfRegulation",
+      "context": "personal",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Send it - they need to know", "scores": {"selfRegulation": 1, "selfAwareness": 2}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Save to drafts and review tomorrow", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Send a toned-down version", "scores": {"selfRegulation": 3, "selfAwareness": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Delete it and journal instead", "scores": {"selfRegulation": 4, "selfAwareness": 4}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "em_004",
+      "scenario": "A friend shares a problem you have faced. Your instinct is to...",
+      "primaryDimension": "empathy",
+      "context": "social",
+      "difficulty": 1,
+      "options": [
+        {"id": "a", "text": "Immediately give advice based on your experience", "scores": {"empathy": 2, "socialSkills": 2}, "emotionalTone": "neutral"},
+        {"id": "b", "text": "Ask what they need: advice or just listening", "scores": {"empathy": 5, "socialSkills": 5}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Share your similar story to show you understand", "scores": {"empathy": 3, "socialSkills": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Change subject to something more positive", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "ss_004",
+      "scenario": "You accidentally offended someone. They are upset. You...",
+      "primaryDimension": "socialSkills",
+      "context": "social",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Defend your intentions - you did not mean to hurt them", "scores": {"socialSkills": 1, "empathy": 2}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Apologize for impact regardless of intent", "scores": {"socialSkills": 5, "empathy": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Avoid them until it blows over", "scores": {"socialSkills": 1, "selfRegulation": 1}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Ask what you could have done differently", "scores": {"socialSkills": 4, "empathy": 4}, "emotionalTone": "positive"}
+      ]
+    }
+  ]
+}
