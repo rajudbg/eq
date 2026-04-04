@@ -53,7 +53,8 @@ class _AnimatedOptionCardState extends State<AnimatedOptionCard> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if (widget.badgeLabel != null && widget.badgeLabel!.isNotEmpty) ...[
+              if (widget.badgeLabel != null &&
+                  widget.badgeLabel!.isNotEmpty) ...[
                 Container(
                   width: 36,
                   height: 36,
@@ -62,7 +63,8 @@ class _AnimatedOptionCardState extends State<AnimatedOptionCard> {
                     shape: BoxShape.circle,
                     color: widget.isSelected
                         ? scheme.primary.withValues(alpha: 0.18)
-                        : scheme.surfaceContainerHighest.withValues(alpha: 0.65),
+                        : scheme.surfaceContainerHighest
+                            .withValues(alpha: 0.65),
                     border: Border.all(
                       color: widget.isSelected
                           ? scheme.primary

@@ -3,15 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:emvo_assessment/emvo_assessment.dart';
-import 'package:emvo_core/emvo_core.dart';
 import 'package:emvo_ui/emvo_ui.dart';
 
 import '../../providers/assessment_providers.dart';
 import '../../providers/daily_checkin_provider.dart';
 import '../../providers/eq_action_plan_provider.dart';
-import '../../widgets/eq_action_plan_widgets.dart';
+import '../../providers/upcoming_situations_provider.dart';
+import '../../providers/action_plan_celebration_provider.dart';
+import '../../providers/retake_banner_snooze_provider.dart';
+import '../../retention/action_plan_unlock.dart';
 import '../../routing/routing.dart';
+import 'action_plan_unlock_dialog.dart';
+import 'dashboard_home_inputs_provider.dart';
+import 'dashboard_home_state.dart';
 import '../../widgets/emvo_app_bar_title.dart';
+import '../../widgets/eq_action_plan_widgets.dart';
+import '../../widgets/upcoming_situations_card.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:in_app_review/in_app_review.dart';
 
@@ -34,12 +41,134 @@ int _dailyStreakFromHistory(List<AssessmentResult> history) {
   return streak;
 }
 
-class HomeScreen extends ConsumerWidget {
-  const HomeScreen({super.key});
+String _assessmentCadenceSubtitle(int consecutiveAssessmentDays) {
+  if (consecutiveAssessmentDays <= 0) {
+    return 'Assessment cadence: complete an assessment to start a run.';
+  }
+  return 'Assessment cadence: $consecutiveAssessmentDays consecutive '
+      'day${consecutiveAssessmentDays == 1 ? '' : 's'} with a completed assessment '
+      '(separate from your daily check-in streak).';
+}
+
+void _showRemindersSheet(BuildContext context, WidgetRef ref) {
+  final situations = ref.read(upcomingSituationsProvider);
+  showModalBottomSheet<void>(
+    context: context,
+    builder: (ctx) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Reminders',
+              style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Enable “Reminders & tips” in Settings for a daily EQ prompt and alerts '
+              'before situations you add on Home.',
+              style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
+                    height: 1.4,
+                  ),
+            ),
+            if (situations.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(
+                '${situations.length} situation${situations.length == 1 ? '' : 's'} on your list.',
+                style: Theme.of(ctx).textTheme.bodySmall,
+              ),
+            ],
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                ctx.push(Routes.settings);
+              },
+              child: const Text('Notification settings'),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class _RetakeBanner extends ConsumerWidget {
+  const _RetakeBanner();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.listen<AsyncValue<AssessmentResult?>>(latestResultProvider, (previous, next) {
+    return GlassContainer(
+      color: EmvoColors.secondary.withValues(alpha: 0.12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ListTile(
+            leading:
+                const Icon(Icons.flag_outlined, color: EmvoColors.secondary),
+            title: const Text('Time to remeasure your EQ'),
+            subtitle: const Text(
+              'It’s been 30 days — retake the assessment to see score changes.',
+            ),
+            trailing: const Icon(Icons.arrow_forward),
+            onTap: () => context.go(Routes.assessment),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: TextButton(
+              onPressed: () =>
+                  ref.read(retakeBannerSnoozeProvider.notifier).snoozeOneWeek(),
+              child: const Text('Remind me in a week'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class HomeScreen extends ConsumerStatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _maybeCelebratePlanUnlock());
+  }
+
+  Future<void> _maybeCelebratePlanUnlock() async {
+    if (!mounted) return;
+    final history = ref.read(assessmentHistoryProvider).valueOrNull;
+    if (history == null || history.isEmpty) return;
+    final latest = history.last;
+    final visible = actionPlanVisibleHabitCount(latest.completedAt);
+    final prefs = ref.read(actionPlanCelebrationPrefsProvider);
+    final last = await prefs.readLast();
+    if (last.resultId != latest.id) {
+      await prefs.write(latest.id, visible);
+      return;
+    }
+    if (visible > last.visible) {
+      await prefs.write(latest.id, visible);
+      if (!mounted) return;
+      await showActionPlanUnlockDialog(context, visibleHabitCount: visible);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen<AsyncValue<AssessmentResult?>>(latestResultProvider,
+        (previous, next) {
       next.whenData((r) {
         if (r != null) {
           ref.read(eqActionPlanProvider.notifier).ensureFromAssessment(r);
@@ -48,8 +177,7 @@ class HomeScreen extends ConsumerWidget {
     });
 
     final latestResultAsync = ref.watch(latestResultProvider);
-    final historyAsync = ref.watch(assessmentHistoryProvider);
-    final isPremium = ref.watch(isPremiumProvider);
+    final derivedAsync = ref.watch(dashboardHomeDerivedProvider);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -58,7 +186,8 @@ class HomeScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {},
+            tooltip: 'Reminders',
+            onPressed: () => _showRemindersSheet(context, ref),
           ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
@@ -68,180 +197,317 @@ class HomeScreen extends ConsumerWidget {
       ),
       body: EmvoAmbientBackground(
         child: SafeArea(
-          child: SingleChildScrollView(
-            padding: EmvoDimensions.paddingScreen,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          child: derivedAsync.when(
+            data: (derived) {
+              final layout = derived.layout;
+              final inputs = derived.inputs;
+              final history = inputs.assessmentHistory;
+              final result = inputs.latestResult;
+              final checkIn = inputs.checkIn;
+
+              final emphasizeCheckIn = checkIn.today == null &&
+                  layout.sections.asMap().entries.any(
+                        (e) =>
+                            e.value == HomeDashboardSection.dailyCheckIn &&
+                            (e.key == 0 ||
+                                (e.key == 1 &&
+                                    layout.sections[0] ==
+                                        HomeDashboardSection.retakeBanner)),
+                      );
+              final emphasizeSituationDiscovery =
+                  result != null && inputs.situations.isEmpty;
+
+              final children = <Widget>[
                 Text(
-                  _getGreeting(),
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: context.emvoOnSurface(0.6),
+                  layout.headline,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        height: 1.2,
+                        letterSpacing: -0.3,
                       ),
-                ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.2, end: 0),
-                const SizedBox(height: 4),
-                Text(
-                  'Ready to grow?',
-                  style: Theme.of(context).textTheme.headlineLarge,
                 )
                     .animate()
-                    .fadeIn(duration: 400.ms, delay: 100.ms)
-                    .slideY(begin: 0.2, end: 0),
-                const SizedBox(height: 24),
-                latestResultAsync.when(
-                  data: (result) => result != null
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _buildScoreCard(context, result),
-                            EqDashboardActionPlanSummary(result: result),
-                          ],
-                        )
-                      : _buildNoDataCard(context),
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (_, __) => _buildNoDataCard(context),
-                ),
-                const SizedBox(height: 24),
-                historyAsync.when(
-                  data: (history) => _buildStreakCard(context, history),
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => _buildStreakCard(context, const []),
-                ),
-                Consumer(
-                  builder: (context, ref, child) {
-                    if (isPremium) return const SizedBox.shrink();
-
-                    return GlassContainer(
-                      margin: const EdgeInsets.only(bottom: 24),
-                      color: EmvoColors.primary.withValues(alpha: 0.1),
-                      child: ListTile(
-                        leading: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: EmvoColors.primary.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.star,
-                            color: EmvoColors.primary,
-                          ),
-                        ),
-                        title: const Text('Unlock Premium'),
-                        subtitle: const Text(
-                          'Get unlimited coaching & full history',
-                        ),
-                        trailing: const Icon(Icons.arrow_forward),
-                        onTap: () => context.push('/paywall'),
-                      ),
-                    ).animate().fadeIn();
-                  },
-                ),
-                const SizedBox(height: 24),
-                historyAsync.when(
-                  data: (history) =>
-                      _buildProgressSection(context, history, isPremium),
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
-                ),
-                const SizedBox(height: 24),
-                const _DailyCheckInCard(),
-                const SizedBox(height: 24),
+                    .fadeIn(duration: 380.ms, curve: Curves.easeOutCubic)
+                    .slideY(begin: 0.06, duration: 400.ms),
+                const SizedBox(height: 6),
                 Text(
-                  'Quick Actions',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
+                  layout.subline,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: context.emvoOnSurface(0.72),
+                        height: 1.4,
                       ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _QuickActionCard(
-                        icon: Icons.psychology,
-                        label: 'Retake\nAssessment',
-                        color: EmvoColors.primary,
-                        onTap: () => context.go(Routes.assessment),
-                      )
-                          .animate()
-                          .scale(delay: 200.ms, begin: const Offset(0.9, 0.9))
-                          .fadeIn(),
+                ).animate().fadeIn(
+                      duration: 400.ms,
+                      delay: 50.ms,
+                      curve: Curves.easeOutCubic,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _QuickActionCard(
-                        icon: Icons.chat_bubble,
-                        label: 'Talk to\nCoach',
-                        color: EmvoColors.secondary,
-                        onTap: () => context.go(Routes.coach),
-                      )
-                          .animate()
-                          .scale(delay: 300.ms, begin: const Offset(0.9, 0.9))
-                          .fadeIn(),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _QuickActionCard(
-                        icon: Icons.theater_comedy,
-                        label: 'Practice\nScenario',
-                        color: EmvoColors.tertiary,
-                        onTap: () {
-                          ref
-                              .read(assessmentNotifierProvider.notifier)
-                              .reset();
-                          context.go(Routes.assessment);
-                        },
-                      )
-                          .animate()
-                          .scale(delay: 400.ms, begin: const Offset(0.9, 0.9))
-                          .fadeIn(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Recent Insights',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                const SizedBox(height: 16),
-                latestResultAsync.maybeWhen(
-                  data: (result) {
-                    if (result != null && result.insights.isNotEmpty) {
-                      final i = result.insights.first;
-                      return _buildInsightCard(
-                        context,
-                        icon: Icons.lightbulb,
-                        title: i.dimension.displayName,
-                        description: i.description,
-                        color: EmvoColors.secondary,
-                      );
-                    }
-                    return _buildInsightCard(
-                      context,
-                      icon: Icons.lightbulb,
-                      title: 'Focus Area',
-                      description:
-                          'Work on pausing before reacting in stressful moments',
-                      color: EmvoColors.secondary,
-                    );
-                  },
-                  orElse: () => _buildInsightCard(
-                    context,
-                    icon: Icons.lightbulb,
-                    title: 'Focus Area',
-                    description:
-                        'Work on pausing before reacting in stressful moments',
-                    color: EmvoColors.secondary,
+                if (layout.metaLine != null) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    layout.metaLine!,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ).animate().fadeIn(delay: 90.ms, duration: 380.ms),
+                ],
+                if (layout.primaryCtaHint != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    layout.primaryCtaHint!,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: context.emvoOnSurface(0.5),
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
+                ],
+                const SizedBox(height: 22),
+                ..._buildDashboardSections(
+                  context,
+                  ref,
+                  layout: layout,
+                  result: result,
+                  history: history,
+                  isPremium: inputs.isPremium,
+                  latestResultAsync: latestResultAsync,
+                  emphasizeCheckIn: emphasizeCheckIn,
+                  checkIn: checkIn,
+                  emphasizeSituationDiscovery: emphasizeSituationDiscovery,
                 ),
-              ],
+              ];
+
+              return SingleChildScrollView(
+                padding: EmvoDimensions.paddingScreen,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: children,
+                ),
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (_, __) => SingleChildScrollView(
+              padding: EmvoDimensions.paddingScreen,
+              child: latestResultAsync.when(
+                data: (r) => r != null
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildScoreCard(context, r),
+                          const SizedBox(height: 24),
+                          _DailyCheckInCard(
+                            compact:
+                                ref.watch(dailyCheckInProvider).today != null,
+                            emphasize: false,
+                          ),
+                        ],
+                      )
+                    : _buildNoDataCard(context),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => _buildNoDataCard(context),
+              ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  List<Widget> _buildDashboardSections(
+    BuildContext context,
+    WidgetRef ref, {
+    required DashboardHomeLayout layout,
+    required AssessmentResult? result,
+    required List<AssessmentResult> history,
+    required bool isPremium,
+    required AsyncValue<AssessmentResult?> latestResultAsync,
+    required bool emphasizeCheckIn,
+    required DailyCheckInState checkIn,
+    required bool emphasizeSituationDiscovery,
+  }) {
+    final widgets = <Widget>[];
+    var gapBefore = false;
+
+    void addGap() {
+      if (gapBefore) widgets.add(const SizedBox(height: 24));
+      gapBefore = true;
+    }
+
+    for (final section in layout.sections) {
+      switch (section) {
+        case HomeDashboardSection.retakeBanner:
+          addGap();
+          widgets.add(const _RetakeBanner());
+        case HomeDashboardSection.dailyCheckIn:
+          addGap();
+          final compact = checkIn.today != null;
+          widgets.add(
+            _DailyCheckInCard(
+              compact: compact,
+              emphasize: emphasizeCheckIn && !compact,
+            ),
+          );
+        case HomeDashboardSection.upcomingSituations:
+          addGap();
+          widgets.add(
+            UpcomingSituationsCard(
+              emphasizeEmptyGuidance: emphasizeSituationDiscovery,
+            ),
+          );
+        case HomeDashboardSection.scoreSnapshot:
+          if (result == null) {
+            addGap();
+            widgets.add(_buildNoDataCard(context));
+          } else {
+            addGap();
+            widgets.add(_buildScoreCard(context, result));
+          }
+        case HomeDashboardSection.weeklyActionPlan:
+          if (result != null) {
+            addGap();
+            widgets.add(EqDashboardActionPlanSummary(result: result));
+          }
+        case HomeDashboardSection.premiumUpsell:
+          if (!isPremium) {
+            addGap();
+            widgets.add(
+              GlassContainer(
+                margin: const EdgeInsets.only(bottom: 0),
+                color: EmvoColors.primary.withValues(alpha: 0.1),
+                child: ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: EmvoColors.primary.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.star,
+                      color: EmvoColors.primary,
+                    ),
+                  ),
+                  title: const Text('Unlock Premium'),
+                  subtitle: const Text(
+                    'Get unlimited coaching & full history',
+                  ),
+                  trailing: const Icon(Icons.arrow_forward),
+                  onTap: () => context.push('/paywall'),
+                ),
+              ).animate().fadeIn(),
+            );
+          }
+        case HomeDashboardSection.eqProgress:
+          addGap();
+          final cadence = _dailyStreakFromHistory(history);
+          widgets.add(
+            _buildProgressSection(
+              context,
+              history,
+              isPremium,
+              assessmentCadenceDays: cadence,
+            ),
+          );
+        case HomeDashboardSection.quickActions:
+          addGap();
+          widgets.add(
+            Text(
+              'Quick Actions',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          );
+          widgets.add(const SizedBox(height: 16));
+          widgets.add(
+            Row(
+              children: [
+                Expanded(
+                  child: _QuickActionCard(
+                    icon: Icons.psychology,
+                    label: 'Retake\nAssessment',
+                    color: EmvoColors.primary,
+                    onTap: () => context.go(Routes.assessment),
+                  )
+                      .animate()
+                      .scale(delay: 200.ms, begin: const Offset(0.9, 0.9))
+                      .fadeIn(),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _QuickActionCard(
+                    icon: Icons.chat_bubble,
+                    label: 'Talk to\nCoach',
+                    color: EmvoColors.secondary,
+                    onTap: () => context.go(Routes.coach),
+                  )
+                      .animate()
+                      .scale(delay: 300.ms, begin: const Offset(0.9, 0.9))
+                      .fadeIn(),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _QuickActionCard(
+                    icon: Icons.theater_comedy,
+                    label: 'Practice\nScenario',
+                    color: EmvoColors.tertiary,
+                    onTap: () {
+                      ref.read(assessmentNotifierProvider.notifier).reset();
+                      context.go(Routes.assessment);
+                    },
+                  )
+                      .animate()
+                      .scale(delay: 400.ms, begin: const Offset(0.9, 0.9))
+                      .fadeIn(),
+                ),
+              ],
+            ),
+          );
+        case HomeDashboardSection.recentInsights:
+          addGap();
+          widgets.add(
+            Text(
+              'Recent Insights',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          );
+          widgets.add(const SizedBox(height: 16));
+          widgets.add(
+            latestResultAsync.maybeWhen(
+              data: (r) {
+                if (r != null && r.insights.isNotEmpty) {
+                  final i = r.insights.first;
+                  return _buildInsightCard(
+                    context,
+                    icon: Icons.lightbulb,
+                    title: i.dimension.displayName,
+                    description: i.description,
+                    color: EmvoColors.secondary,
+                  );
+                }
+                return _buildInsightCard(
+                  context,
+                  icon: Icons.lightbulb,
+                  title: 'Focus Area',
+                  description:
+                      'Work on pausing before reacting in stressful moments',
+                  color: EmvoColors.secondary,
+                );
+              },
+              orElse: () => _buildInsightCard(
+                context,
+                icon: Icons.lightbulb,
+                title: 'Focus Area',
+                description:
+                    'Work on pausing before reacting in stressful moments',
+                color: EmvoColors.secondary,
+              ),
+            ),
+          );
+      }
+    }
+
+    return widgets;
   }
 
   Widget _buildScoreCard(BuildContext context, AssessmentResult result) {
@@ -265,9 +531,9 @@ class HomeScreen extends ConsumerWidget {
               Text(
                 'Overall EQ',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: context.emvoOnSurface(0.7),
-                  fontWeight: FontWeight.w600,
-                ),
+                      color: context.emvoOnSurface(0.7),
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
               Row(
                 children: [
@@ -342,58 +608,12 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStreakCard(
-    BuildContext context,
-    List<AssessmentResult> history,
-  ) {
-    final streak = _dailyStreakFromHistory(history);
-    return GlassContainer(
-      color: EmvoColors.secondary.withValues(alpha: 0.1),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: EmvoColors.secondary.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Icon(
-            Icons.local_fire_department,
-            color: EmvoColors.secondary,
-          ),
-        ),
-        title: Text(
-          streak > 0 ? '$streak Day Streak' : 'Start a streak',
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          streak > 0
-              ? 'Keep your momentum going!'
-              : 'Complete an assessment on consecutive days',
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: EmvoColors.secondary,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Text(
-            '🔥 $streak',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildProgressSection(
     BuildContext context,
     List<AssessmentResult> history,
-    bool isPremium,
-  ) {
+    bool isPremium, {
+    required int assessmentCadenceDays,
+  }) {
     Widget tappableCard(Widget card) {
       return Semantics(
         button: true,
@@ -421,7 +641,7 @@ class HomeScreen extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'EQ progress',
+                      'EQ snapshot',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -435,13 +655,41 @@ class HomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                history.isEmpty
-                    ? 'Finish another assessment to see your score trend.'
-                    : 'Take one more assessment to unlock your trend line.',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: context.emvoOnSurface(0.65),
+                _assessmentCadenceSubtitle(assessmentCadenceDays),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: context.emvoOnSurface(0.55),
                     ),
               ),
+              const SizedBox(height: 12),
+              if (history.isNotEmpty)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    AnimatedScoreRing(
+                      score: history.last.overallScore,
+                      size: 100,
+                      animated: false,
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Text(
+                        'Take one more assessment to unlock your trend line — '
+                        'the Progress tab shows the full path.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: context.emvoOnSurface(0.65),
+                              height: 1.4,
+                            ),
+                      ),
+                    ),
+                  ],
+                )
+              else
+                Text(
+                  'Finish another assessment to see your score trend.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: context.emvoOnSurface(0.65),
+                      ),
+                ),
               const SizedBox(height: 8),
               Text(
                 'Tap to view your Progress screen',
@@ -478,7 +726,7 @@ class HomeScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'EQ progress',
+                    'EQ snapshot',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -489,6 +737,13 @@ class HomeScreen extends ConsumerWidget {
                   child: const Text('See all'),
                 ),
               ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _assessmentCadenceSubtitle(assessmentCadenceDays),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: context.emvoOnSurface(0.55),
+                  ),
             ),
             const SizedBox(height: 4),
             Text(
@@ -622,17 +877,16 @@ class HomeScreen extends ConsumerWidget {
       ),
     );
   }
-
-  String _getGreeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good morning,';
-    if (hour < 17) return 'Good afternoon,';
-    return 'Good evening,';
-  }
 }
 
 class _DailyCheckInCard extends ConsumerStatefulWidget {
-  const _DailyCheckInCard();
+  const _DailyCheckInCard({
+    this.compact = false,
+    this.emphasize = false,
+  });
+
+  final bool compact;
+  final bool emphasize;
 
   @override
   ConsumerState<_DailyCheckInCard> createState() => _DailyCheckInCardState();
@@ -642,11 +896,13 @@ class _DailyCheckInCardState extends ConsumerState<_DailyCheckInCard> {
   final _noteController = TextEditingController();
 
   Future<void> _submitDailyCheckIn(String label) async {
-    await ref.read(dailyCheckInProvider.notifier).recordMood(label);
+    final note = _noteController.text.trim();
+    await ref.read(dailyCheckInProvider.notifier).recordMood(
+          label,
+          note: note.isEmpty ? null : note,
+        );
 
-    // Check for App Store Review eligibility
-    final history = ref.read(assessmentHistoryProvider).valueOrNull ?? [];
-    final streak = _dailyStreakFromHistory(history);
+    final checkStreak = ref.read(dailyCheckInProvider).streakDays;
 
     if (!mounted) return;
     FocusScope.of(context).unfocus();
@@ -661,8 +917,7 @@ class _DailyCheckInCardState extends ConsumerState<_DailyCheckInCard> {
       ),
     );
 
-    // If they have a 3 day streak, gracefully ask for a review
-    if (streak >= 3) {
+    if (checkStreak >= 3) {
       if (await InAppReview.instance.isAvailable()) {
         InAppReview.instance.requestReview();
       }
@@ -677,10 +932,81 @@ class _DailyCheckInCardState extends ConsumerState<_DailyCheckInCard> {
 
   @override
   Widget build(BuildContext context) {
-    final checkIn = ref.watch(dailyCheckInProvider);
+    final checkInState = ref.watch(dailyCheckInProvider);
+    final today = checkInState.today;
     final scheme = Theme.of(context).colorScheme;
+    final prompt = dailyPromptForDate(DateTime.now());
 
-    return GlassContainer(
+    if (widget.compact && today != null) {
+      final note = today.note;
+      return GlassContainer(
+        padding: const EdgeInsets.all(EmvoDimensions.md + 2),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.check_circle_rounded,
+                    color: scheme.primary, size: 24),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    "Today's check-in",
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.35,
+                        ),
+                  ),
+                ),
+                if (checkInState.streakDays > 0)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: scheme.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${checkInState.streakDays}d streak',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: scheme.primary,
+                            fontWeight: FontWeight.w800,
+                          ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              today.moodLabel,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+            if (note != null && note.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                note,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: context.emvoOnSurface(0.72),
+                      height: 1.35,
+                    ),
+              ),
+            ],
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: () => context.go(Routes.coach),
+              icon: const Icon(Icons.chat_bubble_outline, size: 18),
+              label: const Text('Talk to Coach'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    Widget core = GlassContainer(
       padding: const EdgeInsets.all(EmvoDimensions.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -701,18 +1027,34 @@ class _DailyCheckInCardState extends ConsumerState<_DailyCheckInCard> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Daily Check-in',
+                  "Today's check-in",
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                 ),
               ),
+              if (checkInState.streakDays > 0)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: scheme.primary.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${checkInState.streakDays}d streak',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: scheme.primary,
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
+                ),
             ],
           ),
-          if (checkIn != null) ...[
+          if (today != null) ...[
             const SizedBox(height: 8),
             Text(
-              'Today: ${checkIn.moodLabel}',
+              'Logged: ${today.moodLabel}',
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: scheme.primary,
                     fontWeight: FontWeight.w600,
@@ -721,8 +1063,17 @@ class _DailyCheckInCardState extends ConsumerState<_DailyCheckInCard> {
           ],
           const SizedBox(height: 12),
           Text(
+            prompt.value,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Text(
             'How are you feeling right now?',
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: context.emvoOnSurface(0.65),
+                ),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -752,31 +1103,31 @@ class _DailyCheckInCardState extends ConsumerState<_DailyCheckInCard> {
               _EmotionChip(
                 icon: Icons.sentiment_very_dissatisfied,
                 label: 'Low',
-                selected: checkIn?.moodLabel == 'Low',
+                selected: today?.moodLabel == 'Low',
                 onTap: () => _submitDailyCheckIn('Low'),
               ),
               _EmotionChip(
                 icon: Icons.sentiment_dissatisfied,
                 label: 'Down',
-                selected: checkIn?.moodLabel == 'Down',
+                selected: today?.moodLabel == 'Down',
                 onTap: () => _submitDailyCheckIn('Down'),
               ),
               _EmotionChip(
                 icon: Icons.sentiment_neutral,
                 label: 'Okay',
-                selected: checkIn?.moodLabel == 'Okay',
+                selected: today?.moodLabel == 'Okay',
                 onTap: () => _submitDailyCheckIn('Okay'),
               ),
               _EmotionChip(
                 icon: Icons.sentiment_satisfied,
                 label: 'Good',
-                selected: checkIn?.moodLabel == 'Good',
+                selected: today?.moodLabel == 'Good',
                 onTap: () => _submitDailyCheckIn('Good'),
               ),
               _EmotionChip(
                 icon: Icons.sentiment_very_satisfied,
                 label: 'Great',
-                selected: checkIn?.moodLabel == 'Great',
+                selected: today?.moodLabel == 'Great',
                 onTap: () => _submitDailyCheckIn('Great'),
               ),
             ],
@@ -784,6 +1135,27 @@ class _DailyCheckInCardState extends ConsumerState<_DailyCheckInCard> {
         ],
       ),
     );
+
+    // Single entrance pulse — avoids continuous animation jank on low-end devices.
+    if (widget.emphasize) {
+      core = core
+          .animate()
+          .scale(
+            duration: 520.ms,
+            begin: const Offset(0.985, 0.985),
+            end: const Offset(1.014, 1.014),
+            curve: Curves.easeOutCubic,
+          )
+          .then(delay: 80.ms)
+          .scale(
+            duration: 480.ms,
+            begin: const Offset(1.014, 1.014),
+            end: const Offset(1, 1),
+            curve: Curves.easeInOutCubic,
+          );
+    }
+
+    return core;
   }
 }
 

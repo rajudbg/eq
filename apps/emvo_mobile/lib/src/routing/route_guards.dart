@@ -13,9 +13,27 @@ import 'app_router.dart';
 /// ```
 class RouteGuards {
   static String? checkAll(BuildContext context, GoRouterState state) {
-    // Skip guards for auth-related routes to prevent redirect loops
+    final container = ProviderScope.containerOf(context);
     final location = state.uri.path;
+
+    // Returning users: skip marketing landing and intent picker
+    if (container.read(assessmentCompletionProvider)) {
+      if (location == Routes.welcome || location == Routes.intent) {
+        return Routes.home;
+      }
+    }
+
+    // Onboarding was completed but assessment never finished (crash / kill app) —
+    // send them back to the assessment instead of a confusing empty home.
+    if (container.read(onboardingProvider) &&
+        !container.read(assessmentCompletionProvider) &&
+        (location == Routes.welcome || location == Routes.intent)) {
+      return Routes.assessment;
+    }
+
+    // Skip guards for auth-related routes to prevent redirect loops
     final isAuthRoute = location == Routes.welcome ||
+        location == Routes.intent ||
         location == Routes.onboarding ||
         location.startsWith('/login');
 
@@ -28,23 +46,22 @@ class RouteGuards {
       return null;
     }
 
-    // Check auth
-    final authRedirect = _checkAuth(context, state);
+    // Check auth (uses same container as above)
+    final authRedirect = _checkAuth(container, state);
     if (authRedirect != null) return authRedirect;
 
     // Check onboarding
-    final onboardingRedirect = _checkOnboarding(context, state);
+    final onboardingRedirect = _checkOnboarding(container, state);
     if (onboardingRedirect != null) return onboardingRedirect;
 
     // Check assessment
-    final assessmentRedirect = _checkAssessment(context, state);
+    final assessmentRedirect = _checkAssessment(container, state);
     if (assessmentRedirect != null) return assessmentRedirect;
 
     return null;
   }
 
-  static String? _checkAuth(BuildContext context, GoRouterState state) {
-    final container = ProviderScope.containerOf(context);
+  static String? _checkAuth(ProviderContainer container, GoRouterState state) {
     final isAuthenticated = container.read(authProvider);
     final location = state.uri.path;
     final hasCompletedAssessment = container.read(assessmentCompletionProvider);
@@ -58,8 +75,10 @@ class RouteGuards {
     return null;
   }
 
-  static String? _checkOnboarding(BuildContext context, GoRouterState state) {
-    final container = ProviderScope.containerOf(context);
+  static String? _checkOnboarding(
+    ProviderContainer container,
+    GoRouterState state,
+  ) {
     final hasCompletedOnboarding = container.read(onboardingProvider);
     final location = state.uri.path;
     final hasCompletedAssessment = container.read(assessmentCompletionProvider);
@@ -68,7 +87,7 @@ class RouteGuards {
       return null;
     }
 
-    if (!hasCompletedOnboarding) return Routes.onboarding;
+    if (!hasCompletedOnboarding) return Routes.intent;
     return null;
   }
 
@@ -86,8 +105,10 @@ class RouteGuards {
         location == Routes.paywall;
   }
 
-  static String? _checkAssessment(BuildContext context, GoRouterState state) {
-    final container = ProviderScope.containerOf(context);
+  static String? _checkAssessment(
+    ProviderContainer container,
+    GoRouterState state,
+  ) {
     final hasCompletedAssessment = container.read(assessmentCompletionProvider);
 
     // Don't redirect if already going to assessment or results
@@ -117,7 +138,7 @@ class OnboardingGuard {
   static String? redirect(BuildContext context, GoRouterState state) {
     final container = ProviderScope.containerOf(context);
     final hasCompleted = container.read(onboardingProvider);
-    if (!hasCompleted) return Routes.onboarding;
+    if (!hasCompleted) return Routes.intent;
     return null;
   }
 }

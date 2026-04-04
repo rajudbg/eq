@@ -1,15 +1,55 @@
+import 'dart:convert';
+
 import 'package:fpdart/fpdart.dart';
 import 'package:emvo_core/emvo_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/entities/assessment_result.dart';
 import '../../domain/entities/question.dart';
 import '../../domain/repositories/assessment_repository.dart';
 
+const _kAssessmentHistoryKey = 'emvo.assessment_history.v1';
+
 class AssessmentRepositoryImpl implements AssessmentRepository {
   AssessmentRepositoryImpl();
 
-  // In-memory storage for now - replace with Hive/SQLite later
   final List<AssessmentResult> _history = [];
+  bool _loaded = false;
+  Future<void>? _loading;
+
+  Future<void> _ensureLoaded() {
+    if (_loaded) return Future.value();
+    _loading ??= _loadFromPrefs();
+    return _loading!;
+  }
+
+  Future<void> _loadFromPrefs() async {
+    if (_loaded) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_kAssessmentHistoryKey);
+      if (raw != null && raw.isNotEmpty) {
+        final decoded = jsonDecode(raw) as List<dynamic>;
+        for (final item in decoded) {
+          if (item is! Map) continue;
+          _history.add(
+            AssessmentResult.fromJson(Map<String, dynamic>.from(item)),
+          );
+        }
+      }
+    } catch (_) {
+      // Corrupt or incompatible payload — start fresh
+      _history.clear();
+    }
+    _loaded = true;
+  }
+
+  Future<void> _persist() async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded =
+        jsonEncode(_history.map((r) => r.toJson()).toList(growable: false));
+    await prefs.setString(_kAssessmentHistoryKey, encoded);
+  }
 
   @override
   AssessmentResult calculateResult({
@@ -173,17 +213,21 @@ class AssessmentRepositoryImpl implements AssessmentRepository {
 
   @override
   Future<Either<Failure, Unit>> saveResult(AssessmentResult result) async {
+    await _ensureLoaded();
     _history.add(result);
+    await _persist();
     return right(unit);
   }
 
   @override
   Future<Either<Failure, List<AssessmentResult>>> getHistory() async {
+    await _ensureLoaded();
     return right(List<AssessmentResult>.unmodifiable(_history));
   }
 
   @override
   Future<Either<Failure, AssessmentResult?>> getLatestResult() async {
+    await _ensureLoaded();
     if (_history.isEmpty) return right(null);
     return right(_history.last);
   }

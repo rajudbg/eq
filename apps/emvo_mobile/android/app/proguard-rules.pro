@@ -42,3 +42,7 @@
 # For in_app_review / Play Core Ktx missing classes
 -dontwarn com.google.android.gms.**
 -dontwarn com.google.android.play.core.ktx.**
+
+# Firebase (Auth / Core) — keep generic signatures for JNI / reflection
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.internal.firebase_auth.** { *; }

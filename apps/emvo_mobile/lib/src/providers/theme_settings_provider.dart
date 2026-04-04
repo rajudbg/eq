@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../services/emvo_notification_service.dart';
+
 const _kThemeMode = 'settings.theme_mode';
 const _kCoachConcise = 'settings.coach_concise_replies';
 const _kNotifications = 'settings.notifications_enabled';
+const _kDailyReminderHour = 'settings.daily_reminder_hour';
+const _kDailyReminderMinute = 'settings.daily_reminder_minute';
 
 class ThemeModeNotifier extends StateNotifier<ThemeMode> {
   ThemeModeNotifier() : super(ThemeMode.system) {
@@ -76,10 +80,41 @@ class NotificationsSettingNotifier extends StateNotifier<bool> {
     state = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_kNotifications, value);
+    if (value) {
+      await EmvoNotificationService.instance.ensureRuntimePermissions();
+    }
   }
 }
 
 final notificationsEnabledProvider =
     StateNotifierProvider<NotificationsSettingNotifier, bool>((ref) {
   return NotificationsSettingNotifier();
+});
+
+/// Local time for the daily EQ check-in notification (when master switch is on).
+class DailyReminderTimeNotifier extends StateNotifier<TimeOfDay> {
+  DailyReminderTimeNotifier() : super(const TimeOfDay(hour: 9, minute: 0)) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final h = prefs.getInt(_kDailyReminderHour);
+    final m = prefs.getInt(_kDailyReminderMinute);
+    if (h != null && m != null && h >= 0 && h < 24 && m >= 0 && m < 60) {
+      state = TimeOfDay(hour: h, minute: m);
+    }
+  }
+
+  Future<void> setTime(TimeOfDay t) async {
+    state = t;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_kDailyReminderHour, t.hour);
+    await prefs.setInt(_kDailyReminderMinute, t.minute);
+  }
+}
+
+final dailyReminderTimeProvider =
+    StateNotifierProvider<DailyReminderTimeNotifier, TimeOfDay>((ref) {
+  return DailyReminderTimeNotifier();
 });

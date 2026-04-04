@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:emvo_ui/emvo_ui.dart';
 
+import '../../providers/profile_display_name_provider.dart';
 import '../../providers/theme_settings_provider.dart';
 import '../../routing/routing.dart';
 
@@ -13,6 +14,8 @@ class SettingsScreen extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final concise = ref.watch(coachConciseRepliesProvider);
     final notifications = ref.watch(notificationsEnabledProvider);
+    final reminderTime = ref.watch(dailyReminderTimeProvider);
+    final displayName = ref.watch(profileDisplayNameProvider);
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -147,17 +150,45 @@ class SettingsScreen extends ConsumerWidget {
               _sectionLabel(context, 'Notifications'),
               GlassContainer(
                 margin: const EdgeInsets.only(bottom: 20),
-                child: SwitchListTile.adaptive(
-                  secondary:
-                      Icon(Icons.notifications_outlined, color: scheme.primary),
-                  title: const Text('Reminders & tips'),
-                  subtitle: const Text(
-                    'EQ nudges and streak reminders (local only until push is wired).',
-                  ),
-                  value: notifications,
-                  onChanged: (v) => ref
-                      .read(notificationsEnabledProvider.notifier)
-                      .setEnabled(v),
+                child: Column(
+                  children: [
+                    SwitchListTile.adaptive(
+                      secondary: Icon(
+                        Icons.notifications_outlined,
+                        color: scheme.primary,
+                      ),
+                      title: const Text('Reminders & tips'),
+                      subtitle: const Text(
+                        'Local notifications for daily check-in and situations you log.',
+                      ),
+                      value: notifications,
+                      onChanged: (v) => ref
+                          .read(notificationsEnabledProvider.notifier)
+                          .setEnabled(v),
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.schedule, color: scheme.primary),
+                      title: const Text('Daily check-in time'),
+                      subtitle: Text(
+                        reminderTime.format(context),
+                      ),
+                      enabled: notifications,
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: !notifications
+                          ? null
+                          : () async {
+                              final picked = await showTimePicker(
+                                context: context,
+                                initialTime: reminderTime,
+                              );
+                              if (picked != null && context.mounted) {
+                                await ref
+                                    .read(dailyReminderTimeProvider.notifier)
+                                    .setTime(picked);
+                              }
+                            },
+                    ),
+                  ],
                 ),
               ),
               _sectionLabel(context, 'Account'),
@@ -166,10 +197,26 @@ class SettingsScreen extends ConsumerWidget {
                 child: Column(
                   children: [
                     ListTile(
+                      leading: Icon(Icons.waving_hand_outlined,
+                          color: scheme.primary),
+                      title: const Text('Home greeting'),
+                      subtitle: Text(
+                        displayName == null || displayName.isEmpty
+                            ? 'Add a first name for your dashboard'
+                            : '“$displayName” on Home',
+                      ),
+                      trailing: const Icon(Icons.edit_outlined, size: 20),
+                      onTap: () => _editDisplayName(context, ref),
+                    ),
+                    Divider(
+                      height: 1,
+                      color: scheme.outline.withValues(alpha: 0.2),
+                    ),
+                    ListTile(
                       leading:
                           Icon(Icons.person_outline, color: scheme.primary),
-                      title: const Text('Profile'),
-                      subtitle: const Text('Name, goals, and subscription'),
+                      title: const Text('You'),
+                      subtitle: const Text('Overview, reminders, subscription'),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
                         context.pop();
@@ -177,8 +224,9 @@ class SettingsScreen extends ConsumerWidget {
                       },
                     ),
                     Divider(
-                        height: 1,
-                        color: scheme.outline.withValues(alpha: 0.2)),
+                      height: 1,
+                      color: scheme.outline.withValues(alpha: 0.2),
+                    ),
                     ListTile(
                       leading: Icon(
                         Icons.workspace_premium_outlined,
@@ -198,8 +246,10 @@ class SettingsScreen extends ConsumerWidget {
                 child: Column(
                   children: [
                     ListTile(
-                      leading: Icon(Icons.privacy_tip_outlined,
-                          color: scheme.primary),
+                      leading: Icon(
+                        Icons.privacy_tip_outlined,
+                        color: scheme.primary,
+                      ),
                       title: const Text('Privacy'),
                       subtitle: const Text('How we use your data'),
                       onTap: () => _soon(context),
@@ -237,6 +287,48 @@ class SettingsScreen extends ConsumerWidget {
             ),
       ),
     );
+  }
+
+  Future<void> _editDisplayName(BuildContext context, WidgetRef ref) async {
+    final current = ref.read(profileDisplayNameProvider) ?? '';
+    final controller = TextEditingController(text: current);
+    try {
+      final result = await showDialog<String?>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('How should we greet you?'),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(
+              hintText: 'First name or nickname',
+              border: OutlineInputBorder(),
+            ),
+            autofocus: true,
+            textCapitalization: TextCapitalization.words,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, ''),
+              child: const Text('Clear'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      );
+      if (!context.mounted || result == null) return;
+      await ref.read(profileDisplayNameProvider.notifier).setDisplayName(
+            result.isEmpty ? null : result,
+          );
+    } finally {
+      controller.dispose();
+    }
   }
 
   void _soon(BuildContext context) {

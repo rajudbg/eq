@@ -16,7 +16,8 @@ void main() {
 
     test('normalizes against per-question maxima, not a fixed 20', () {
       final answered = questions.map((q) => q.id).toSet();
-      final maxRaw = AssessmentRepositoryImpl.maxAchievableRawByDimensionForAnswers(
+      final maxRaw =
+          AssessmentRepositoryImpl.maxAchievableRawByDimensionForAnswers(
         questions: questions,
         answeredQuestionIds: answered,
       );
@@ -24,7 +25,8 @@ void main() {
       expect(maxRaw[EQDimension.selfRegulation], greaterThan(20.0));
     });
 
-    test('always picking first option does not yield 100 on self-awareness', () {
+    test('always picking first option does not yield 100 on self-awareness',
+        () {
       final answers = <String, String>{
         for (final q in questions) q.id: q.options.first.id,
       };
@@ -35,7 +37,9 @@ void main() {
       );
     });
 
-    test('best self-awareness option each question yields ~100 for that dimension', () {
+    test(
+        'best self-awareness option each question yields ~100 for that dimension',
+        () {
       final answers = <String, String>{};
       for (final q in questions) {
         final best = q.options.reduce((a, b) {
@@ -46,7 +50,8 @@ void main() {
         answers[q.id] = best.id;
       }
       final r = repo.calculateResult(answers: answers, questions: questions);
-      expect(r.dimensionScores[EQDimension.selfAwareness], greaterThanOrEqualTo(99.0));
+      expect(r.dimensionScores[EQDimension.selfAwareness],
+          greaterThanOrEqualTo(99.0));
     });
 
     test('worst self-awareness option each question yields a low score', () {

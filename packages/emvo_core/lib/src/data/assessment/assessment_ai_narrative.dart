@@ -203,7 +203,8 @@ class AssessmentAiNarrativeService {
       }
       if (headline.isEmpty || narrative.isEmpty) return null;
       if (actions.isEmpty) {
-        actions.add('Name one emotion before you react in a tense moment today');
+        actions
+            .add('Name one emotion before you react in a tense moment today');
       }
       while (actions.length < 3) {
         actions

@@ -53,6 +53,21 @@ class ChatMessageBubble extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          if (message.metadata?['offlineFallback'] == true)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Text(
+                                'Offline — tip while we reconnect',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: scheme.onSurface
+                                          .withValues(alpha: 0.55),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                            ),
                           _CoachMessageHeader(color: scheme.onSurface),
                           const SizedBox(height: 10),
                           CoachMarkdownView(

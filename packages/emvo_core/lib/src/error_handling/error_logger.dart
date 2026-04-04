@@ -79,13 +79,17 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
     super.initState();
     _previousOnError = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
-      setState(() => _error = details);
+      // Never call setState synchronously: onError can run during build/layout.
+      _previousOnError?.call(details);
       ErrorLogger.error(
         'Flutter Error: ${details.exceptionAsString()}',
         error: details.exception,
         stackTrace: details.stack,
       );
-      _previousOnError?.call(details);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() => _error = details);
+      });
     };
   }
 
@@ -134,7 +138,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
                 'We have logged this error. Please restart the app.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: scheme.onSurface.withOpacity(0.72),
+                  color: scheme.onSurface.withValues(alpha: 0.72),
                 ),
               ),
               const SizedBox(height: 24),

@@ -31,12 +31,23 @@ class EmvoTextTheme {
         fontWeight: FontWeight.w600,
         color: onSurface,
       ),
+      headlineSmall: base.headlineSmall?.copyWith(
+        fontSize: 22,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.35,
+        height: 1.2,
+        color: onSurface,
+      ),
       titleLarge: base.titleLarge?.copyWith(
         fontWeight: FontWeight.w600,
         color: onSurface,
       ),
       titleMedium: base.titleMedium?.copyWith(
         fontSize: 18,
+        fontWeight: FontWeight.w600,
+        color: onSurface,
+      ),
+      titleSmall: base.titleSmall?.copyWith(
         fontWeight: FontWeight.w600,
         color: onSurface,
       ),
@@ -60,6 +71,10 @@ class EmvoTextTheme {
         fontWeight: FontWeight.w600,
         letterSpacing: 0.5,
         color: onSurface,
+      ),
+      labelMedium: base.labelMedium?.copyWith(
+        fontWeight: FontWeight.w600,
+        color: onSurface.withValues(alpha: 0.92),
       ),
       labelSmall: base.labelSmall?.copyWith(
         color: onSurface.withValues(alpha: 0.65),

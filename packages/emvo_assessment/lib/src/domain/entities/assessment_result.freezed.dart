@@ -14,16 +14,24 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
+AssessmentResult _$AssessmentResultFromJson(Map<String, dynamic> json) {
+  return _AssessmentResult.fromJson(json);
+}
+
 /// @nodoc
 mixin _$AssessmentResult {
   String get id => throw _privateConstructorUsedError;
   DateTime get completedAt => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: _dimensionScoresFromJson, toJson: _dimensionScoresToJson)
   Map<EQDimension, double> get dimensionScores =>
-      throw _privateConstructorUsedError; // 0-100
+      throw _privateConstructorUsedError;
   double get overallScore => throw _privateConstructorUsedError;
   List<DimensionInsight> get insights => throw _privateConstructorUsedError;
   List<String> get recommendations => throw _privateConstructorUsedError;
   Map<String, String> get answers => throw _privateConstructorUsedError;
+
+  /// Serializes this AssessmentResult to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of AssessmentResult
   /// with the given fields replaced by the non-null parameter values.
@@ -41,6 +49,8 @@ abstract class $AssessmentResultCopyWith<$Res> {
   $Res call(
       {String id,
       DateTime completedAt,
+      @JsonKey(
+          fromJson: _dimensionScoresFromJson, toJson: _dimensionScoresToJson)
       Map<EQDimension, double> dimensionScores,
       double overallScore,
       List<DimensionInsight> insights,
@@ -115,6 +125,8 @@ abstract class _$$AssessmentResultImplCopyWith<$Res>
   $Res call(
       {String id,
       DateTime completedAt,
+      @JsonKey(
+          fromJson: _dimensionScoresFromJson, toJson: _dimensionScoresToJson)
       Map<EQDimension, double> dimensionScores,
       double overallScore,
       List<DimensionInsight> insights,
@@ -178,10 +190,13 @@ class __$$AssessmentResultImplCopyWithImpl<$Res>
 
 /// @nodoc
 
+@JsonSerializable(explicitToJson: true)
 class _$AssessmentResultImpl implements _AssessmentResult {
   const _$AssessmentResultImpl(
       {required this.id,
       required this.completedAt,
+      @JsonKey(
+          fromJson: _dimensionScoresFromJson, toJson: _dimensionScoresToJson)
       required final Map<EQDimension, double> dimensionScores,
       required this.overallScore,
       required final List<DimensionInsight> insights,
@@ -192,19 +207,22 @@ class _$AssessmentResultImpl implements _AssessmentResult {
         _recommendations = recommendations,
         _answers = answers;
 
+  factory _$AssessmentResultImpl.fromJson(Map<String, dynamic> json) =>
+      _$$AssessmentResultImplFromJson(json);
+
   @override
   final String id;
   @override
   final DateTime completedAt;
   final Map<EQDimension, double> _dimensionScores;
   @override
+  @JsonKey(fromJson: _dimensionScoresFromJson, toJson: _dimensionScoresToJson)
   Map<EQDimension, double> get dimensionScores {
     if (_dimensionScores is EqualUnmodifiableMapView) return _dimensionScores;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableMapView(_dimensionScores);
   }
 
-// 0-100
   @override
   final double overallScore;
   final List<DimensionInsight> _insights;
@@ -254,6 +272,7 @@ class _$AssessmentResultImpl implements _AssessmentResult {
             const DeepCollectionEquality().equals(other._answers, _answers));
   }
 
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -273,24 +292,37 @@ class _$AssessmentResultImpl implements _AssessmentResult {
   _$$AssessmentResultImplCopyWith<_$AssessmentResultImpl> get copyWith =>
       __$$AssessmentResultImplCopyWithImpl<_$AssessmentResultImpl>(
           this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$AssessmentResultImplToJson(
+      this,
+    );
+  }
 }
 
 abstract class _AssessmentResult implements AssessmentResult {
   const factory _AssessmentResult(
       {required final String id,
       required final DateTime completedAt,
+      @JsonKey(
+          fromJson: _dimensionScoresFromJson, toJson: _dimensionScoresToJson)
       required final Map<EQDimension, double> dimensionScores,
       required final double overallScore,
       required final List<DimensionInsight> insights,
       required final List<String> recommendations,
       required final Map<String, String> answers}) = _$AssessmentResultImpl;
 
+  factory _AssessmentResult.fromJson(Map<String, dynamic> json) =
+      _$AssessmentResultImpl.fromJson;
+
   @override
   String get id;
   @override
   DateTime get completedAt;
   @override
-  Map<EQDimension, double> get dimensionScores; // 0-100
+  @JsonKey(fromJson: _dimensionScoresFromJson, toJson: _dimensionScoresToJson)
+  Map<EQDimension, double> get dimensionScores;
   @override
   double get overallScore;
   @override
@@ -308,14 +340,20 @@ abstract class _AssessmentResult implements AssessmentResult {
       throw _privateConstructorUsedError;
 }
 
+DimensionInsight _$DimensionInsightFromJson(Map<String, dynamic> json) {
+  return _DimensionInsight.fromJson(json);
+}
+
 /// @nodoc
 mixin _$DimensionInsight {
   EQDimension get dimension => throw _privateConstructorUsedError;
   double get score => throw _privateConstructorUsedError;
-  String get level =>
-      throw _privateConstructorUsedError; // "Developing", "Proficient", "Advanced"
+  String get level => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
   List<String> get growthAreas => throw _privateConstructorUsedError;
+
+  /// Serializes this DimensionInsight to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of DimensionInsight
   /// with the given fields replaced by the non-null parameter values.
@@ -446,6 +484,7 @@ class __$$DimensionInsightImplCopyWithImpl<$Res>
 
 /// @nodoc
 
+@JsonSerializable(explicitToJson: true)
 class _$DimensionInsightImpl implements _DimensionInsight {
   const _$DimensionInsightImpl(
       {required this.dimension,
@@ -455,13 +494,15 @@ class _$DimensionInsightImpl implements _DimensionInsight {
       required final List<String> growthAreas})
       : _growthAreas = growthAreas;
 
+  factory _$DimensionInsightImpl.fromJson(Map<String, dynamic> json) =>
+      _$$DimensionInsightImplFromJson(json);
+
   @override
   final EQDimension dimension;
   @override
   final double score;
   @override
   final String level;
-// "Developing", "Proficient", "Advanced"
   @override
   final String description;
   final List<String> _growthAreas;
@@ -492,6 +533,7 @@ class _$DimensionInsightImpl implements _DimensionInsight {
                 .equals(other._growthAreas, _growthAreas));
   }
 
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, dimension, score, level,
       description, const DeepCollectionEquality().hash(_growthAreas));
@@ -504,6 +546,13 @@ class _$DimensionInsightImpl implements _DimensionInsight {
   _$$DimensionInsightImplCopyWith<_$DimensionInsightImpl> get copyWith =>
       __$$DimensionInsightImplCopyWithImpl<_$DimensionInsightImpl>(
           this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$DimensionInsightImplToJson(
+      this,
+    );
+  }
 }
 
 abstract class _DimensionInsight implements DimensionInsight {
@@ -514,12 +563,15 @@ abstract class _DimensionInsight implements DimensionInsight {
       required final String description,
       required final List<String> growthAreas}) = _$DimensionInsightImpl;
 
+  factory _DimensionInsight.fromJson(Map<String, dynamic> json) =
+      _$DimensionInsightImpl.fromJson;
+
   @override
   EQDimension get dimension;
   @override
   double get score;
   @override
-  String get level; // "Developing", "Proficient", "Advanced"
+  String get level;
   @override
   String get description;
   @override

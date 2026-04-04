@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:emvo_assessment/emvo_assessment.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:emvo_core/emvo_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _kV2 = 'eq.action_plan.v2';
@@ -51,7 +52,8 @@ class EqActionPlanRecord {
 }
 
 List<String> _padThreeStrings(List<String> raw) {
-  final out = raw.map((s) => s.trim()).where((s) => s.isNotEmpty).take(3).toList();
+  final out =
+      raw.map((s) => s.trim()).where((s) => s.isNotEmpty).take(3).toList();
   const fallbacks = [
     'Name one emotion before you react in a tense moment today',
     'After a stressful exchange, write what you felt vs. what you needed',
@@ -112,10 +114,13 @@ List<bool> _mergeDoneForNewTexts(
 }
 
 /// Stores weekly EQ action items + completion (habit-style), keyed by assessment result id.
-class EqActionPlanNotifier extends StateNotifier<Map<String, EqActionPlanRecord>> {
-  EqActionPlanNotifier() : super({}) {
+class EqActionPlanNotifier
+    extends StateNotifier<Map<String, EqActionPlanRecord>> {
+  EqActionPlanNotifier(this._ref) : super({}) {
     _load();
   }
+
+  final Ref _ref;
 
   final Map<String, List<bool>> _legacyV1Done = {};
 
@@ -129,12 +134,13 @@ class EqActionPlanNotifier extends StateNotifier<Map<String, EqActionPlanRecord>
         final next = <String, EqActionPlanRecord>{};
         for (final e in plans.entries) {
           if (e.value is Map<String, dynamic>) {
-            next[e.key] =
-                EqActionPlanRecord.fromJson(e.key, Map<String, dynamic>.from(e.value as Map));
+            next[e.key] = EqActionPlanRecord.fromJson(
+                e.key, Map<String, dynamic>.from(e.value as Map));
           }
         }
         // In-memory updates (e.g. ensure before load finished) win over stale disk.
         state = {...next, ...state};
+        _syncCoachContext();
       } catch (_) {}
     }
     final v1 = prefs.getString(_kV1Legacy);
@@ -149,6 +155,7 @@ class EqActionPlanNotifier extends StateNotifier<Map<String, EqActionPlanRecord>
         }
       } catch (_) {}
     }
+    _syncCoachContext();
   }
 
   Future<void> _persist() async {
@@ -159,6 +166,22 @@ class EqActionPlanNotifier extends StateNotifier<Map<String, EqActionPlanRecord>
     }
     await prefs.setString(_kV2, jsonEncode({'plans': plans}));
     await prefs.remove(_kV1Legacy);
+    _syncCoachContext();
+  }
+
+  void _syncCoachContext() {
+    final byResult = <String, dynamic>{};
+    for (final e in state.entries) {
+      final r = e.value;
+      byResult[e.key] = {
+        'completedCount': r.completedCount,
+        'items': r.items,
+        'done': r.done,
+      };
+    }
+    _ref.read(coachingRepositoryProvider).applyCoachingContext({
+      'actionPlanProgress': byResult,
+    });
   }
 
   EqActionPlanRecord? planFor(String resultId) => state[resultId];
@@ -166,8 +189,8 @@ class EqActionPlanNotifier extends StateNotifier<Map<String, EqActionPlanRecord>
   /// Seed from assessment recommendations when the user has not opened results yet.
   void ensureFromAssessment(AssessmentResult result) {
     final existing = state[result.id];
-    if (existing != null &&
-        existing.items.every((t) => t.trim().isNotEmpty)) {
+    if (existing != null && existing.items.every((t) => t.trim().isNotEmpty)) {
+      _syncCoachContext();
       return;
     }
     final recs = result.recommendations
@@ -189,6 +212,7 @@ class EqActionPlanNotifier extends StateNotifier<Map<String, EqActionPlanRecord>
         done: done,
       );
     _persist();
+    _syncCoachContext();
   }
 
   /// Prefer narrative / analysis actions when available (results screen).
@@ -213,6 +237,7 @@ class EqActionPlanNotifier extends StateNotifier<Map<String, EqActionPlanRecord>
     }
     state = Map<String, EqActionPlanRecord>.from(state)..[resultId] = next;
     _persist();
+    _syncCoachContext();
   }
 
   Future<void> toggleDone(String resultId, int index) async {
@@ -223,10 +248,11 @@ class EqActionPlanNotifier extends StateNotifier<Map<String, EqActionPlanRecord>
     state = Map<String, EqActionPlanRecord>.from(state)
       ..[resultId] = r.copyWith(done: nextDone);
     await _persist();
+    _syncCoachContext();
   }
 }
 
-final eqActionPlanProvider =
-    StateNotifierProvider<EqActionPlanNotifier, Map<String, EqActionPlanRecord>>(
-  (ref) => EqActionPlanNotifier(),
+final eqActionPlanProvider = StateNotifierProvider<EqActionPlanNotifier,
+    Map<String, EqActionPlanRecord>>(
+  (ref) => EqActionPlanNotifier(ref),
 );

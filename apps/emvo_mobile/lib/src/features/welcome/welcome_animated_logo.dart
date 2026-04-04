@@ -4,17 +4,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:emvo_ui/emvo_ui.dart';
 
-/// Single hero logo: heart mark on brand gradient, with layered motion.
+/// Hero logo: brand mark on a circular gradient medallion. The raster is
+/// **zoomed** so the asset’s square frame sits outside the [ClipOval] and only
+/// the mark shows inside the circle.
 class WelcomeAnimatedLogo extends StatefulWidget {
   const WelcomeAnimatedLogo({
     super.key,
     this.emphasize = false,
     this.size = 168,
+    this.logoZoom = 1.52,
   });
 
   /// When true (e.g. after a short delay), plays a one-shot “hello” burst.
   final bool emphasize;
   final double size;
+
+  /// Scale applied to the bitmap so square PNG bounds clear the circle (>1).
+  final double logoZoom;
 
   @override
   State<WelcomeAnimatedLogo> createState() => _WelcomeAnimatedLogoState();
@@ -41,8 +47,8 @@ class _WelcomeAnimatedLogoState extends State<WelcomeAnimatedLogo>
 
   @override
   Widget build(BuildContext context) {
-    final r = widget.size * 0.24;
     final logoPath = 'assets/branding/emvo_logo.png';
+    final zoom = widget.logoZoom.clamp(1.0, 2.2);
 
     final core = AnimatedBuilder(
       animation: _shimmer,
@@ -58,8 +64,7 @@ class _WelcomeAnimatedLogoState extends State<WelcomeAnimatedLogo>
           ),
         );
       },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(r),
+      child: ClipOval(
         child: SizedBox(
           width: widget.size,
           height: widget.size,
@@ -71,29 +76,54 @@ class _WelcomeAnimatedLogoState extends State<WelcomeAnimatedLogo>
                   gradient: EmvoColors.brandGradient,
                 ),
               ),
-              // Soft inner vignette for depth
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    center: Alignment.center,
-                    radius: 1.05,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.0),
-                      Colors.black.withValues(alpha: 0.12),
-                    ],
+              // Soft inner vignette for depth (theme-aware for dark mode)
+              Builder(
+                builder: (context) {
+                  final dark = Theme.of(context).brightness == Brightness.dark;
+                  return DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        center: Alignment.center,
+                        radius: 1.05,
+                        colors: dark
+                            ? [
+                                Colors.white.withValues(alpha: 0.0),
+                                Colors.black.withValues(alpha: 0.35),
+                              ]
+                            : [
+                                Colors.white.withValues(alpha: 0.0),
+                                Colors.black.withValues(alpha: 0.12),
+                              ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+              Positioned.fill(
+                child: Transform.scale(
+                  scale: zoom,
+                  alignment: Alignment.center,
+                  child: Image.asset(
+                    logoPath,
+                    fit: BoxFit.cover,
+                    alignment: Alignment.center,
+                    filterQuality: FilterQuality.high,
+                    errorBuilder: (_, __, ___) => Icon(
+                      Icons.favorite_rounded,
+                      size: widget.size * 0.58,
+                      color: Colors.white.withValues(alpha: 0.95),
+                    ),
                   ),
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.all(widget.size * 0.14),
-                child: Image.asset(
-                  logoPath,
-                  fit: BoxFit.contain,
-                  filterQuality: FilterQuality.high,
-                  errorBuilder: (_, __, ___) => Icon(
-                    Icons.favorite_rounded,
-                    size: widget.size * 0.42,
-                    color: Colors.white.withValues(alpha: 0.95),
+              // Light rim separates the disc from the ambient background
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.transparent,
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    width: 1,
                   ),
                 ),
               ),

@@ -80,7 +80,7 @@ class _DashboardShellState extends ConsumerState<DashboardShell> {
             NavigationDestination(
               icon: Icon(Icons.person_outline),
               selectedIcon: Icon(Icons.person),
-              label: 'Profile',
+              label: 'You',
             ),
           ],
         ),

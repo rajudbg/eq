@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:emvo_assessment/emvo_assessment.dart';
 
-/// Latest completed assessment (in-memory until persisted storage exists).
+/// Latest completed assessment (persisted via [AssessmentRepositoryImpl]).
 final latestResultProvider = FutureProvider<AssessmentResult?>((ref) async {
   final repo = ref.watch(assessmentRepositoryProvider);
   final either = await repo.getLatestResult();

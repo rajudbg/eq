@@ -116,10 +116,20 @@ class ProgressScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildJourneyHero(context, history),
+          const SizedBox(height: 28),
           Text(
             'EQ Journey',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Each point is a completed assessment — your trail through time.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: context.emvoOnSurface(0.62),
+                  height: 1.4,
                 ),
           ),
           const SizedBox(height: 16),
@@ -127,6 +137,13 @@ class ProgressScreen extends ConsumerWidget {
             height: 200,
             child: _buildTrendChart(context, history),
           ),
+          if (history.length >= 2) ...[
+            const SizedBox(height: 24),
+            _AssessmentDeltaCard(
+              previous: history[history.length - 2],
+              latest: history.last,
+            ),
+          ],
           const SizedBox(height: 32),
           Text(
             'Dimension Growth',
@@ -148,6 +165,74 @@ class ProgressScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           ...history.reversed.map((result) => _HistoryCard(result: result)),
         ],
+      ),
+    );
+  }
+
+  /// Ring + copy so progress is felt as movement, not only a line chart.
+  Widget _buildJourneyHero(
+    BuildContext context,
+    List<AssessmentResult> history,
+  ) {
+    final latest = history.last;
+    final first = history.first;
+    final hasArc = history.length >= 2;
+    final delta = hasArc ? latest.overallScore - first.overallScore : 0.0;
+    final deltaLabel =
+        delta >= 0 ? '+${delta.toStringAsFixed(1)}' : delta.toStringAsFixed(1);
+
+    return Semantics(
+      container: true,
+      label: 'Overall score ${latest.overallScore.toInt()} out of one hundred',
+      child: GlassContainer(
+        padding: const EdgeInsets.all(EmvoDimensions.lg),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            AnimatedScoreRing(
+              score: latest.overallScore,
+              size: 128,
+              animated: true,
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Where you are on the path',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    hasArc
+                        ? 'EQ shifts gradually — small moves still count. '
+                            'The chart below is how your overall score has traveled.'
+                        : 'This ring is your baseline. After a second assessment, '
+                            'the journey line appears and you can feel the arc.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: context.emvoOnSurface(0.68),
+                          height: 1.45,
+                        ),
+                  ),
+                  if (hasArc) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      '$deltaLabel points overall vs your first result '
+                      '(${first.overallScore.toInt()} → ${latest.overallScore.toInt()})',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -297,6 +382,74 @@ class ProgressScreen extends ConsumerWidget {
       case EQDimension.socialSkills:
         return EmvoColors.success;
     }
+  }
+}
+
+class _AssessmentDeltaCard extends StatelessWidget {
+  const _AssessmentDeltaCard({
+    required this.previous,
+    required this.latest,
+  });
+
+  final AssessmentResult previous;
+  final AssessmentResult latest;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final overallDelta = latest.overallScore - previous.overallScore;
+    final sign = overallDelta >= 0 ? '+' : '';
+    return GlassContainer(
+      padding: const EdgeInsets.all(EmvoDimensions.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Since your last assessment',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Overall EQ $sign${overallDelta.toStringAsFixed(1)} points',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: scheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(height: 12),
+          for (final d in EQDimension.values)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    d.displayName,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  Text(
+                    _dimDeltaLabel(
+                      (latest.dimensionScores[d] ?? 0) -
+                          (previous.dimensionScores[d] ?? 0),
+                    ),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  static String _dimDeltaLabel(double delta) {
+    if (delta.abs() < 0.05) return '0';
+    final s = delta > 0 ? '+' : '';
+    return '$s${delta.toStringAsFixed(1)}';
   }
 }
 

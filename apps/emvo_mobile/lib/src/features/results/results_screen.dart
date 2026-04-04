@@ -8,10 +8,14 @@ import 'package:emvo_core/emvo_core.dart';
 import 'package:emvo_ui/emvo_ui.dart';
 
 import '../../providers/app_state_providers.dart';
+import '../../retention/action_plan_unlock.dart';
 import '../../widgets/eq_action_plan_widgets.dart';
 import '../../routing/routing.dart';
 import '../assessment/assessment_ai_bridge.dart';
 import '../assessment/assessment_ai_providers.dart';
+import 'results_account_nudge.dart';
+import 'results_notification_nudge.dart';
+import '../../widgets/share_eq_result_card.dart';
 
 class ResultsScreen extends ConsumerStatefulWidget {
   const ResultsScreen({super.key});
@@ -36,6 +40,16 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
         // Ensure EQ analysis refetches after navigation (avoids empty section on first paint).
         ref.invalidate(assessmentNarrativeProvider);
         ref.read(mascotProvider.notifier).celebrate();
+      }
+      if (!mounted || r == null) return;
+      if (!kIsWeb) {
+        await Future<void>.delayed(const Duration(milliseconds: 2200));
+        if (!mounted) return;
+        await ResultsAccountNudge.maybeShow(context, ref);
+        if (!mounted) return;
+        await Future<void>.delayed(const Duration(milliseconds: 550));
+        if (!mounted) return;
+        await ResultsNotificationNudge.maybeShow(context, ref);
       }
     });
   }
@@ -138,8 +152,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                       ),
                       const SizedBox(height: 16),
                       ...result.insights.map(
-                        (insight) =>
-                            _DimensionInsightCard(insight: insight),
+                        (insight) => _DimensionInsightCard(insight: insight),
                       ),
                       const SizedBox(height: 28),
                       Consumer(
@@ -180,7 +193,8 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 16),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Written analysis did not load. Tap retry—your scores and plan below are still valid.',
@@ -189,9 +203,9 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                                             .bodyMedium
                                             ?.copyWith(
                                               color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onSurface
-                                                      .withValues(alpha: 0.72),
+                                                  .colorScheme
+                                                  .onSurface
+                                                  .withValues(alpha: 0.72),
                                             ),
                                       ),
                                       const SizedBox(height: 8),
@@ -241,6 +255,49 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                               text: entry.value,
                             ),
                           ),
+                      const SizedBox(height: 24),
+                      GlassContainer(
+                        padding: const EdgeInsets.all(EmvoDimensions.md),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.event_repeat,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'Your growth checkpoint',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
+                                        ?.copyWith(fontWeight: FontWeight.w700),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Retake your EQ assessment on or after '
+                              '${_fmtDate(assessmentRetakeEligibleAt(result))} '
+                              '(${_daysUntilRetakeLabel(result)}) to see how your scores move.',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    height: 1.4,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.78),
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
                       const SizedBox(height: 32),
                       AnimatedButton(
                         text: 'Start Coaching',
@@ -263,6 +320,14 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                         isSecondary: true,
                         width: double.infinity,
                       ),
+                      if (!kIsWeb) ...[
+                        const SizedBox(height: 12),
+                        TextButton.icon(
+                          onPressed: () => shareEqResultAsPng(context, result),
+                          icon: const Icon(Icons.ios_share_outlined, size: 20),
+                          label: const Text('Share score as image'),
+                        ),
+                      ],
                       const SizedBox(height: 32),
                     ],
                   ),
@@ -273,6 +338,23 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
         ),
       ),
     );
+  }
+
+  String _fmtDate(DateTime d) {
+    final m = d.month.toString().padLeft(2, '0');
+    final day = d.day.toString().padLeft(2, '0');
+    return '${d.year}-$m-$day';
+  }
+
+  String _daysUntilRetakeLabel(AssessmentResult result) {
+    final eligible = assessmentRetakeEligibleAt(result);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final el = DateTime(eligible.year, eligible.month, eligible.day);
+    final d = el.difference(today).inDays;
+    if (d <= 0) return 'today — mark your calendar';
+    if (d == 1) return '1 day';
+    return '$d days';
   }
 
   Widget _buildRadarChart(AssessmentResult result) {
@@ -363,9 +445,7 @@ class _EqAnalysisLoadingCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 color: track,
               ),
-            )
-                .animate(onPlay: (c) => c.repeat())
-                .shimmer(
+            ).animate(onPlay: (c) => c.repeat()).shimmer(
                   delay: (widthFactor * 180).round().ms,
                   duration: 1600.ms,
                   color: scheme.primary.withValues(alpha: 0.22),
@@ -398,9 +478,7 @@ class _EqAnalysisLoadingCard extends StatelessWidget {
                       size: 26,
                     ),
                   ),
-                )
-                    .animate(onPlay: (c) => c.repeat(reverse: true))
-                    .scale(
+                ).animate(onPlay: (c) => c.repeat(reverse: true)).scale(
                       begin: const Offset(0.94, 0.94),
                       end: const Offset(1.05, 1.05),
                       duration: 1100.ms,
@@ -413,10 +491,11 @@ class _EqAnalysisLoadingCard extends StatelessWidget {
                     children: [
                       Text(
                         'Generating your EQ analysis',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.1,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.1,
+                                ),
                       ),
                       const SizedBox(height: 6),
                       Text(

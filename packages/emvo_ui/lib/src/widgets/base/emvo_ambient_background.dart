@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -47,29 +46,30 @@ class EmvoAmbientBackground extends StatelessWidget {
           ),
         ),
         Positioned(
-          top: -80,
-          right: -60,
+          top: -120,
+          right: -80,
           child: _BlurBlob(
-            diameter: 260,
+            diameter: 480,
             color: (isDark ? EmvoColors.brandMagenta : EmvoColors.brandPurple)
-                .withValues(alpha: isDark ? 0.22 : 0.18),
+                .withValues(alpha: isDark ? 0.45 : 0.40),
           ),
         ),
         Positioned(
-          bottom: 120,
-          left: -100,
+          bottom: 20,
+          left: -140,
+          child: _BlurBlob(
+            diameter: 560,
+            color: (isDark ? EmvoColors.brandOrange : EmvoColors.primary)
+                .withValues(alpha: isDark ? 0.35 : 0.30),
+          ),
+        ),
+        Positioned(
+          top: 240,
+          left: 80,
           child: _BlurBlob(
             diameter: 320,
-            color: (isDark ? EmvoColors.brandOrange : EmvoColors.primary)
-                .withValues(alpha: isDark ? 0.14 : 0.12),
-          ),
-        ),
-        Positioned(
-          top: 180,
-          left: 40,
-          child: _BlurBlob(
-            diameter: 140,
-            color: EmvoColors.accentCyan.withValues(alpha: isDark ? 0.08 : 0.1),
+            color:
+                EmvoColors.accentCyan.withValues(alpha: isDark ? 0.25 : 0.28),
           ),
         ),
         child,
@@ -89,29 +89,23 @@ class _BlurBlob extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final circle = Container(
+    // We use a BoxShape.circle with a RadialGradient to create a performant,
+    // gorgeous blur effect that works flawlessly on Flutter Web canvas/wasm
+    // without the ImageFiltered performance and layout bugs.
+    Widget blob = Container(
       width: diameter,
       height: diameter,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: color,
+        gradient: RadialGradient(
+          colors: [
+            color,
+            color.withValues(alpha: 0.0),
+          ],
+          stops: const [0.1, 1.0],
+        ),
       ),
     );
-
-    // ImageFiltered + blur is a frequent source of view/layer bugs on Flutter web
-    // when the tree rebuilds (e.g. light/dark toggle).
-    Widget blob;
-    if (kIsWeb) {
-      blob = Opacity(
-        opacity: 0.92,
-        child: circle,
-      );
-    } else {
-      blob = ImageFiltered(
-        imageFilter: ImageFilter.blur(sigmaX: 64, sigmaY: 64),
-        child: circle,
-      );
-    }
 
     // Pseudo-randomize based on diameter to avoid them moving in unison
     final int durationSec = 10 + (diameter % 8).toInt();

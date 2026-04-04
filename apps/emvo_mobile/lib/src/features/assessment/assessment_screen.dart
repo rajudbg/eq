@@ -3,13 +3,13 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:emvo_assessment/emvo_assessment.dart';
 import 'package:emvo_core/emvo_core.dart';
 import 'package:emvo_ui/emvo_ui.dart';
 
 import '../../providers/app_state_providers.dart';
 import '../../providers/assessment_providers.dart';
+import '../../routing/routing.dart';
 
 class AssessmentScreen extends ConsumerStatefulWidget {
   const AssessmentScreen({super.key});
@@ -29,6 +29,7 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
   void initState() {
     super.initState();
     Future<void>.delayed(Duration.zero, () {
+      ref.read(onboardingProvider.notifier).completeOnboarding();
       ref.read(assessmentNotifierProvider.notifier).loadQuestions();
       ref.read(mascotProvider.notifier).listen();
     });
@@ -106,9 +107,14 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
             : const Text('Assessment'),
         leading: IconButton(
           icon: const Icon(Icons.close),
-          onPressed: () {
+          tooltip: 'Leave assessment',
+          onPressed: () async {
             ref.read(assessmentNotifierProvider.notifier).reset();
-            context.go('/welcome');
+            if (!ref.read(assessmentCompletionProvider)) {
+              await ref.read(onboardingProvider.notifier).reset();
+            }
+            if (!context.mounted) return;
+            context.go(Routes.welcome);
           },
         ),
       ),
@@ -166,7 +172,16 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
           children: [
             AnimatedProgressBar(
               progress: state.progress,
-              showPercentage: false,
+              showPercentage: true,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Typical session is about 8 minutes — you are almost there.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: context.emvoOnSurface(0.55),
+                    height: 1.3,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -255,8 +270,9 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
                 itemBuilder: (context, index) {
                   final option = question.options[index];
                   final isSelected = selectedOptionId == option.id;
-                  final letter =
-                      index < 26 ? String.fromCharCode(65 + index) : '${index + 1}';
+                  final letter = index < 26
+                      ? String.fromCharCode(65 + index)
+                      : '${index + 1}';
 
                   return AnimatedOptionCard(
                     badgeLabel: letter,
@@ -315,7 +331,9 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
     if (current.isLastQuestion) {
       await notifier.calculateResult();
       if (!mounted) return;
-      await ref.read(assessmentCompletionProvider.notifier).completeAssessment();
+      await ref
+          .read(assessmentCompletionProvider.notifier)
+          .completeAssessment();
       if (!mounted) return;
       context.go('/results');
     } else {
@@ -470,7 +488,10 @@ class _ScenarioPromptCard extends StatelessWidget {
                       TypewriterText(
                         key: ValueKey(scenario),
                         text: scenario,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
                               height: 1.48,
                               fontWeight: FontWeight.w600,
                               color: scheme.onSurface.withValues(alpha: 0.94),

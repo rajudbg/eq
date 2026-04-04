@@ -5,6 +5,7 @@ import 'package:emvo_ui/emvo_ui.dart';
 
 import 'providers/theme_settings_provider.dart';
 import 'routing/app_router.dart';
+import 'system/notification_schedule_sync.dart';
 import 'system_ui_theme_sync.dart';
 
 class EmvoApp extends ConsumerWidget {
@@ -23,7 +24,9 @@ class EmvoApp extends ConsumerWidget {
         routerConfig: AppRouter.router,
         builder: (context, child) {
           return SystemUiThemeSync(
-            child: child ?? const SizedBox.shrink(),
+            child: NotificationScheduleSync(
+              child: child ?? const SizedBox.shrink(),
+            ),
           );
         },
       ),

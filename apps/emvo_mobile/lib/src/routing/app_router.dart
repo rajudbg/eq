@@ -7,7 +7,7 @@ import '../features/coaching/coaching_screen.dart';
 import '../features/dashboard/dashboard_shell.dart';
 import '../features/dashboard/home_screen.dart';
 import '../features/progress/progress_screen.dart';
-import '../features/onboarding/onboarding_screen.dart';
+import '../features/onboarding/intent_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/results/results_screen.dart';
 import '../features/settings/settings_screen.dart';
@@ -34,9 +34,24 @@ class AppRouter {
         builder: (context, state) => const WelcomeScreen(),
       ),
       GoRoute(
+        path: '/intent',
+        name: 'intent',
+        pageBuilder: (context, state) => CustomTransitionPage<void>(
+          key: state.pageKey,
+          child: const IntentScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SharedAxisTransition(
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
+              transitionType: SharedAxisTransitionType.horizontal,
+              child: child,
+            );
+          },
+        ),
+      ),
+      GoRoute(
         path: '/onboarding',
-        name: 'onboarding',
-        builder: (context, state) => const OnboardingScreen(),
+        redirect: (context, state) => Routes.intent,
       ),
       GoRoute(
         path: '/paywall',
@@ -141,6 +156,7 @@ class AppRouter {
 /// Route names for type-safe navigation
 class Routes {
   static const String welcome = '/welcome';
+  static const String intent = '/intent';
   static const String onboarding = '/onboarding';
   static const String assessment = '/assessment';
   static const String results = '/results';

@@ -63,7 +63,11 @@ final assessmentCompletionProvider =
   return AssessmentCompletionNotifier();
 });
 
-/// Simple auth state (replace with proper auth when backend ready)
+/// Linked-account flag (Apple / Google / email) stored in prefs.
+///
+/// Firebase anonymous auth runs separately in [main] via
+/// [ensureFirebaseAppAndAnonymousUser]; use [firebaseUidProvider] for the
+/// stable guest UID before link.
 class AuthNotifier extends StateNotifier<bool> {
   AuthNotifier() : super(false) {
     _load();

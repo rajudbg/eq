@@ -6,6 +6,7 @@ import 'package:emvo_assessment/emvo_assessment.dart';
 import 'package:emvo_ui/emvo_ui.dart';
 
 import '../providers/eq_action_plan_provider.dart';
+import '../retention/action_plan_unlock.dart';
 
 /// Full habit-style block on the results screen (below EQ analysis).
 class EqWeeklyActionPlanCard extends ConsumerStatefulWidget {
@@ -23,7 +24,8 @@ class EqWeeklyActionPlanCard extends ConsumerStatefulWidget {
       _EqWeeklyActionPlanCardState();
 }
 
-class _EqWeeklyActionPlanCardState extends ConsumerState<EqWeeklyActionPlanCard> {
+class _EqWeeklyActionPlanCardState
+    extends ConsumerState<EqWeeklyActionPlanCard> {
   void _syncAfterFrame() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -60,6 +62,8 @@ class _EqWeeklyActionPlanCardState extends ConsumerState<EqWeeklyActionPlanCard>
     }
 
     final scheme = Theme.of(context).colorScheme;
+    final anchor = planUnlockAnchor(ref, widget.resultId);
+    final visible = actionPlanVisibleHabitCount(anchor);
     return GlassContainer(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(EmvoDimensions.md),
@@ -82,7 +86,7 @@ class _EqWeeklyActionPlanCardState extends ConsumerState<EqWeeklyActionPlanCard>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Three habits from your results. Tap a row when you complete it — '
+                      'Habits unlock week by week so you can focus. Tap a row when you complete it — '
                       'progress syncs to your dashboard.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: scheme.onSurface.withValues(alpha: 0.65),
@@ -100,12 +104,13 @@ class _EqWeeklyActionPlanCardState extends ConsumerState<EqWeeklyActionPlanCard>
             child: LinearProgressIndicator(
               value: plan.progress.clamp(0.0, 1.0),
               minHeight: 6,
-              backgroundColor: scheme.surfaceContainerHighest.withValues(alpha: 0.6),
+              backgroundColor:
+                  scheme.surfaceContainerHighest.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 6),
           Text(
-            '${plan.completedCount} of 3 completed',
+            '${plan.completedCount} of 3 completed · $visible of 3 unlocked',
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   color: scheme.onSurface.withValues(alpha: 0.55),
                   fontWeight: FontWeight.w600,
@@ -117,7 +122,10 @@ class _EqWeeklyActionPlanCardState extends ConsumerState<EqWeeklyActionPlanCard>
               index: i,
               text: plan.items[i],
               done: i < plan.done.length && plan.done[i],
+              locked: i >= visible,
+              unlockHint: actionPlanUnlockHint(anchor, i),
               onToggle: () {
+                if (i >= visible) return;
                 HapticFeedback.lightImpact();
                 ref
                     .read(eqActionPlanProvider.notifier)
@@ -136,12 +144,16 @@ class _ActionPlanRow extends StatelessWidget {
     required this.text,
     required this.done,
     required this.onToggle,
+    this.locked = false,
+    this.unlockHint = '',
   });
 
   final int index;
   final String text;
   final bool done;
   final VoidCallback onToggle;
+  final bool locked;
+  final String unlockHint;
 
   @override
   Widget build(BuildContext context) {
@@ -149,9 +161,11 @@ class _ActionPlanRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
-        color: done
-            ? EmvoColors.success.withValues(alpha: 0.12)
-            : scheme.surfaceContainerHighest.withValues(alpha: 0.35),
+        color: locked
+            ? scheme.surfaceContainerHighest.withValues(alpha: 0.2)
+            : done
+                ? EmvoColors.success.withValues(alpha: 0.12)
+                : scheme.surfaceContainerHighest.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(14),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -167,7 +181,11 @@ class _ActionPlanRow extends StatelessWidget {
                   height: 28,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: done ? EmvoColors.success : Colors.transparent,
+                    color: done
+                        ? EmvoColors.success
+                        : locked
+                            ? scheme.outline.withValues(alpha: 0.25)
+                            : Colors.transparent,
                     border: Border.all(
                       color: done
                           ? EmvoColors.success
@@ -175,31 +193,62 @@ class _ActionPlanRow extends StatelessWidget {
                       width: 2,
                     ),
                   ),
-                  child: done
-                      ? const Icon(Icons.check, size: 18, color: Colors.white)
-                      : Center(
-                          child: Text(
-                            '${index + 1}',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: scheme.onSurface.withValues(alpha: 0.5),
+                  child: locked
+                      ? Icon(
+                          Icons.lock_outline,
+                          size: 16,
+                          color: scheme.onSurface.withValues(alpha: 0.45),
+                        )
+                      : done
+                          ? const Icon(Icons.check,
+                              size: 18, color: Colors.white)
+                          : Center(
+                              child: Text(
+                                '${index + 1}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color:
+                                      scheme.onSurface.withValues(alpha: 0.5),
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    text,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          height: 1.4,
-                          decoration:
-                              done ? TextDecoration.lineThrough : TextDecoration.none,
-                          color: scheme.onSurface.withValues(
-                            alpha: done ? 0.5 : 0.92,
-                          ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        text,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              height: 1.4,
+                              decoration: done
+                                  ? TextDecoration.lineThrough
+                                  : TextDecoration.none,
+                              color: scheme.onSurface.withValues(
+                                alpha: locked
+                                    ? 0.45
+                                    : done
+                                        ? 0.5
+                                        : 0.92,
+                              ),
+                            ),
+                      ),
+                      if (locked && unlockHint.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          unlockHint,
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(
+                                color: scheme.primary.withValues(alpha: 0.85),
+                                fontWeight: FontWeight.w600,
+                              ),
                         ),
+                      ],
+                    ],
                   ),
                 ),
               ],
@@ -272,6 +321,7 @@ class _EqDashboardActionPlanSummaryState
     }
 
     final scheme = Theme.of(context).colorScheme;
+    final visible = actionPlanVisibleHabitCount(widget.result.completedAt);
     return GlassContainer(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(EmvoDimensions.md),
@@ -284,20 +334,21 @@ class _EqDashboardActionPlanSummaryState
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Weekly action plan',
+                  'Your focus this week',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: scheme.primary.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '${plan.completedCount}/3',
+                  '${plan.completedCount}/3 · $visible unlocked',
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
                         color: scheme.primary,
                         fontWeight: FontWeight.w800,
@@ -308,7 +359,7 @@ class _EqDashboardActionPlanSummaryState
           ),
           const SizedBox(height: 4),
           Text(
-            'Based on your latest assessment — tap to mark habits done.',
+            'Based on your latest assessment — habits unlock each week.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: scheme.onSurface.withValues(alpha: 0.58),
                 ),
@@ -319,7 +370,8 @@ class _EqDashboardActionPlanSummaryState
             child: LinearProgressIndicator(
               value: plan.progress.clamp(0.0, 1.0),
               minHeight: 4,
-              backgroundColor: scheme.surfaceContainerHighest.withValues(alpha: 0.6),
+              backgroundColor:
+                  scheme.surfaceContainerHighest.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 10),
@@ -327,7 +379,10 @@ class _EqDashboardActionPlanSummaryState
             _DashboardActionTile(
               text: plan.items[i],
               done: i < plan.done.length && plan.done[i],
+              locked: i >= visible,
+              unlockHint: actionPlanUnlockHint(widget.result.completedAt, i),
               onTap: () {
+                if (i >= visible) return;
                 HapticFeedback.lightImpact();
                 ref
                     .read(eqActionPlanProvider.notifier)
@@ -345,11 +400,15 @@ class _DashboardActionTile extends StatelessWidget {
     required this.text,
     required this.done,
     required this.onTap,
+    this.locked = false,
+    this.unlockHint = '',
   });
 
   final String text;
   final bool done;
   final VoidCallback onTap;
+  final bool locked;
+  final String unlockHint;
 
   @override
   Widget build(BuildContext context) {
@@ -365,22 +424,51 @@ class _DashboardActionTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(
-                done ? Icons.check_circle : Icons.circle_outlined,
+                locked
+                    ? Icons.lock_outline
+                    : done
+                        ? Icons.check_circle
+                        : Icons.circle_outlined,
                 size: 22,
-                color: done ? EmvoColors.success : scheme.outline.withValues(alpha: 0.55),
+                color: locked
+                    ? scheme.outline.withValues(alpha: 0.5)
+                    : done
+                        ? EmvoColors.success
+                        : scheme.outline.withValues(alpha: 0.55),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(
-                  text,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        height: 1.35,
-                        decoration:
-                            done ? TextDecoration.lineThrough : TextDecoration.none,
-                        color: scheme.onSurface.withValues(alpha: done ? 0.48 : 0.88),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      text,
+                      maxLines: locked ? 1 : 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            height: 1.35,
+                            decoration: done
+                                ? TextDecoration.lineThrough
+                                : TextDecoration.none,
+                            color: scheme.onSurface.withValues(
+                              alpha: locked
+                                  ? 0.42
+                                  : done
+                                      ? 0.48
+                                      : 0.88,
+                            ),
+                          ),
+                    ),
+                    if (locked && unlockHint.isNotEmpty)
+                      Text(
+                        unlockHint,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: scheme.primary.withValues(alpha: 0.85),
+                            ),
                       ),
+                  ],
                 ),
               ),
             ],

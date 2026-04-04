@@ -12,6 +12,7 @@ class CoachingRepositoryImpl implements CoachingRepository {
 
   final CoachingAiGateway _gateway;
   CoachingSession? _currentSession;
+  String? _lastCoachSnippet;
 
   @override
   CoachingSession? get cachedActiveSession => _currentSession;
@@ -71,11 +72,20 @@ class CoachingRepositoryImpl implements CoachingRepository {
           );
 
           return turn.match(
-            (f) {
-              _currentSession = session.copyWith(messages: previousMessages);
-              return Left<Failure, Message>(f);
+            (_) {
+              final offline = _offlineCoachMessage();
+              _currentSession = _currentSession!.copyWith(
+                messages: [..._currentSession!.messages, offline],
+              );
+              _messageController.add(offline);
+              return Right<Failure, Message>(offline);
             },
             (aiResponse) {
+              final t = aiResponse.content.trim();
+              if (t.isNotEmpty) {
+                _lastCoachSnippet =
+                    t.length > 280 ? '${t.substring(0, 280)}…' : t;
+              }
               _currentSession = _currentSession!.copyWith(
                 messages: [..._currentSession!.messages, aiResponse],
               );
@@ -128,5 +138,21 @@ class CoachingRepositoryImpl implements CoachingRepository {
 
   void dispose() {
     _messageController.close();
+  }
+
+  Message _offlineCoachMessage() {
+    final hint = _lastCoachSnippet != null && _lastCoachSnippet!.isNotEmpty
+        ? '\n\nLast time we connected, I said: “$_lastCoachSnippet”'
+        : '';
+    return Message(
+      id: 'offline-${DateTime.now().microsecondsSinceEpoch}',
+      content: 'I can’t reach the AI coach right now (network or service '
+          'hiccup). Your message is saved — try again in a moment.\n\n'
+          'Meanwhile: name one feeling you had when you sent that, and one '
+          'small next step you could take in the next hour.$hint',
+      sender: MessageSender.coach,
+      timestamp: DateTime.now(),
+      metadata: <String, dynamic>{'offlineFallback': true},
+    );
   }
 }
