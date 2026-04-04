@@ -55,7 +55,11 @@ the check-in only for tone when it is clearly relevant.
         messages.add({'role': role, 'content': m.content});
       }
 
-      final text = await _client.complete(messages);
+      final text = await _client.complete(
+        messages,
+        maxTokens: 560,
+        temperature: 0.7,
+      );
       return Right(
         Message(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -90,19 +94,23 @@ the check-in only for tone when it is clearly relevant.
       return const Right([]);
     }
     try {
-      final raw = await _client.complete([
-        {
-          'role': 'system',
-          'content':
-              'You summarize coaching chat themes. Reply with ONLY valid JSON: '
-                  '{"insights":[{"title":"short title","description":"1-2 sentences","relatedDimension":"selfAwareness|selfRegulation|empathy|socialSkills|null"}]} '
-                  'Use 1-3 insights max. No markdown.',
-        },
-        {
-          'role': 'user',
-          'content': 'Recent user messages:\n$recent',
-        },
-      ]);
+      final raw = await _client.complete(
+        [
+          {
+            'role': 'system',
+            'content':
+                'You summarize coaching chat themes. Reply with ONLY valid JSON: '
+                    '{"insights":[{"title":"short title","description":"1-2 sentences","relatedDimension":"selfAwareness|selfRegulation|empathy|socialSkills|null"}]} '
+                    'Use 1-3 insights max. No markdown.',
+          },
+          {
+            'role': 'user',
+            'content': 'Recent user messages:\n$recent',
+          },
+        ],
+        maxTokens: 380,
+        temperature: 0.5,
+      );
       final decoded =
           jsonDecode(_stripMarkdownJson(raw)) as Map<String, dynamic>;
       final list = decoded['insights'] as List<dynamic>? ?? [];
@@ -156,18 +164,22 @@ the check-in only for tone when it is clearly relevant.
               '\nThey checked in today as: ${d['moodLabel']}. You may reflect that lightly in one starter if it fits; do not make every starter about mood.';
         }
       }
-      final raw = await _client.complete([
-        {
-          'role': 'system',
-          'content':
-              'Reply with exactly 4 short first-person coaching prompts (one sentence each), '
-                  'each on its own line. No numbering or bullets. Tailor lightly to their EQ context when provided.',
-        },
-        {
-          'role': 'user',
-          'content': 'Suggest 4 starters.\n$ctxLine',
-        },
-      ]);
+      final raw = await _client.complete(
+        [
+          {
+            'role': 'system',
+            'content':
+                'Reply with exactly 4 short first-person coaching prompts (one sentence each), '
+                    'each on its own line. No numbering or bullets. Tailor lightly to their EQ context when provided.',
+          },
+          {
+            'role': 'user',
+            'content': 'Suggest 4 starters.\n$ctxLine',
+          },
+        ],
+        maxTokens: 220,
+        temperature: 0.75,
+      );
       final lines = raw
           .split('\n')
           .map((s) => s.trim())

@@ -43,7 +43,8 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
         ref.read(coachingRepositoryProvider).applyCoachingContext(
               assessmentToCoachingContext(result),
             );
-        ref.invalidate(coachingSessionProvider);
+        // Session is re-read from the repo on each send/suggest; invalidating it
+        // here only forced a full-screen loading spinner. Refresh starters only.
         ref.invalidate(suggestedPromptsProvider);
       } catch (_) {}
     });
@@ -68,6 +69,7 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
 
   Future<void> _sendMessage(String content) async {
     if (content.trim().isEmpty) return;
+    FocusManager.instance.primaryFocus?.unfocus();
     if (_isAtMessageLimit(ref)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -118,7 +120,8 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
     final sessionAsync = ref.watch(coachingSessionProvider);
     final subscriptionAsync = ref.watch(currentSubscriptionProvider);
     final subscription = subscriptionAsync.valueOrNull;
-    final session = sessionAsync.valueOrNull;
+    final repo = ref.watch(coachingRepositoryProvider);
+    final session = sessionAsync.valueOrNull ?? repo.cachedActiveSession;
 
     final messageCount =
         session?.messages.where((m) => m.sender == MessageSender.user).length ??
@@ -210,9 +213,16 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
               ),
               Expanded(
                 child: sessionAsync.when(
+                  skipLoadingOnReload: true,
+                  skipLoadingOnRefresh: true,
                   data: (session) => _buildMessageList(session),
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
+                  loading: () {
+                    final cached = repo.cachedActiveSession;
+                    if (cached != null) {
+                      return _buildMessageList(cached);
+                    }
+                    return const Center(child: CircularProgressIndicator());
+                  },
                   error: (_, __) => Center(
                     child: Padding(
                       padding: EmvoDimensions.paddingScreen,
@@ -247,19 +257,16 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
                   }
                   final promptsAsync = ref.watch(suggestedPromptsProvider);
                   return promptsAsync.when(
+                    skipLoadingOnReload: true,
                     data: (prompts) => SuggestedPrompts(
                       prompts: prompts,
                       onPromptSelected: _sendMessage,
                     ),
-                    loading: () => const SizedBox(
-                      height: 58,
-                      child: Center(
-                        child: SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      ),
+                    loading: () => SuggestedPrompts(
+                      prompts: promptsAsync.hasValue
+                          ? promptsAsync.requireValue
+                          : kDefaultSuggestedPrompts,
+                      onPromptSelected: _sendMessage,
                     ),
                     error: (_, __) => SuggestedPrompts(
                       prompts: kDefaultSuggestedPrompts,

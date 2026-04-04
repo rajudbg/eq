@@ -5,13 +5,28 @@ import 'package:emvo_assessment/emvo_assessment.dart';
 import 'package:emvo_ui/emvo_ui.dart';
 
 import '../../providers/assessment_providers.dart';
+import '../../providers/eq_action_plan_provider.dart';
 import '../../routing/routing.dart';
+import '../../widgets/eq_action_plan_widgets.dart';
 
 class ProgressScreen extends ConsumerWidget {
   const ProgressScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen<AsyncValue<List<AssessmentResult>>>(
+      assessmentHistoryProvider,
+      (previous, next) {
+        next.whenData((history) {
+          if (history.isNotEmpty) {
+            ref
+                .read(eqActionPlanProvider.notifier)
+                .ensureFromAssessment(history.last);
+          }
+        });
+      },
+    );
+
     final historyAsync = ref.watch(assessmentHistoryProvider);
 
     return Scaffold(
@@ -22,7 +37,7 @@ class ProgressScreen extends ConsumerWidget {
       body: EmvoAmbientBackground(
         child: SafeArea(
           child: historyAsync.when(
-            data: (history) => _buildContent(context, history),
+            data: (history) => _buildContent(context, ref, history),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (_, __) => Center(
               child: Padding(
@@ -54,7 +69,11 @@ class ProgressScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildContent(BuildContext context, List<AssessmentResult> history) {
+  Widget _buildContent(
+    BuildContext context,
+    WidgetRef ref,
+    List<AssessmentResult> history,
+  ) {
     if (history.isEmpty) {
       return Center(
         child: Padding(
@@ -117,6 +136,8 @@ class ProgressScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           _buildDimensionComparison(context, history.last),
+          const SizedBox(height: 24),
+          EqDashboardActionPlanSummary(result: history.last),
           const SizedBox(height: 32),
           Text(
             'Assessment History',

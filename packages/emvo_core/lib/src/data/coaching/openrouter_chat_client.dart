@@ -20,12 +20,25 @@ class OpenRouterChatClient {
 
   static const baseUrl = 'https://openrouter.ai/api/v1/chat/completions';
 
-  Future<String> complete(List<Map<String, String>> messages) async {
+  /// [maxTokens] caps completion length so OpenRouter returns faster (less to generate).
+  /// Omit for provider default (often slower / verbose).
+  Future<String> complete(
+    List<Map<String, String>> messages, {
+    int? maxTokens,
+    double? temperature,
+  }) async {
     final uri = Uri.parse(baseUrl);
-    final body = jsonEncode({
+    final body = <String, dynamic>{
       'model': model,
       'messages': messages,
-    });
+    };
+    if (maxTokens != null) {
+      body['max_tokens'] = maxTokens;
+    }
+    if (temperature != null) {
+      body['temperature'] = temperature;
+    }
+    final encoded = jsonEncode(body);
 
     final response = await _http
         .post(
@@ -36,7 +49,7 @@ class OpenRouterChatClient {
             'HTTP-Referer': referer,
             'X-Title': appTitle,
           },
-          body: body,
+          body: encoded,
         )
         .timeout(const Duration(seconds: 90));
 

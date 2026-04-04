@@ -5,6 +5,22 @@ import 'package:fpdart/fpdart.dart';
 import '../../domain/failures/failure.dart';
 import '../coaching/openrouter_chat_client.dart';
 
+/// JSON payload uses [EQDimension.name] (e.g. selfAwareness); turn into readable copy.
+String _dimensionDisplayName(String raw) {
+  switch (raw) {
+    case 'selfAwareness':
+      return 'Self-Awareness';
+    case 'selfRegulation':
+      return 'Self-Regulation';
+    case 'empathy':
+      return 'Empathy';
+    case 'socialSkills':
+      return 'Social Skills';
+    default:
+      return raw;
+  }
+}
+
 /// LLM-generated copy for the results screen; falls back to templates without an API key.
 class AssessmentAiNarrative {
   const AssessmentAiNarrative({
@@ -38,28 +54,37 @@ class AssessmentAiNarrativeService {
     final client = _client;
     if (client != null) {
       try {
-        final raw = await client.complete([
-          {
-            'role': 'system',
-            'content': 'You write clear, warm EQ results copy for a free tier: one comprehensive analysis. '
-                'Output ONLY valid JSON with keys: '
-                'headline (max 12 words, inviting), '
-                'narrative (4–6 short paragraphs, plain text, separate with \\n\\n). The narrative MUST: '
-                '(1) explain what the overall and dimension scores mean—they are 0–100 from scenario-based choices, '
-                'a practical snapshot not a medical or IQ test; '
-                '(2) briefly interpret this user’s pattern using the JSON (strengths and growth areas); '
-                '(3) explain why emotional intelligence matters in relationships, work, and wellbeing, in plain language; '
-                '(4) tie “why it matters” to their specific scores where natural. '
-                'Stay encouraging, non-judgmental, no clinical claims. '
-                'actions: array of exactly 3 short imperative micro-habits for this week. '
-                'No markdown, no code fences.',
-          },
-          {
-            'role': 'user',
-            'content':
-                'Write this free comprehensive EQ analysis from the assessment JSON:\n${jsonEncode(payload)}',
-          },
-        ]);
+        String userPayload;
+        try {
+          userPayload = jsonEncode(payload);
+        } catch (_) {
+          userPayload = '{"overallScore":${payload['overallScore'] ?? 0}}';
+        }
+        final raw = await client.complete(
+          [
+            {
+              'role': 'system',
+              'content': 'You write clear, warm EQ results copy for a mobile app. Be concise—users wait on a loading screen. '
+                  'Output ONLY valid JSON with keys: '
+                  'headline (max 10 words, inviting), '
+                  'narrative (2–3 short paragraphs only, plain text, separate with \\n\\n; each paragraph max 3 sentences; '
+                  'no filler). The narrative MUST still cover: '
+                  '(1) what 0–100 scores mean (each dimension vs strongest answers per question—not clinical); '
+                  '(2) one line on their pattern from the JSON; '
+                  '(3) one line on why EQ matters for them, tied lightly to scores. '
+                  'Stay encouraging, non-judgmental. '
+                  'actions: array of exactly 3 items, each one concrete imperative sentence (when/where), doable this week. '
+                  'No markdown, no code fences.',
+            },
+            {
+              'role': 'user',
+              'content':
+                  'Write this EQ analysis from the assessment JSON:\n$userPayload',
+            },
+          ],
+          maxTokens: 720,
+          temperature: 0.65,
+        );
         final parsed = _parseNarrativeJson(raw);
         if (parsed != null) {
           return Right(parsed);
@@ -75,8 +100,8 @@ class AssessmentAiNarrativeService {
   AssessmentAiNarrative _localNarrative(Map<String, dynamic> payload) {
     final overall = (payload['overallScore'] as num?)?.round() ?? 50;
     final insights = payload['insights'] as List<dynamic>? ?? [];
-    String? weakest;
-    String? strongest;
+    String? weakestKey;
+    String? strongestKey;
     double low = 100;
     double high = -1;
     for (final i in insights) {
@@ -87,15 +112,20 @@ class AssessmentAiNarrativeService {
           final v = s.toDouble();
           if (v < low) {
             low = v;
-            weakest = dim;
+            weakestKey = dim;
           }
           if (v > high) {
             high = v;
-            strongest = dim;
+            strongestKey = dim;
           }
         }
       }
     }
+
+    final weakest =
+        weakestKey == null ? null : _dimensionDisplayName(weakestKey);
+    final strongest =
+        strongestKey == null ? null : _dimensionDisplayName(strongestKey);
 
     final headline = overall >= 75
         ? 'Strong emotional awareness is already on your side'
@@ -104,12 +134,14 @@ class AssessmentAiNarrativeService {
             : 'Small shifts here will compound quickly';
 
     final p1 =
-        'Your numbers are on a 0–100 scale from scenario-based choices. They describe tendencies—how you notice feelings, regulate reactions, and navigate social situations—not a medical diagnosis, IQ score, or fixed label. Think of them as a snapshot you can grow from.';
+        'Your numbers are on a 0–100 scale: each dimension compares your raw points to the best you could score on the questions you answered, so they reflect how often you picked stronger responses—not a medical diagnosis, IQ score, or fixed label. Think of them as a snapshot you can grow from.';
 
     final p2 =
         'Emotional intelligence quietly shapes everyday life: how you recover after conflict, how clearly you communicate under stress, how supported others feel around you, and how steady your own mood tends to be. Improving these skills often means fewer regrets after hard conversations and more trust at work and home.';
 
-    final p3 = (weakest != null && strongest != null && weakest != strongest)
+    final p3 = (weakest != null &&
+            strongest != null &&
+            weakestKey != strongestKey)
         ? 'In your profile, **$strongest** is relatively strong right now, while **$weakest** is the ripest area to practice—that imbalance is common, and focused work there usually produces the fastest visible wins.'
         : weakest != null
             ? 'Your pattern points to **$weakest** as a key growth edge. That is normal; targeted practice there tends to unlock the biggest gains in relationships and stress.'
@@ -141,8 +173,24 @@ class AssessmentAiNarrativeService {
       s = s.replaceFirst(RegExp(r'^```\w*\n?'), '');
       s = s.replaceFirst(RegExp(r'\n?```\s*$'), '');
     }
+    final candidates = <String>{s};
+    final start = s.indexOf('{');
+    final end = s.lastIndexOf('}');
+    if (start >= 0 && end > start) {
+      candidates.add(s.substring(start, end + 1));
+    }
+    for (final chunk in candidates) {
+      final parsed = _tryParseNarrativeMap(chunk);
+      if (parsed != null) return parsed;
+    }
+    return null;
+  }
+
+  AssessmentAiNarrative? _tryParseNarrativeMap(String s) {
     try {
-      final m = jsonDecode(s) as Map<String, dynamic>;
+      final decoded = jsonDecode(s);
+      if (decoded is! Map) return null;
+      final m = Map<String, dynamic>.from(decoded);
       final headline = m['headline']?.toString().trim() ?? '';
       final narrative = m['narrative']?.toString().trim() ?? '';
       final actionsRaw = m['actions'];
@@ -153,8 +201,9 @@ class AssessmentAiNarrativeService {
           if (t.isNotEmpty) actions.add(t);
         }
       }
-      if (headline.isEmpty || narrative.isEmpty || actions.length < 2) {
-        return null;
+      if (headline.isEmpty || narrative.isEmpty) return null;
+      if (actions.isEmpty) {
+        actions.add('Name one emotion before you react in a tense moment today');
       }
       while (actions.length < 3) {
         actions

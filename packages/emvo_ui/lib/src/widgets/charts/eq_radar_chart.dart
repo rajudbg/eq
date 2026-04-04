@@ -75,7 +75,7 @@ class EqRadarChart extends StatelessWidget {
         children: [
           Text(
             'EQ Profile',
-            style: EmvoTextTheme.get(context).headlineSmall?.copyWith(
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
             textAlign: TextAlign.center,
@@ -113,19 +113,18 @@ class EqRadarChart extends StatelessWidget {
                   RadarChartData(
                     dataSets: dataSets,
                     radarBackgroundColor: Colors.transparent,
-                    radarBorderData: const BorderData(show: false),
+                    radarBorderData: BorderSide.none,
                     radarShape: RadarShape.polygon,
-                    titlePositionMultiplier: 1.3,
                     tickCount: 5,
                     ticksTextStyle: const TextStyle(
                         color: Colors.transparent, fontSize: 10),
-                    tickBorderData: BorderData(show: false),
+                    tickBorderData: BorderSide.none,
                     gridBorderData: BorderSide(
                       color: isDark ? Colors.white12 : Colors.black12,
                       width: 1,
                     ),
                     titleTextStyle:
-                        EmvoTextTheme.get(context).labelMedium?.copyWith(
+                        Theme.of(context).textTheme.labelMedium?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: isDark ? Colors.white70 : Colors.black54,
                             ),

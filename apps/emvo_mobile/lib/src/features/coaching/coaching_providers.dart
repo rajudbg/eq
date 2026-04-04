@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:emvo_core/emvo_core.dart';
 
@@ -10,13 +12,20 @@ const kDefaultSuggestedPrompts = <String>[
 ];
 
 /// Loads starter prompts from the active coaching backend (OpenRouter or mock).
+/// Times out quickly so the coach screen never sits on a spinner for starters.
 final suggestedPromptsProvider = FutureProvider<List<String>>((ref) async {
   final repo = ref.watch(coachingRepositoryProvider);
-  final result = await repo.getSuggestedPrompts();
-  return result.fold(
-    (_) => kDefaultSuggestedPrompts,
-    (prompts) => prompts.isEmpty ? kDefaultSuggestedPrompts : prompts,
-  );
+  try {
+    final result = await repo.getSuggestedPrompts().timeout(
+          const Duration(seconds: 12),
+        );
+    return result.fold(
+      (_) => kDefaultSuggestedPrompts,
+      (prompts) => prompts.isEmpty ? kDefaultSuggestedPrompts : prompts,
+    );
+  } on TimeoutException {
+    return kDefaultSuggestedPrompts;
+  }
 });
 
 final coachingSessionProvider = FutureProvider<CoachingSession>((ref) async {

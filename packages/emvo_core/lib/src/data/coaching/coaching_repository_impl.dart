@@ -12,6 +12,9 @@ class CoachingRepositoryImpl implements CoachingRepository {
 
   final CoachingAiGateway _gateway;
   CoachingSession? _currentSession;
+
+  @override
+  CoachingSession? get cachedActiveSession => _currentSession;
   Map<String, dynamic>? _pendingContext;
   final _messageController = StreamController<Message>.broadcast();
 

@@ -8,10 +8,10 @@ import 'package:emvo_core/emvo_core.dart';
 import 'package:emvo_ui/emvo_ui.dart';
 
 import '../../providers/app_state_providers.dart';
+import '../../widgets/eq_action_plan_widgets.dart';
 import '../../routing/routing.dart';
 import '../assessment/assessment_ai_bridge.dart';
 import '../assessment/assessment_ai_providers.dart';
-import '../subscription/widgets/premium_gate.dart';
 
 class ResultsScreen extends ConsumerStatefulWidget {
   const ResultsScreen({super.key});
@@ -33,6 +33,8 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
             .completeAssessment();
       }
       if (mounted) {
+        // Ensure EQ analysis refetches after navigation (avoids empty section on first paint).
+        ref.invalidate(assessmentNarrativeProvider);
         ref.read(mascotProvider.notifier).celebrate();
       }
     });
@@ -120,26 +122,32 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
                       Center(
                         child: SizedBox(
                           height: 280,
                           child: _buildRadarChart(result),
                         ),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 28),
+                      Text(
+                        'Your Strengths & Growth Areas',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                      const SizedBox(height: 16),
+                      ...result.insights.map(
+                        (insight) =>
+                            _DimensionInsightCard(insight: insight),
+                      ),
+                      const SizedBox(height: 28),
                       Consumer(
                         builder: (context, ref, _) {
                           final async = ref.watch(assessmentNarrativeProvider);
                           return async.when(
-                            loading: () => Padding(
-                              padding: const EdgeInsets.only(bottom: 24),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child:
-                                    const LinearProgressIndicator(minHeight: 4),
-                              ),
-                            ),
+                            skipLoadingOnReload: true,
+                            loading: () => const _EqAnalysisLoadingCard(),
                             error: (_, __) => Padding(
                               padding: const EdgeInsets.only(bottom: 24),
                               child: Column(
@@ -168,38 +176,57 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                               ),
                             ),
                             data: (n) {
-                              if (n == null) return const SizedBox.shrink();
-                              return _AiCoachReadSection(narrative: n);
+                              if (n == null) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Written analysis did not load. Tap retry—your scores and plan below are still valid.',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurface
+                                                      .withValues(alpha: 0.72),
+                                            ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      TextButton(
+                                        onPressed: () => ref.invalidate(
+                                          assessmentNarrativeProvider,
+                                        ),
+                                        child: const Text('Retry analysis'),
+                                      ),
+                                      const SizedBox(height: 20),
+                                      EqWeeklyActionPlanCard(
+                                        resultId: result.id,
+                                        actionTexts: result.recommendations,
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _AiCoachReadSection(narrative: n),
+                                    EqWeeklyActionPlanCard(
+                                      resultId: result.id,
+                                      actionTexts: n.actions,
+                                    ),
+                                  ],
+                                ),
+                              );
                             },
                           );
                         },
                       ),
-                      Text(
-                        'Your Strengths & Growth Areas',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                      const SizedBox(height: 16),
-                      ...result.insights.take(2).map(
-                            (insight) =>
-                                _DimensionInsightCard(insight: insight),
-                          ),
-                      if (result.insights.length > 2)
-                        PremiumGate(
-                          feature: SubscriptionFeature.detailedAnalytics,
-                          featureName: 'Detailed Dimension Analysis',
-                          child: Column(
-                            children: result.insights
-                                .skip(2)
-                                .map(
-                                  (insight) => _DimensionInsightCard(
-                                    insight: insight,
-                                  ),
-                                )
-                                .toList(),
-                          ),
-                        ),
                       const SizedBox(height: 32),
                       Text(
                         'Your Personalized Plan',
@@ -307,6 +334,126 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
         gridBorderData: BorderSide(
           color:
               Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12),
+        ),
+      ),
+    );
+  }
+}
+
+/// Shown while [assessmentNarrativeProvider] loads — reads as “AI composing,” not a generic bar.
+class _EqAnalysisLoadingCard extends StatelessWidget {
+  const _EqAnalysisLoadingCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final muted = scheme.onSurface.withValues(alpha: 0.72);
+    final track = scheme.surfaceContainerHighest.withValues(alpha: 0.75);
+
+    Widget skeletonLine(double widthFactor) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: FractionallySizedBox(
+            widthFactor: widthFactor,
+            child: Container(
+              height: 12,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: track,
+              ),
+            )
+                .animate(onPlay: (c) => c.repeat())
+                .shimmer(
+                  delay: (widthFactor * 180).round().ms,
+                  duration: 1600.ms,
+                  color: scheme.primary.withValues(alpha: 0.22),
+                ),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 22),
+      child: GlassContainer(
+        padding: const EdgeInsets.all(EmvoDimensions.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: scheme.primary.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Icon(
+                      Icons.auto_awesome_rounded,
+                      color: scheme.primary,
+                      size: 26,
+                    ),
+                  ),
+                )
+                    .animate(onPlay: (c) => c.repeat(reverse: true))
+                    .scale(
+                      begin: const Offset(0.94, 0.94),
+                      end: const Offset(1.05, 1.05),
+                      duration: 1100.ms,
+                      curve: Curves.easeInOut,
+                    ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Generating your EQ analysis',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.1,
+                            ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'AI is interpreting your scores and growth areas to write a personalized summary and three habits for this week. This usually takes a few seconds.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: muted,
+                              height: 1.45,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                minHeight: 5,
+                backgroundColor: track,
+                color: scheme.primary.withValues(alpha: 0.85),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              'Preview',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: muted,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                  ),
+            ),
+            const SizedBox(height: 10),
+            skeletonLine(1),
+            skeletonLine(0.92),
+            skeletonLine(0.62),
+          ],
         ),
       ),
     );
@@ -428,39 +575,13 @@ class _AiCoachReadSection extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Try this week',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
+          'Your three habits for this week are in the action plan below.',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: scheme.onSurface.withValues(alpha: 0.62),
+                height: 1.35,
               ),
         ),
-        const SizedBox(height: 8),
-        ...narrative.actions.asMap().entries.map(
-              (e) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${e.key + 1}.',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: scheme.primary,
-                          ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _plain(e.value),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: scheme.onSurface.withValues(alpha: 0.9),
-                            ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
       ],
     );
   }

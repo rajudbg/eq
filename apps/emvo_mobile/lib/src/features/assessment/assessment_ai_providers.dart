@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:emvo_assessment/emvo_assessment.dart';
 import 'package:emvo_core/emvo_core.dart';
 
+import '../../providers/assessment_providers.dart';
 import 'assessment_ai_bridge.dart';
 
 /// `true` only if you intentionally want the web build to call OpenRouter from the
@@ -18,7 +21,15 @@ const _kOpenRouterAllowBrowser = bool.fromEnvironment(
 /// built-in template there unless [OPENROUTER_ALLOW_BROWSER] is enabled.
 final assessmentNarrativeProvider =
     FutureProvider.autoDispose<AssessmentAiNarrative?>((ref) async {
-  final AssessmentResult? result = ref.watch(assessmentNotifierProvider).result;
+  ref.watch(assessmentNotifierProvider);
+  var result = ref.read(assessmentNotifierProvider).result;
+
+  // Fall back to repository latest when notifier has no in-memory result (rare timing / navigation).
+  if (result == null) {
+    ref.watch(latestResultProvider);
+    result = ref.read(latestResultProvider).valueOrNull;
+  }
+
   if (result == null) return null;
 
   // Avoid autoDispose dropping an in-flight request when the widget tree flickers
@@ -53,7 +64,11 @@ final assessmentNarrativeProvider =
       return await builtInSummary();
     }
 
-    final either = await createAssessmentAiNarrativeService().generate(payload);
+    final remoteFuture = createAssessmentAiNarrativeService().generate(payload);
+    final either = await remoteFuture.timeout(
+      const Duration(seconds: 22),
+      onTimeout: () => throw TimeoutException('assessment narrative'),
+    );
     return either.fold<AssessmentAiNarrative?>(
           (_) => null,
           (n) => n,

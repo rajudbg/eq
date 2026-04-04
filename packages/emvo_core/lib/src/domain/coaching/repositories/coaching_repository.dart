@@ -7,6 +7,9 @@ abstract class CoachingRepository {
   /// Merge assessment / profile data into the active (or next) coaching session.
   void applyCoachingContext(Map<String, dynamic> context);
 
+  /// In-memory session after [getActiveSession] / sends; use for UI when async providers are loading.
+  CoachingSession? get cachedActiveSession;
+
   /// Get or create active session
   Future<Either<Failure, CoachingSession>> getActiveSession();
 

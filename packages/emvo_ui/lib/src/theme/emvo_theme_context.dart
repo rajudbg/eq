@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 /// aliases like [EmvoColors.onBackground] or [EmvoColors.surfaceVariant],
 /// which are fixed to the light palette and break dark-mode legibility.
 extension EmvoThemeContext on BuildContext {
+  bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
+
   ColorScheme get emvoScheme => Theme.of(this).colorScheme;
 
   Color emvoOnSurface([double alpha = 1]) =>

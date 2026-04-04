@@ -8,6 +8,8 @@ import 'package:emvo_ui/emvo_ui.dart';
 
 import '../../providers/assessment_providers.dart';
 import '../../providers/daily_checkin_provider.dart';
+import '../../providers/eq_action_plan_provider.dart';
+import '../../widgets/eq_action_plan_widgets.dart';
 import '../../routing/routing.dart';
 import '../../widgets/emvo_app_bar_title.dart';
 import 'package:share_plus/share_plus.dart';
@@ -37,6 +39,14 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen<AsyncValue<AssessmentResult?>>(latestResultProvider, (previous, next) {
+      next.whenData((r) {
+        if (r != null) {
+          ref.read(eqActionPlanProvider.notifier).ensureFromAssessment(r);
+        }
+      });
+    });
+
     final latestResultAsync = ref.watch(latestResultProvider);
     final historyAsync = ref.watch(assessmentHistoryProvider);
     final isPremium = ref.watch(isPremiumProvider);
@@ -80,7 +90,13 @@ class HomeScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
                 latestResultAsync.when(
                   data: (result) => result != null
-                      ? _buildScoreCard(context, result)
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildScoreCard(context, result),
+                            EqDashboardActionPlanSummary(result: result),
+                          ],
+                        )
                       : _buildNoDataCard(context),
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
@@ -169,12 +185,11 @@ class HomeScreen extends ConsumerWidget {
                         icon: Icons.theater_comedy,
                         label: 'Practice\nScenario',
                         color: EmvoColors.tertiary,
-                        onTap: () => {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content:
-                                    Text('Opening AI Scenario Simulator...')),
-                          )
+                        onTap: () {
+                          ref
+                              .read(assessmentNotifierProvider.notifier)
+                              .reset();
+                          context.go(Routes.assessment);
                         },
                       )
                           .animate()
@@ -250,8 +265,9 @@ class HomeScreen extends ConsumerWidget {
               Text(
                 'Overall EQ',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: context.emvoOnSurface(0.7),
-                    fontWeight: FontWeight.w600),
+                  color: context.emvoOnSurface(0.7),
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               Row(
                 children: [

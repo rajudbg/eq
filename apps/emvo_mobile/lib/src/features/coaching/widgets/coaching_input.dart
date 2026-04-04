@@ -62,7 +62,12 @@ class CoachingInput extends StatelessWidget {
                       ),
                       maxLines: null,
                       textInputAction: TextInputAction.send,
-                      onSubmitted: isTyping ? null : onSend,
+                      onSubmitted: isTyping
+                          ? null
+                          : (value) {
+                              FocusManager.instance.primaryFocus?.unfocus();
+                              onSend(value);
+                            },
                     ),
                   ),
                 ),
@@ -104,7 +109,12 @@ class CoachingInput extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(14),
-                  onTap: isTyping ? null : () => onSend(controller.text),
+                  onTap: isTyping
+                      ? null
+                      : () {
+                          FocusManager.instance.primaryFocus?.unfocus();
+                          onSend(controller.text);
+                        },
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     child: Icon(

@@ -38,11 +38,18 @@ class AssessmentRepositoryImpl implements AssessmentRepository {
       }
     }
 
-    const maxPossible = 20.0;
-    final normalizedScores = dimensionScores.map((dimension, score) {
+    final maxRawByDimension = _maxAchievableRawByDimension(
+      questions,
+      answers.keys.toSet(),
+    );
+    final normalizedScores = dimensionScores.map((dimension, raw) {
+      final maxRaw = maxRawByDimension[dimension] ?? 0.0;
+      if (maxRaw <= 0) {
+        return MapEntry(dimension, 0.0);
+      }
       return MapEntry(
         dimension,
-        (score / maxPossible * 100).clamp(0.0, 100.0).toDouble(),
+        (raw / maxRaw * 100).clamp(0.0, 100.0).toDouble(),
       );
     });
 
@@ -60,6 +67,35 @@ class AssessmentRepositoryImpl implements AssessmentRepository {
       recommendations: recommendations,
       answers: Map<String, String>.from(answers),
     );
+  }
+
+  /// Sum of best-possible raw points per dimension across answered questions.
+  static Map<EQDimension, double> maxAchievableRawByDimensionForAnswers({
+    required List<Question> questions,
+    required Set<String> answeredQuestionIds,
+  }) {
+    return _maxAchievableRawByDimension(questions, answeredQuestionIds);
+  }
+
+  static Map<EQDimension, double> _maxAchievableRawByDimension(
+    List<Question> questions,
+    Set<String> answeredQuestionIds,
+  ) {
+    final maxes = {
+      for (final d in EQDimension.values) d: 0.0,
+    };
+    for (final q in questions) {
+      if (!answeredQuestionIds.contains(q.id)) continue;
+      for (final d in EQDimension.values) {
+        var best = 0.0;
+        for (final o in q.options) {
+          final v = (o.scores[d] ?? 0).toDouble();
+          if (v > best) best = v;
+        }
+        maxes[d] = (maxes[d] ?? 0) + best;
+      }
+    }
+    return maxes;
   }
 
   List<DimensionInsight> _generateInsights(Map<EQDimension, double> scores) {

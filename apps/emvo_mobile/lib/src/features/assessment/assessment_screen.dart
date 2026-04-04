@@ -19,6 +19,12 @@ class AssessmentScreen extends ConsumerStatefulWidget {
 }
 
 class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
+  /// True after [Previous] so we stay on the question until [Continue] (or change answer).
+  bool _editingAfterBack = false;
+
+  /// Prevents double-taps while a transition animation / delay runs.
+  bool _interactionBusy = false;
+
   @override
   void initState() {
     super.initState();
@@ -121,8 +127,11 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline,
-                  size: 64, color: EmvoColors.error),
+              const Icon(
+                Icons.error_outline,
+                size: 64,
+                color: EmvoColors.error,
+              ),
               const SizedBox(height: 16),
               Text(state.errorMessage ?? 'Something went wrong'),
               const SizedBox(height: 16),
@@ -156,7 +165,9 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
         child: Column(
           children: [
             AnimatedProgressBar(
-                progress: state.progress, showPercentage: false),
+              progress: state.progress,
+              showPercentage: false,
+            ),
             const SizedBox(height: 8),
             Text(
               'Focus: ${question.primaryDimension.displayName}',
@@ -200,17 +211,43 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
                 );
               },
             ),
-            const SizedBox(height: 16),
-            GlassContainer(
-              padding: const EdgeInsets.all(EmvoDimensions.lg),
-              child: TypewriterText(
-                key: ValueKey(question.id),
-                text: question.scenario,
-                style: Theme.of(context).textTheme.bodyLarge,
-                delay: Duration.zero,
-              ),
+            const SizedBox(height: 12),
+            _ScenarioPromptCard(
+              key: ValueKey(question.id),
+              scenario: question.scenario,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Icon(
+                  Icons.radio_button_checked_outlined,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Choose your response',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.15,
+                          color: context.emvoOnSurface(1),
+                          height: 1.25,
+                        ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Tap the option that best matches what you would do.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: context.emvoOnSurface(0.82),
+                    height: 1.35,
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+            const SizedBox(height: 12),
             Expanded(
               child: ListView.separated(
                 itemCount: question.options.length,
@@ -218,13 +255,16 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
                 itemBuilder: (context, index) {
                   final option = question.options[index];
                   final isSelected = selectedOptionId == option.id;
+                  final letter =
+                      index < 26 ? String.fromCharCode(65 + index) : '${index + 1}';
 
                   return AnimatedOptionCard(
+                    badgeLabel: letter,
                     text: option.text,
                     isSelected: isSelected,
-                    onTap: selectedOptionId == null
-                        ? () => _onOptionSelected(question, option)
-                        : () {},
+                    onTap: _interactionBusy
+                        ? () {}
+                        : () => _onOptionSelected(question, option),
                   )
                       .animate()
                       .fadeIn(
@@ -234,14 +274,31 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
                 },
               ),
             ),
+            if (_editingAfterBack && selectedOptionId != null) ...[
+              const SizedBox(height: 16),
+              AnimatedButton(
+                text: 'Continue',
+                onPressed: _interactionBusy
+                    ? () {}
+                    : () {
+                        _onContinueFromReview();
+                      },
+                width: double.infinity,
+              ),
+            ],
             if (!state.isFirstQuestion)
               Padding(
                 padding: const EdgeInsets.only(top: 16),
                 child: AnimatedButton(
                   text: 'Previous',
-                  onPressed: () => ref
-                      .read(assessmentNotifierProvider.notifier)
-                      .previousQuestion(),
+                  onPressed: _interactionBusy
+                      ? () {}
+                      : () {
+                          ref
+                              .read(assessmentNotifierProvider.notifier)
+                              .previousQuestion();
+                          setState(() => _editingAfterBack = true);
+                        },
                   isSecondary: true,
                 ),
               ),
@@ -249,6 +306,35 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _advanceAfterAnswer() async {
+    final notifier = ref.read(assessmentNotifierProvider.notifier);
+    final current = ref.read(assessmentNotifierProvider);
+
+    if (current.isLastQuestion) {
+      await notifier.calculateResult();
+      if (!mounted) return;
+      await ref.read(assessmentCompletionProvider.notifier).completeAssessment();
+      if (!mounted) return;
+      context.go('/results');
+    } else {
+      notifier.nextQuestion();
+      ref.read(mascotProvider.notifier).listen();
+    }
+    if (mounted) setState(() => _editingAfterBack = false);
+  }
+
+  Future<void> _onContinueFromReview() async {
+    if (_interactionBusy || !_editingAfterBack) return;
+    setState(() => _interactionBusy = true);
+    try {
+      await Future<void>.delayed(const Duration(milliseconds: 280));
+      if (!mounted) return;
+      await _advanceAfterAnswer();
+    } finally {
+      if (mounted) setState(() => _interactionBusy = false);
+    }
   }
 
   String _mascotFeedback(MascotState state) {
@@ -278,29 +364,127 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
   }
 
   Future<void> _onOptionSelected(Question question, AnswerOption option) async {
-    ref.read(assessmentNotifierProvider.notifier).answerQuestion(option.id);
+    if (_interactionBusy) return;
 
-    ref.read(mascotProvider.notifier).reactToAnswer(
-          _rubricQualityScore(option, question),
-        );
+    final reviewing = _editingAfterBack;
 
-    await Future<void>.delayed(const Duration(milliseconds: 600));
-    if (!mounted) return;
+    setState(() => _interactionBusy = true);
+    try {
+      ref.read(assessmentNotifierProvider.notifier).answerQuestion(option.id);
 
-    final notifier = ref.read(assessmentNotifierProvider.notifier);
-    final current = ref.read(assessmentNotifierProvider);
+      ref.read(mascotProvider.notifier).reactToAnswer(
+            _rubricQualityScore(option, question),
+          );
 
-    if (current.isLastQuestion) {
-      await notifier.calculateResult();
+      await Future<void>.delayed(const Duration(milliseconds: 600));
       if (!mounted) return;
-      await ref
-          .read(assessmentCompletionProvider.notifier)
-          .completeAssessment();
-      if (!mounted) return;
-      context.go('/results');
-    } else {
-      notifier.nextQuestion();
-      ref.read(mascotProvider.notifier).listen();
+
+      if (reviewing) {
+        ref.read(mascotProvider.notifier).listen();
+        return;
+      }
+
+      await _advanceAfterAnswer();
+    } finally {
+      if (mounted) setState(() => _interactionBusy = false);
     }
+  }
+}
+
+/// Visually distinct from [AnimatedOptionCard]: reads as the situational prompt, not a choice.
+class _ScenarioPromptCard extends StatelessWidget {
+  const _ScenarioPromptCard({
+    super.key,
+    required this.scenario,
+  });
+
+  final String scenario;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            EmvoColors.primary.withValues(alpha: 0.14),
+            scheme.surfaceContainerHighest.withValues(alpha: 0.35),
+          ],
+        ),
+        border: Border.all(
+          color: EmvoColors.primary.withValues(alpha: 0.4),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: EmvoColors.primary.withValues(alpha: 0.1),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20.5),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                width: 5,
+                decoration: const BoxDecoration(
+                  gradient: EmvoColors.primaryGradient,
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.auto_stories_rounded,
+                            size: 22,
+                            color: scheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'SCENARIO',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.35,
+                                  color: scheme.primary,
+                                ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      TypewriterText(
+                        key: ValueKey(scenario),
+                        text: scenario,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              height: 1.48,
+                              fontWeight: FontWeight.w600,
+                              color: scheme.onSurface.withValues(alpha: 0.94),
+                            ),
+                        delay: Duration.zero,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
