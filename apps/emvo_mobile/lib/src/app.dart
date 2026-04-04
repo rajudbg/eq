@@ -23,9 +23,14 @@ class EmvoApp extends ConsumerWidget {
         themeMode: themeMode,
         routerConfig: AppRouter.router,
         builder: (context, child) {
+          final dir =
+              Directionality.maybeOf(context) ?? TextDirection.ltr;
           return SystemUiThemeSync(
             child: NotificationScheduleSync(
-              child: child ?? const SizedBox.shrink(),
+              child: Directionality(
+                textDirection: dir,
+                child: child ?? const SizedBox.shrink(),
+              ),
             ),
           );
         },

@@ -28,8 +28,17 @@ class ProgressScreen extends ConsumerWidget {
     );
 
     final historyAsync = ref.watch(assessmentHistoryProvider);
+    final textDirection =
+        Directionality.maybeOf(context) ?? TextDirection.ltr;
 
-    return Scaffold(
+    // Nested shell [Scaffold] + tab [Scaffold]: [primary: false] avoids broken
+    // body constraints; explicit [Directionality] covers [ListTile]/[Icon] if
+    // transition layers ever drop inherited directionality.
+    return Directionality(
+      textDirection: textDirection,
+      child: Scaffold(
+      primary: false,
+      resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Your Progress'),
@@ -66,6 +75,7 @@ class ProgressScreen extends ConsumerWidget {
           ),
         ),
       ),
+    ),
     );
   }
 

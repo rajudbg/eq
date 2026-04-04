@@ -12,7 +12,7 @@ CoachingAiGateway createCoachingAiGateway() {
   );
   const model = String.fromEnvironment(
     'OPENROUTER_MODEL',
-    defaultValue: 'qwen/qwen3.6-plus:free',
+    defaultValue: 'stepfun/step-3.5-flash:free',
   );
   if (apiKey.isEmpty) {
     return LocalContextCoachingAiGateway();

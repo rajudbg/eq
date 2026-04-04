@@ -40,6 +40,7 @@ class ProfileScreen extends ConsumerWidget {
     }
 
     return Scaffold(
+      primary: false,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('You'),

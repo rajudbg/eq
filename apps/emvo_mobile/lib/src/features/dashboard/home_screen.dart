@@ -180,9 +180,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final derivedAsync = ref.watch(dashboardHomeDerivedProvider);
 
     return Scaffold(
+      primary: false,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const EmvoAppBarTitle(height: 28),
+        title: const EmvoAppBarTitle(),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined),

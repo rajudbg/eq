@@ -66,7 +66,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       Center(
                         child: WelcomeAnimatedLogo(
                           emphasize: _emphasizeLogo,
-                          size: 152,
+                          size: 192,
                         ),
                       ),
                       const SizedBox(height: 28),

@@ -32,10 +32,27 @@ class _DashboardShellState extends ConsumerState<DashboardShell> {
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).uri.path;
     final selectedIndex = _calculateSelectedIndex(location);
+    // [PageTransitionSwitcher] + [FadeThroughTransition] can build the active tab
+    // in a subtree where [Directionality] is missing; [Icon] / [ListTile] then throw.
+    final textDirection =
+        Directionality.maybeOf(context) ?? TextDirection.ltr;
 
-    return Scaffold(
+    return Directionality(
+      textDirection: textDirection,
+      child: Scaffold(
+      // Only tab content should react to the keyboard; nested [Scaffold]s
+      // both resizing causes broken constraints (huge overflow / layout errors).
+      resizeToAvoidBottomInset: false,
       body: PageTransitionSwitcher(
         duration: EmvoAnimations.normal,
+        // Default [Stack] uses [StackFit.loose], so the active tab can shrink to
+        // intrinsic height and clip the app bar / status area. Expand so each
+        // shell route fills the body like a full-screen page.
+        layoutBuilder: (List<Widget> entries) => Stack(
+          fit: StackFit.expand,
+          alignment: Alignment.center,
+          children: entries,
+        ),
         transitionBuilder: (
           Widget c,
           Animation<double> primary,
@@ -44,7 +61,10 @@ class _DashboardShellState extends ConsumerState<DashboardShell> {
           return FadeThroughTransition(
             animation: primary,
             secondaryAnimation: secondary,
-            child: c,
+            child: Directionality(
+              textDirection: textDirection,
+              child: c,
+            ),
           );
         },
         child: KeyedSubtree(
@@ -95,6 +115,7 @@ class _DashboardShellState extends ConsumerState<DashboardShell> {
             duration: EmvoAnimations.normal,
             curve: EmvoAnimations.decelerate,
           ),
+      ),
     );
   }
 

@@ -132,6 +132,8 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
     final hasReachedLimit = remainingMessages <= 0 && maxMessages != -1;
 
     return Scaffold(
+      primary: false,
+      resizeToAvoidBottomInset: true,
       extendBodyBehindAppBar: false,
       appBar: AppBar(
         centerTitle: true,

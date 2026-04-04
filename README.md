@@ -46,7 +46,9 @@ flutter run -d macos
 
 ### Android flavors (dev / staging / prod)
 
-Android product flavors are defined in `apps/emvo_mobile/android/app/build.gradle.kts`. When building or running from the CLI, pass `--flavor` and match Dart env with `--dart-define`:
+Android product flavors are defined in `apps/emvo_mobile/android/app/build.gradle.kts`. The app’s `pubspec.yaml` sets **`default-flavor: dev`**, so a plain `flutter run` / `flutter build apk` picks the **dev** Android variant and the matching Dart flavor unless you override with `--flavor` and `--dart-define=FLAVOR=…`.
+
+When you need an explicit variant, pass `--flavor` and match Dart with `--dart-define`:
 
 ```bash
 cd apps/emvo_mobile

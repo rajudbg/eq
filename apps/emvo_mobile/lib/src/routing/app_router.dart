@@ -115,17 +115,10 @@ class AppRouter {
           GoRoute(
             path: '/coach',
             name: 'coach',
-            pageBuilder: (context, state) => CustomTransitionPage<void>(
-              key: state.pageKey,
-              child: const CoachingScreen(),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                return FadeScaleTransition(
-                  animation: animation,
-                  child: child,
-                );
-              },
-            ),
+            // Match other shell tabs: avoid stacking [FadeScaleTransition] on top
+            // of [PageTransitionSwitcher] (nested transitions + dual scaffolds
+            // caused layout and inherited-widget issues for some devices).
+            builder: (context, state) => const CoachingScreen(),
           ),
           GoRoute(
             path: '/progress',

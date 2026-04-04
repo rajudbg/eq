@@ -55,23 +55,27 @@ class ErrorLogger {
   }
 }
 
-/// Widget to catch and handle Flutter errors
+/// Installs a global [FlutterError.onError] hook to log and forward errors.
+///
+/// Do **not** swap out the entire app UI from this callback: [FlutterError.onError]
+/// runs for many framework events (e.g. debug layout overflow reporting). Replacing
+/// [MaterialApp] with a full-screen error widget made every tab appear "broken"
+/// after a single non-fatal error. Subtree-specific recovery should use other APIs
+/// (e.g. [ErrorWidget.builder], route-level error handlers, or a small local
+/// [StatefulWidget]) instead.
 class ErrorBoundary extends StatefulWidget {
-  final Widget child;
-  final Widget Function(FlutterErrorDetails)? errorBuilder;
-
   const ErrorBoundary({
     super.key,
     required this.child,
-    this.errorBuilder,
   });
+
+  final Widget child;
 
   @override
   State<ErrorBoundary> createState() => _ErrorBoundaryState();
 }
 
 class _ErrorBoundaryState extends State<ErrorBoundary> {
-  FlutterErrorDetails? _error;
   void Function(FlutterErrorDetails details)? _previousOnError;
 
   @override
@@ -79,17 +83,12 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
     super.initState();
     _previousOnError = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
-      // Never call setState synchronously: onError can run during build/layout.
       _previousOnError?.call(details);
       ErrorLogger.error(
         'Flutter Error: ${details.exceptionAsString()}',
         error: details.exception,
         stackTrace: details.stack,
       );
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        setState(() => _error = details);
-      });
     };
   }
 
@@ -100,56 +99,5 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (_error != null) {
-      return widget.errorBuilder?.call(_error!) ?? _defaultErrorWidget(_error!);
-    }
-    return widget.child;
-  }
-
-  Widget _defaultErrorWidget(FlutterErrorDetails error) {
-    final brightness =
-        WidgetsBinding.instance.platformDispatcher.platformBrightness;
-    final scheme = ColorScheme.fromSeed(
-      seedColor: const Color(0xFFE91E8C),
-      brightness: brightness,
-    );
-    return Theme(
-      data: ThemeData(useMaterial3: true, colorScheme: scheme),
-      child: Material(
-        color: scheme.surface,
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 64, color: scheme.error),
-              const SizedBox(height: 16),
-              Text(
-                'Something went wrong',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: scheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'We have logged this error. Please restart the app.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: scheme.onSurface.withValues(alpha: 0.72),
-                ),
-              ),
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: () => setState(() => _error = null),
-                child: const Text('Try Again'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => widget.child;
 }

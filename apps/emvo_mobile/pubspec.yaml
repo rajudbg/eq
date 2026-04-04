@@ -46,6 +46,8 @@ dev_dependencies:
   build_runner: ^2.4.7
 
 flutter:
+  # So `flutter run` / `flutter build` find the correct APK without repeating `--flavor dev`.
+  default-flavor: dev
   uses-material-design: true
   assets:
     - assets/branding/

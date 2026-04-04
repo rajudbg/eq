@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
-/// Wordmark for the app bar (replaces plain "Emvo" text).
+/// Mark-only logo for the app bar (no wordmark). Sized to read larger while
+/// staying within the default Material toolbar height — do not raise
+/// [AppBar.toolbarHeight] here.
 class EmvoAppBarTitle extends StatelessWidget {
   const EmvoAppBarTitle({
     super.key,
-    this.height = 30,
+    /// Fits comfortably inside [kToolbarHeight] with standard padding (~56dp).
+    this.height = 40,
   });
 
   final double height;
@@ -14,15 +17,14 @@ class EmvoAppBarTitle extends StatelessWidget {
     return Semantics(
       label: 'Emvo',
       child: Image.asset(
-        'assets/branding/emvo_logo_with_text.png',
+        'assets/branding/emvo_logo.png',
         height: height,
         fit: BoxFit.contain,
         filterQuality: FilterQuality.high,
-        errorBuilder: (_, __, ___) => Text(
-          'Emvo',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+        errorBuilder: (_, __, ___) => Icon(
+          Icons.favorite_rounded,
+          size: height * 0.88,
+          color: Theme.of(context).colorScheme.primary,
         ),
       ),
     );

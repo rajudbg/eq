@@ -60,7 +60,9 @@ class CoachingInput extends StatelessWidget {
                         contentPadding:
                             const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      minLines: 1,
+                      maxLines: 6,
                       textInputAction: TextInputAction.send,
                       onSubmitted: isTyping
                           ? null

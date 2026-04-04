@@ -7,9 +7,11 @@ enum Flavor {
 class F {
   static Flavor? appFlavor;
 
-  /// Reads [Flavor] from `--dart-define=FLAVOR=dev|staging|prod` (default `prod`).
+  /// Reads [Flavor] from `--dart-define=FLAVOR=dev|staging|prod`.
+  /// Default `dev` matches `default-flavor` in pubspec for local runs; release and
+  /// prod CI must pass `--dart-define=FLAVOR=prod` (see repo README).
   static void initFromDartDefine() {
-    const raw = String.fromEnvironment('FLAVOR', defaultValue: 'prod');
+    const raw = String.fromEnvironment('FLAVOR', defaultValue: 'dev');
     appFlavor = switch (raw) {
       'dev' => Flavor.dev,
       'staging' => Flavor.staging,
