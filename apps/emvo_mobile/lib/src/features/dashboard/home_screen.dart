@@ -180,7 +180,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final derivedAsync = ref.watch(dashboardHomeDerivedProvider);
 
     return Scaffold(
-      primary: false,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const EmvoAppBarTitle(),

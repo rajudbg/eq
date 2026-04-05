@@ -21,10 +21,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(
-      find.text("You're capable. People respect you."),
+      find.text("You're capable.\nPeople respect you."),
       findsOneWidget,
     );
     expect(find.text('Take the EQ Assessment'), findsOneWidget);
     expect(find.text('I already have an account'), findsOneWidget);
+    expect(
+      find.text('Sign in with Google, Apple, Facebook, or email'),
+      findsOneWidget,
+    );
   });
 }

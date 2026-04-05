@@ -6,6 +6,7 @@ import 'package:emvo_ui/emvo_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../providers/app_state_providers.dart';
+import '../../routing/routing.dart';
 
 const _kLegacyDone = 'results_account_nudge_done_v1';
 const _kDoneV2 = 'results_account_nudge.done_v2';
@@ -75,8 +76,9 @@ class ResultsAccountNudge {
                       ),
                   const SizedBox(height: 10),
                   Text(
-                    'Create a light account so your EQ results and coach history stay '
-                    'with you if you switch phones. You can skip — nothing is lost on this device.',
+                    'Sign in with Google, Apple, Facebook, or email so your EQ results '
+                    'and coach history stay with you if you switch phones. You can skip '
+                    '— nothing is lost on this device.',
                     style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
                           height: 1.45,
                           color: scheme.onSurface.withValues(alpha: 0.76),
@@ -88,35 +90,15 @@ class ResultsAccountNudge {
                       ),
                   const SizedBox(height: 22),
                   FilledButton(
-                    onPressed: () async {
-                      final id =
-                          'emvo_${DateTime.now().millisecondsSinceEpoch}';
-                      await ref.read(authProvider.notifier).signIn(id);
-                      final p = await SharedPreferences.getInstance();
-                      await _persistDismiss(p, boundUser: id);
-                      if (ctx.mounted) Navigator.pop(ctx);
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("You're signed in on this device"),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      }
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (!context.mounted) return;
+                        context.push('${Routes.login}?mode=register');
+                      });
                     },
                     child: const Text('Create account'),
-                  )
-                      .animate()
-                      .fadeIn(
-                        delay: 90.ms,
-                        duration: 300.ms,
-                      )
-                      .slideY(
-                        begin: 0.06,
-                        delay: 90.ms,
-                        duration: 340.ms,
-                        curve: Curves.easeOutCubic,
-                      ),
+                  ),
                   const SizedBox(height: 8),
                   TextButton(
                     onPressed: () async {

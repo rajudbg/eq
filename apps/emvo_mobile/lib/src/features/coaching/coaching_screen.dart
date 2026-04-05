@@ -57,14 +57,16 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
     super.dispose();
   }
 
+  /// Chat list is [reverse]d; the “bottom” (newest, near the input) is
+  /// [minScrollExtent], not max.
   void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: EmvoAnimations.normal,
-        curve: EmvoAnimations.standard,
-      );
-    }
+    if (!_scrollController.hasClients) return;
+    final pos = _scrollController.position;
+    _scrollController.animateTo(
+      pos.minScrollExtent,
+      duration: EmvoAnimations.normal,
+      curve: EmvoAnimations.standard,
+    );
   }
 
   Future<void> _sendMessage(String content) async {
@@ -84,6 +86,9 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
     setState(() => _isTyping = true);
     _textController.clear();
     ref.read(mascotProvider.notifier).think();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _scrollToBottom();
+    });
 
     try {
       final sendMessage = ref.read(sendMessageProvider);
@@ -118,10 +123,18 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
   @override
   Widget build(BuildContext context) {
     final sessionAsync = ref.watch(coachingSessionProvider);
+    ref.listen<AsyncValue<CoachingSession>>(coachingSessionProvider, (prev, next) {
+      if (next.hasValue) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _scrollToBottom();
+        });
+      }
+    });
+
     final subscriptionAsync = ref.watch(currentSubscriptionProvider);
     final subscription = subscriptionAsync.valueOrNull;
     final repo = ref.watch(coachingRepositoryProvider);
-    final session = sessionAsync.valueOrNull ?? repo.cachedActiveSession;
+    final session = _displaySession(sessionAsync, repo);
 
     final messageCount =
         session?.messages.where((m) => m.sender == MessageSender.user).length ??
@@ -132,11 +145,11 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
     final hasReachedLimit = remainingMessages <= 0 && maxMessages != -1;
 
     return Scaffold(
-      primary: false,
       resizeToAvoidBottomInset: true,
       extendBodyBehindAppBar: false,
       appBar: AppBar(
         centerTitle: true,
+        toolbarHeight: 72,
         elevation: 0,
         scrolledUnderElevation: 0.5,
         flexibleSpace: Container(
@@ -217,7 +230,8 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
                 child: sessionAsync.when(
                   skipLoadingOnReload: true,
                   skipLoadingOnRefresh: true,
-                  data: (session) => _buildMessageList(session),
+                  data: (s) =>
+                      _buildMessageList(_preferRicherSession(s, repo.cachedActiveSession)),
                   loading: () {
                     final cached = repo.cachedActiveSession;
                     if (cached != null) {
@@ -253,7 +267,9 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
               ),
               Consumer(
                 builder: (context, ref, _) {
-                  final s = ref.watch(coachingSessionProvider).valueOrNull;
+                  final async = ref.watch(coachingSessionProvider);
+                  final r = ref.watch(coachingRepositoryProvider);
+                  final s = _displaySession(async, r);
                   if (s == null || s.messages.length > 2 || hasReachedLimit) {
                     return const SizedBox.shrink();
                   }
@@ -332,12 +348,44 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
     );
   }
 
+  /// [CoachingRepository] updates [CoachingRepository.cachedActiveSession] with the
+  /// user message before the AI finishes, but [coachingSessionProvider] only
+  /// refreshes after the full send — merge so the UI shows the user bubble immediately.
+  CoachingSession? _displaySession(
+    AsyncValue<CoachingSession> async,
+    CoachingRepository repo,
+  ) {
+    final cached = repo.cachedActiveSession;
+    final fromAsync = async.valueOrNull;
+    if (fromAsync == null) return cached;
+    return _preferRicherSession(fromAsync, cached);
+  }
+
+  CoachingSession _preferRicherSession(
+    CoachingSession fromAsync,
+    CoachingSession? cached,
+  ) {
+    if (cached == null) return fromAsync;
+    if (cached.messages.length > fromAsync.messages.length) return cached;
+    if (cached.messages.length < fromAsync.messages.length) return fromAsync;
+    if (fromAsync.messages.isEmpty) return fromAsync;
+    if (cached.messages.isEmpty) return fromAsync;
+    return cached.messages.last.timestamp.isAfter(fromAsync.messages.last.timestamp)
+        ? cached
+        : fromAsync;
+  }
+
   Widget _buildMessageList(CoachingSession session) {
-    if (session.messages.isEmpty) {
+    final messages = session.messages;
+    if (messages.isEmpty) {
       if (_isTyping) {
-        return Center(
-          child: Padding(
-            padding: EmvoDimensions.paddingScreen,
+        return ListView.builder(
+          reverse: true,
+          controller: _scrollController,
+          padding: const EdgeInsets.all(EmvoDimensions.md),
+          itemCount: 1,
+          itemBuilder: (context, _) => Padding(
+            padding: const EdgeInsets.only(bottom: EmvoDimensions.sm),
             child: _buildTypingIndicator(),
           ),
         );
@@ -372,23 +420,30 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
       );
     }
 
+    final typingPad = _isTyping ? 1 : 0;
     return ListView.builder(
+      reverse: true,
       controller: _scrollController,
       padding: const EdgeInsets.all(EmvoDimensions.md),
-      itemCount: session.messages.length + (_isTyping ? 1 : 0),
+      itemCount: messages.length + typingPad,
       itemBuilder: (context, index) {
-        if (index == session.messages.length) {
-          return _buildTypingIndicator();
+        if (_isTyping && index == 0) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: EmvoDimensions.sm),
+            child: _buildTypingIndicator(),
+          );
         }
-
-        final message = session.messages[index];
-        final isLast = index == session.messages.length - 1;
+        final offset = typingPad;
+        final reversedIdx = index - offset;
+        final msgIndex = messages.length - 1 - reversedIdx;
+        final message = messages[msgIndex];
+        final isLast = msgIndex == messages.length - 1;
 
         return Padding(
           padding: const EdgeInsets.only(bottom: EmvoDimensions.sm),
           child: ChatMessageBubble(
             message: message,
-            animate: isLast,
+            animate: isLast && !_isTyping,
           ),
         );
       },

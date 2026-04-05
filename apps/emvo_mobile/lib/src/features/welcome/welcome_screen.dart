@@ -234,6 +234,26 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                                     duration: 400.ms,
                                     curve: Curves.easeOutCubic,
                                   ),
+                              const SizedBox(height: 14),
+                              TextButton(
+                                onPressed: () => context.go(Routes.login),
+                                child: Text(
+                                  'Sign in with Google, Apple, Facebook, or email',
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: scheme.primary,
+                                      ),
+                                ),
+                              )
+                                  .animate()
+                                  .fadeIn(
+                                    delay: 420.ms,
+                                    duration: 400.ms,
+                                  ),
                             ],
                           ),
                         ).animate().fadeIn(

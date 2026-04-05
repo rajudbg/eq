@@ -4,6 +4,7 @@ import 'package:emvo_assessment/emvo_assessment.dart';
 import 'package:emvo_ui/emvo_ui.dart';
 
 import '../../providers/assessment_providers.dart';
+import '../../providers/firebase_auth_providers.dart';
 import '../../providers/profile_display_name_provider.dart';
 import '../../providers/theme_settings_provider.dart';
 import '../../providers/user_intent_provider.dart';
@@ -15,10 +16,11 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final name = ref.watch(profileDisplayNameProvider);
+    final name = ref.watch(effectiveProfileDisplayNameProvider);
     final notifications = ref.watch(notificationsEnabledProvider);
     final intent = ref.watch(userIntentProvider);
     final latest = ref.watch(latestResultProvider).valueOrNull;
+    final firebaseLinked = ref.watch(firebaseSignedInWithProviderProvider);
     final scheme = Theme.of(context).colorScheme;
 
     final scores = latest?.dimensionScores;
@@ -40,7 +42,6 @@ class ProfileScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      primary: false,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('You'),
@@ -144,6 +145,20 @@ class ProfileScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 20),
               _section(context, 'Shortcuts'),
+              if (!firebaseLinked) ...[
+                GlassContainer(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: ListTile(
+                    leading: Icon(Icons.login_rounded, color: scheme.primary),
+                    title: const Text('Sign in'),
+                    subtitle: const Text(
+                      'Google, Apple, Facebook, or email — sync across devices',
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push(Routes.login),
+                  ),
+                ),
+              ],
               GlassContainer(
                 margin: const EdgeInsets.only(bottom: 16),
                 child: Column(

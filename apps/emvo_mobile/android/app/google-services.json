@@ -1,64 +1,51 @@
 {
   "project_info": {
-    "project_number": "000000000000",
-    "project_id": "emvo-app-placeholder",
-    "storage_bucket": "emvo-app-placeholder.appspot.com"
+    "project_number": "432397815558",
+    "project_id": "emvo-e882b",
+    "storage_bucket": "emvo-e882b.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
-        "android_client_info": {
-          "package_name": "com.emvo.emvo_mobile"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "replace-me"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000001",
+        "mobilesdk_app_id": "1:432397815558:android:abff7ef8bb5c1cd4e2d887",
         "android_client_info": {
           "package_name": "com.emvo.emvo_mobile.dev"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "432397815558-lq5m9kgk6gv10o4fprsdne9skd7r9m0d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.emvo.emvo_mobile.dev",
+            "certificate_hash": "ce92835e1e50496f66986f9139d6e402cd1f0ca0"
+          }
+        },
+        {
+          "client_id": "432397815558-7b522jpm1ihrilsonpobp6jtm49qha2f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "replace-me"
+          "current_key": "AIzaSyBL5JMdIUjH7FJ96PbXcDbrW3VbPVmmxyU"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000002",
-        "android_client_info": {
-          "package_name": "com.emvo.emvo_mobile.staging"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "replace-me"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "432397815558-7b522jpm1ihrilsonpobp6jtm49qha2f.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "432397815558-v7hd3ui242nld9lhj4bktmbbb7p7s0dt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.emvo.emvoMobile"
+              }
+            }
+          ]
         }
       }
     }

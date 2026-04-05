@@ -12,6 +12,7 @@ import '../features/profile/profile_screen.dart';
 import '../features/results/results_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/subscription/paywall_screen.dart';
+import '../features/auth/login_screen.dart';
 import '../features/welcome/welcome_screen.dart';
 import 'route_guards.dart';
 
@@ -32,6 +33,13 @@ class AppRouter {
         path: '/welcome',
         name: 'welcome',
         builder: (context, state) => const WelcomeScreen(),
+      ),
+      GoRoute(
+        path: '/login',
+        name: 'login',
+        builder: (context, state) => LoginScreen(
+          initialRegister: state.uri.queryParameters['mode'] == 'register',
+        ),
       ),
       GoRoute(
         path: '/intent',
@@ -149,6 +157,7 @@ class AppRouter {
 /// Route names for type-safe navigation
 class Routes {
   static const String welcome = '/welcome';
+  static const String login = '/login';
   static const String intent = '/intent';
   static const String onboarding = '/onboarding';
   static const String assessment = '/assessment';

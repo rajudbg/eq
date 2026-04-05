@@ -31,13 +31,11 @@ class ProgressScreen extends ConsumerWidget {
     final textDirection =
         Directionality.maybeOf(context) ?? TextDirection.ltr;
 
-    // Nested shell [Scaffold] + tab [Scaffold]: [primary: false] avoids broken
-    // body constraints; explicit [Directionality] covers [ListTile]/[Icon] if
-    // transition layers ever drop inherited directionality.
+    // Shell body uses [StackFit.expand] so this scaffold gets full insets;
+    // keep [Directionality] for transition safety.
     return Directionality(
       textDirection: textDirection,
       child: Scaffold(
-      primary: false,
       resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -173,7 +171,14 @@ class ProgressScreen extends ConsumerWidget {
                 ),
           ),
           const SizedBox(height: 16),
-          ...history.reversed.map((result) => _HistoryCard(result: result)),
+          ...history.reversed.map(
+            (result) => _HistoryCard(
+              result: result,
+              onTap: () => context.push(
+                '${Routes.results}?rid=${Uri.encodeComponent(result.id)}',
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -464,9 +469,13 @@ class _AssessmentDeltaCard extends StatelessWidget {
 }
 
 class _HistoryCard extends StatelessWidget {
-  const _HistoryCard({required this.result});
+  const _HistoryCard({
+    required this.result,
+    required this.onTap,
+  });
 
   final AssessmentResult result;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -476,6 +485,7 @@ class _HistoryCard extends StatelessWidget {
     return GlassContainer(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
+        onTap: onTap,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
           width: 50,

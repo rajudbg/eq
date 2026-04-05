@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:emvo_ui/emvo_ui.dart';
 
+import '../../providers/app_state_providers.dart';
+import '../../providers/firebase_auth_providers.dart';
 import '../../providers/profile_display_name_provider.dart';
 import '../../providers/theme_settings_provider.dart';
 import '../../routing/routing.dart';
+import '../../services/firebase_bootstrap.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -15,7 +18,9 @@ class SettingsScreen extends ConsumerWidget {
     final concise = ref.watch(coachConciseRepliesProvider);
     final notifications = ref.watch(notificationsEnabledProvider);
     final reminderTime = ref.watch(dailyReminderTimeProvider);
-    final displayName = ref.watch(profileDisplayNameProvider);
+    final effectiveDisplayName = ref.watch(effectiveProfileDisplayNameProvider);
+    final firebaseUser = ref.watch(firebaseAuthUserProvider).valueOrNull;
+    final firebaseLinked = ref.watch(firebaseSignedInWithProviderProvider);
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -196,14 +201,72 @@ class SettingsScreen extends ConsumerWidget {
                 margin: const EdgeInsets.only(bottom: 20),
                 child: Column(
                   children: [
+                    if (firebaseLinked && firebaseUser != null) ...[
+                      ListTile(
+                        leading: Icon(
+                          Icons.verified_user_outlined,
+                          color: scheme.primary,
+                        ),
+                        title: const Text('Signed in'),
+                        subtitle: Text(
+                          firebaseUser.email ??
+                              'User ${firebaseUser.uid.substring(0, 8)}…',
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        color: scheme.outline.withValues(alpha: 0.2),
+                      ),
+                      ListTile(
+                        leading:
+                            Icon(Icons.logout_rounded, color: scheme.primary),
+                        title: const Text('Sign out'),
+                        subtitle: const Text(
+                          'You can keep using Emvo as a guest on this device',
+                        ),
+                        onTap: () async {
+                          final auth = ref.read(firebaseAuthProvider);
+                          await auth?.signOut();
+                          await ref.read(authProvider.notifier).signOut();
+                          await ensureFirebaseAppAndAnonymousUser();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Signed out'),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                      Divider(
+                        height: 1,
+                        color: scheme.outline.withValues(alpha: 0.2),
+                      ),
+                    ] else ...[
+                      ListTile(
+                        leading: Icon(Icons.login_rounded, color: scheme.primary),
+                        title: const Text('Sign in'),
+                        subtitle: const Text(
+                          'Google, Apple, Facebook, or email',
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => context.push(Routes.login),
+                      ),
+                      Divider(
+                        height: 1,
+                        color: scheme.outline.withValues(alpha: 0.2),
+                      ),
+                    ],
                     ListTile(
                       leading: Icon(Icons.waving_hand_outlined,
                           color: scheme.primary),
                       title: const Text('Home greeting'),
                       subtitle: Text(
-                        displayName == null || displayName.isEmpty
+                        effectiveDisplayName == null ||
+                                effectiveDisplayName.isEmpty
                             ? 'Add a first name for your dashboard'
-                            : '“$displayName” on Home',
+                            : '“$effectiveDisplayName” on Home',
                       ),
                       trailing: const Icon(Icons.edit_outlined, size: 20),
                       onTap: () => _editDisplayName(context, ref),
@@ -290,7 +353,10 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Future<void> _editDisplayName(BuildContext context, WidgetRef ref) async {
-    final current = ref.read(profileDisplayNameProvider) ?? '';
+    final current =
+        ref.read(profileDisplayNameProvider) ??
+            ref.read(effectiveProfileDisplayNameProvider) ??
+            '';
     final controller = TextEditingController(text: current);
     try {
       final result = await showDialog<String?>(

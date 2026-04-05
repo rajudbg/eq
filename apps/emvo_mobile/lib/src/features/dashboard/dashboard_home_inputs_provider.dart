@@ -46,7 +46,7 @@ final dashboardHomeDerivedProvider =
 
   final inputs = DashboardHomeInputs(
     now: DateTime.now(),
-    displayName: ref.watch(profileDisplayNameProvider),
+    displayName: ref.watch(effectiveProfileDisplayNameProvider),
     checkIn: ref.watch(dailyCheckInProvider),
     situations: ref.watch(upcomingSituationsProvider),
     latestResult: result,

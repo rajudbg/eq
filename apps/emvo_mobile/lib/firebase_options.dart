@@ -1,18 +1,12 @@
-// Generated-style options: replace with real values from Firebase Console or run:
-//   dart pub global activate flutterfire_cli
-//   flutterfire configure
-//
-// Until then, anonymous sign-in is attempted but will fail at runtime until
-// apiKey / appId / projectId match your Firebase project (see also
-// android/app/google-services.json).
+// Synced with `android/app/google-services.json` and
+// `ios/Runner/GoogleService-Info.plist` (project `emvo-e882b`).
+// Re-run `flutterfire configure` after adding apps/flavors or web.
 
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, TargetPlatform;
 
 class DefaultFirebaseOptions {
-  /// Mobile-only: Emvo is not shipping web; `flutterfire configure` will still
-  /// regenerate this file if you add web later.
   static FirebaseOptions get currentPlatform {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -27,20 +21,23 @@ class DefaultFirebaseOptions {
     }
   }
 
+  /// Matches the **dev** Android client in `google-services.json`
+  /// (`com.emvo.emvo_mobile.dev`). Add prod/staging clients in Firebase and
+  /// merge `google-services.json`, or use flavor-specific JSON if needed.
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'replace-me',
-    appId: '1:000000000000:android:0000000000000000000000',
-    messagingSenderId: '000000000000',
-    projectId: 'emvo-app-placeholder',
-    storageBucket: 'emvo-app-placeholder.appspot.com',
+    apiKey: 'AIzaSyBL5JMdIUjH7FJ96PbXcDbrW3VbPVmmxyU',
+    appId: '1:432397815558:android:abff7ef8bb5c1cd4e2d887',
+    messagingSenderId: '432397815558',
+    projectId: 'emvo-e882b',
+    storageBucket: 'emvo-e882b.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'replace-me',
-    appId: '1:000000000000:ios:0000000000000000000000',
-    messagingSenderId: '000000000000',
-    projectId: 'emvo-app-placeholder',
-    storageBucket: 'emvo-app-placeholder.appspot.com',
+    apiKey: 'AIzaSyAwiFuQiuYCovNnaOdlHGeK8nUm5beW81A',
+    appId: '1:432397815558:ios:322d7fc81cb11393e2d887',
+    messagingSenderId: '432397815558',
+    projectId: 'emvo-e882b',
+    storageBucket: 'emvo-e882b.firebasestorage.app',
     iosBundleId: 'com.emvo.emvoMobile',
   );
 }

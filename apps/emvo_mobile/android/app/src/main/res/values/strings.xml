@@ -2,4 +2,8 @@
 <resources>
     <!-- Overridden per product flavor (dev / staging / prod) -->
     <string name="app_name">Emvo</string>
+    <!-- Replace with your Meta / Facebook app credentials for Facebook Login. -->
+    <string name="facebook_app_id" translatable="false">YOUR_FACEBOOK_APP_ID</string>
+    <string name="facebook_client_token" translatable="false">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+    <string name="fb_login_protocol_scheme" translatable="false">fbYOUR_FACEBOOK_APP_ID</string>
 </resources>

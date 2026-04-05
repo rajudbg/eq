@@ -1,5 +1,6 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:emvo_ui/emvo_ui.dart';
@@ -39,7 +40,25 @@ class _DashboardShellState extends ConsumerState<DashboardShell> {
 
     return Directionality(
       textDirection: textDirection,
-      child: Scaffold(
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (!context.mounted) return;
+          final router = GoRouter.of(context);
+          // Keep users inside the dashboard: back from Coach / Progress / You
+          // switches to Home instead of popping past the shell (welcome / exit).
+          if (selectedIndex != 0) {
+            context.go(Routes.home);
+            return;
+          }
+          if (router.canPop()) {
+            router.pop();
+          } else {
+            SystemNavigator.pop();
+          }
+        },
+        child: Scaffold(
       // Only tab content should react to the keyboard; nested [Scaffold]s
       // both resizing causes broken constraints (huge overflow / layout errors).
       resizeToAvoidBottomInset: false,
@@ -115,6 +134,7 @@ class _DashboardShellState extends ConsumerState<DashboardShell> {
             duration: EmvoAnimations.normal,
             curve: EmvoAnimations.decelerate,
           ),
+        ),
       ),
     );
   }

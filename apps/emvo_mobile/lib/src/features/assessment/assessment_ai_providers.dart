@@ -15,27 +15,10 @@ const _kOpenRouterAllowBrowser = bool.fromEnvironment(
   defaultValue: false,
 );
 
-/// Personalized headline + story + actions (OpenRouter on mobile/desktop when key set).
-///
-/// Web/Chrome cannot reach OpenRouter directly (CORS), so we use the same rich
-/// built-in template there unless [OPENROUTER_ALLOW_BROWSER] is enabled.
-final assessmentNarrativeProvider =
-    FutureProvider.autoDispose<AssessmentAiNarrative?>((ref) async {
-  ref.watch(assessmentNotifierProvider);
-  var result = ref.read(assessmentNotifierProvider).result;
-
-  // Fall back to repository latest when notifier has no in-memory result (rare timing / navigation).
-  if (result == null) {
-    ref.watch(latestResultProvider);
-    result = ref.read(latestResultProvider).valueOrNull;
-  }
-
-  if (result == null) return null;
-
-  // Avoid autoDispose dropping an in-flight request when the widget tree flickers
-  // after `context.go('/results')`, which previously left a blank analysis section.
-  ref.keepAlive();
-
+/// Shared LLM / fallback narrative for any persisted [AssessmentResult].
+Future<AssessmentAiNarrative?> generateAssessmentNarrativeForResult(
+  AssessmentResult result,
+) async {
   final payload = assessmentToNarrativePayload(result);
 
   Future<AssessmentAiNarrative> builtInSummary() async {
@@ -77,4 +60,46 @@ final assessmentNarrativeProvider =
   } catch (_) {
     return await builtInSummary();
   }
+}
+
+/// Personalized headline + story + actions (OpenRouter on mobile/desktop when key set).
+///
+/// Web/Chrome cannot reach OpenRouter directly (CORS), so we use the same rich
+/// built-in template there unless [OPENROUTER_ALLOW_BROWSER] is enabled.
+final assessmentNarrativeProvider =
+    FutureProvider.autoDispose<AssessmentAiNarrative?>((ref) async {
+  ref.watch(assessmentNotifierProvider);
+  var result = ref.read(assessmentNotifierProvider).result;
+
+  // Fall back to repository latest when notifier has no in-memory result (rare timing / navigation).
+  if (result == null) {
+    ref.watch(latestResultProvider);
+    result = ref.read(latestResultProvider).valueOrNull;
+  }
+
+  if (result == null) return null;
+
+  // Avoid autoDispose dropping an in-flight request when the widget tree flickers
+  // after `context.go('/results')`, which previously left a blank analysis section.
+  ref.keepAlive();
+
+  return generateAssessmentNarrativeForResult(result);
+});
+
+/// Narrative for a specific saved assessment (Progress → history → results).
+final assessmentNarrativeByResultIdProvider = FutureProvider.autoDispose
+    .family<AssessmentAiNarrative?, String>((ref, resultId) async {
+  ref.watch(assessmentRepositoryProvider);
+  final either = await ref.read(assessmentRepositoryProvider).getHistory();
+  final list = either.fold((_) => <AssessmentResult>[], (l) => l);
+  AssessmentResult? found;
+  for (final r in list) {
+    if (r.id == resultId) {
+      found = r;
+      break;
+    }
+  }
+  if (found == null) return null;
+  ref.keepAlive();
+  return generateAssessmentNarrativeForResult(found);
 });

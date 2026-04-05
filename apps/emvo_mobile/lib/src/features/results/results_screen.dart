@@ -8,6 +8,7 @@ import 'package:emvo_core/emvo_core.dart';
 import 'package:emvo_ui/emvo_ui.dart';
 
 import '../../providers/app_state_providers.dart';
+import '../../providers/assessment_providers.dart';
 import '../../retention/action_plan_unlock.dart';
 import '../../widgets/eq_action_plan_widgets.dart';
 import '../../routing/routing.dart';
@@ -28,8 +29,13 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
   @override
   void initState() {
     super.initState();
-    Future<void>.delayed(Duration.zero, () async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
+      final rid = GoRouterState.of(context).uri.queryParameters['rid'];
+      if (rid != null && rid.isNotEmpty) {
+        return;
+      }
+
       final r = ref.read(assessmentNotifierProvider).result;
       if (r != null) {
         await ref
@@ -37,7 +43,6 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
             .completeAssessment();
       }
       if (mounted) {
-        // Ensure EQ analysis refetches after navigation (avoids empty section on first paint).
         ref.invalidate(assessmentNarrativeProvider);
         ref.read(mascotProvider.notifier).celebrate();
       }
@@ -56,6 +61,92 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final pastId = GoRouterState.of(context).uri.queryParameters['rid'];
+    final viewingPast = pastId != null && pastId.isNotEmpty;
+
+    if (viewingPast) {
+      final historyAsync = ref.watch(assessmentHistoryProvider);
+      return historyAsync.when(
+        loading: () => const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
+        error: (_, __) => Scaffold(
+          body: Center(
+            child: Padding(
+              padding: EmvoDimensions.paddingScreen,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Could not load assessment history.',
+                    style: Theme.of(context).textTheme.titleMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  AnimatedButton(
+                    text: 'Back',
+                    onPressed: () {
+                      if (GoRouter.of(context).canPop()) {
+                        context.pop();
+                      } else {
+                        context.go(Routes.progress);
+                      }
+                    },
+                    width: double.infinity,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        data: (history) {
+          AssessmentResult? found;
+          for (final r in history) {
+            if (r.id == pastId) {
+              found = r;
+              break;
+            }
+          }
+          if (found == null) {
+            return Scaffold(
+              body: Center(
+                child: Padding(
+                  padding: EmvoDimensions.paddingScreen,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'That assessment could not be found.',
+                        style: Theme.of(context).textTheme.titleMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      AnimatedButton(
+                        text: 'Back to Progress',
+                        onPressed: () {
+                          if (GoRouter.of(context).canPop()) {
+                            context.pop();
+                          } else {
+                            context.go(Routes.progress);
+                          }
+                        },
+                        width: double.infinity,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
+          return _buildResultsScaffold(
+            context,
+            found,
+            narrativeResultId: pastId,
+          );
+        },
+      );
+    }
+
     final assessmentState = ref.watch(assessmentNotifierProvider);
     final result = assessmentState.result;
 
@@ -85,6 +176,22 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
       );
     }
 
+    return _buildResultsScaffold(
+      context,
+      result,
+      narrativeResultId: null,
+    );
+  }
+
+  Widget _buildResultsScaffold(
+    BuildContext context,
+    AssessmentResult result, {
+    required String? narrativeResultId,
+  }) {
+    final appBarTitle = narrativeResultId != null
+        ? 'Assessment · ${_fmtShortDate(result.completedAt)}'
+        : 'Your EQ Profile';
+
     return Scaffold(
       body: EmvoAmbientBackground(
         child: SafeArea(
@@ -95,7 +202,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                 floating: false,
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
-                  title: const Text('Your EQ Profile'),
+                  title: Text(appBarTitle),
                   background: Container(
                     decoration: const BoxDecoration(
                       gradient: EmvoColors.primaryGradient,
@@ -157,7 +264,25 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                       const SizedBox(height: 28),
                       Consumer(
                         builder: (context, ref, _) {
-                          final async = ref.watch(assessmentNarrativeProvider);
+                          final async = narrativeResultId != null
+                              ? ref.watch(
+                                  assessmentNarrativeByResultIdProvider(
+                                    narrativeResultId,
+                                  ),
+                                )
+                              : ref.watch(assessmentNarrativeProvider);
+                          void invalidateNarrative() {
+                            if (narrativeResultId != null) {
+                              ref.invalidate(
+                                assessmentNarrativeByResultIdProvider(
+                                  narrativeResultId,
+                                ),
+                              );
+                            } else {
+                              ref.invalidate(assessmentNarrativeProvider);
+                            }
+                          }
+
                           return async.when(
                             skipLoadingOnReload: true,
                             loading: () => const _EqAnalysisLoadingCard(),
@@ -180,9 +305,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                                   ),
                                   const SizedBox(height: 12),
                                   TextButton(
-                                    onPressed: () => ref.invalidate(
-                                      assessmentNarrativeProvider,
-                                    ),
+                                    onPressed: invalidateNarrative,
                                     child: const Text('Retry analysis'),
                                   ),
                                 ],
@@ -210,9 +333,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                                       ),
                                       const SizedBox(height: 8),
                                       TextButton(
-                                        onPressed: () => ref.invalidate(
-                                          assessmentNarrativeProvider,
-                                        ),
+                                        onPressed: invalidateNarrative,
                                         child: const Text('Retry analysis'),
                                       ),
                                       const SizedBox(height: 20),
@@ -302,13 +423,10 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                       AnimatedButton(
                         text: 'Start Coaching',
                         onPressed: () {
-                          final r = ref.read(assessmentNotifierProvider).result;
                           final repo = ref.read(coachingRepositoryProvider);
-                          if (r != null) {
-                            repo.applyCoachingContext(
-                              assessmentToCoachingContext(r),
-                            );
-                          }
+                          repo.applyCoachingContext(
+                            assessmentToCoachingContext(result),
+                          );
                           context.go(Routes.coach);
                         },
                         width: double.infinity,
@@ -338,6 +456,11 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
         ),
       ),
     );
+  }
+
+  String _fmtShortDate(DateTime d) {
+    final local = d.toLocal();
+    return '${local.day}/${local.month}/${local.year}';
   }
 
   String _fmtDate(DateTime d) {
