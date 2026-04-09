@@ -7,6 +7,9 @@ import '../../providers/upcoming_situations_provider.dart';
 enum HomeDashboardSection {
   retakeBanner,
   dailyCheckIn,
+  microLearning,
+  eqChallenge,
+  weeklyPulse,
   upcomingSituations,
   scoreSnapshot,
   weeklyActionPlan,
@@ -28,6 +31,7 @@ class DashboardHomeInputs {
     required this.retakeDue,
     required this.retakeSnoozed,
     required this.isPremium,
+    this.pulseCompletedThisWeek = false,
   });
 
   final DateTime now;
@@ -39,6 +43,7 @@ class DashboardHomeInputs {
   final bool retakeDue;
   final bool retakeSnoozed;
   final bool isPremium;
+  final bool pulseCompletedThisWeek;
 }
 
 class DashboardHomeLayout {
@@ -268,8 +273,20 @@ DashboardHomeLayout computeDashboardLayout(DashboardHomeInputs in_) {
     sections.add(HomeDashboardSection.upcomingSituations);
   }
 
+  // Micro-learning: always show for daily engagement.
+  sections.add(HomeDashboardSection.microLearning);
+
+  // Monthly challenge: always show.
+  sections.add(HomeDashboardSection.eqChallenge);
+
   if (in_.latestResult != null) {
     sections.add(HomeDashboardSection.scoreSnapshot);
+
+    // Weekly pulse: show when not yet completed this week.
+    if (!in_.pulseCompletedThisWeek) {
+      sections.add(HomeDashboardSection.weeklyPulse);
+    }
+
     sections.add(HomeDashboardSection.weeklyActionPlan);
   }
 

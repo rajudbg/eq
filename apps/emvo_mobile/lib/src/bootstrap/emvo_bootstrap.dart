@@ -57,17 +57,13 @@ class _BootstrapSplash extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = Theme.of(context).scaffoldBackgroundColor;
-    final primary = Theme.of(context).colorScheme.primary;
-    return Scaffold(
-      backgroundColor: bg,
-      body: Center(
-        child: SizedBox(
-          width: 28,
-          height: 28,
-          child: CircularProgressIndicator(
-            strokeWidth: 2.5,
-            color: primary.withValues(alpha: 0.45),
+    return const Scaffold(
+      body: EmvoAmbientBackground(
+        child: SafeArea(
+          child: Center(
+            child: EmvoLoadingPanel(
+              message: 'Starting Emvo…',
+            ),
           ),
         ),
       ),

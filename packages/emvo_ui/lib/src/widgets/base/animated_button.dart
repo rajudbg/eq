@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../theme/emvo_colors.dart';
+import 'emvo_loading_indicator.dart';
 
 class AnimatedButton extends StatefulWidget {
   const AnimatedButton({
     super.key,
     required this.text,
-    required this.onPressed,
+    this.onPressed,
     this.isLoading = false,
     this.isSecondary = false,
     this.icon,
@@ -15,7 +16,7 @@ class AnimatedButton extends StatefulWidget {
   });
 
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final bool isLoading;
   final bool isSecondary;
   final IconData? icon;
@@ -51,11 +52,11 @@ class _AnimatedButtonState extends State<AnimatedButton> {
       },
       onTapUp: (_) => setState(() => _isPressed = false),
       onTapCancel: () => setState(() => _isPressed = false),
-      onTap: widget.isLoading
+      onTap: (widget.isLoading || widget.onPressed == null)
           ? null
           : () {
               HapticFeedback.lightImpact();
-              widget.onPressed();
+              widget.onPressed!();
             },
       child: AnimatedScale(
         scale: _isPressed ? 0.98 : 1.0,
@@ -72,12 +73,15 @@ class _AnimatedButtonState extends State<AnimatedButton> {
   }
 
   Widget _primaryBody(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDisabled = widget.onPressed == null;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
-        gradient: EmvoColors.brandGradient,
+        color: isDisabled ? scheme.surfaceContainerHighest : null,
+        gradient: isDisabled ? null : EmvoColors.brandGradient,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
+        boxShadow: isDisabled ? [] : [
           BoxShadow(
             color: EmvoColors.brandMagenta.withValues(
               alpha: _isPressed ? 0.2 : 0.45,
@@ -89,42 +93,30 @@ class _AnimatedButtonState extends State<AnimatedButton> {
       ),
       child: widget.isLoading
           ? const Center(
-              child: SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              ),
+              child: EmvoLoadingIndicator(size: EmvoLoaderSize.compact),
             )
-          : _labelRow(Colors.white),
+          : _labelRow(isDisabled ? scheme.onSurface.withValues(alpha: 0.38) : Colors.white),
     );
   }
 
   Widget _secondaryBody(BuildContext context, Color fg) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDisabled = widget.onPressed == null;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: fg.withValues(alpha: 0.55),
+          color: isDisabled ? scheme.onSurface.withValues(alpha: 0.12) : fg.withValues(alpha: 0.55),
           width: 1.5,
         ),
       ),
       child: widget.isLoading
-          ? Center(
-              child: SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(fg),
-                ),
-              ),
+          ? const Center(
+              child: EmvoLoadingIndicator(size: EmvoLoaderSize.compact),
             )
-          : _labelRow(fg),
+          : _labelRow(isDisabled ? scheme.onSurface.withValues(alpha: 0.38) : fg),
     );
   }
 

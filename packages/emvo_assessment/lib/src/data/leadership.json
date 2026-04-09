@@ -1,0 +1,319 @@
+{
+  "version": "2.0.0-leadership",
+  "intent": "leadership",
+  "description": "Focus on team dynamics, influence, and leadership contexts",
+  "questions": [
+    {
+      "id": "sa_l_001",
+      "scenario": "You are leading a team and realize you have been making decisions based on what will make you look good, not what is best for the project.",
+      "primaryDimension": "selfAwareness",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Continue with your current approach since reputation matters", "scores": {"selfAwareness": 1, "selfRegulation": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Acknowledge your ego-driven pattern and refocus on project outcomes", "scores": {"selfAwareness": 5, "selfRegulation": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Ask your team what they think is best to spread accountability", "scores": {"selfAwareness": 3, "socialSkills": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Justify your decisions as what the organization expects from leaders", "scores": {"selfAwareness": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "sa_l_002",
+      "scenario": "After a successful project, you notice yourself dismissing contributions from team members and taking more credit than you deserve in your mind.",
+      "primaryDimension": "selfAwareness",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Enjoy the success - you earned it as the leader", "scores": {"selfAwareness": 1, "empathy": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Notice your credit-hogging tendency and actively acknowledge others' contributions", "scores": {"selfAwareness": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Rationalize that leaders naturally get more credit", "scores": {"selfAwareness": 2, "empathy": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Publicly share credit but privately feel you deserved more", "scores": {"selfAwareness": 2, "socialSkills": 3}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "sa_l_003",
+      "scenario": "You feel threatened by a high-performing team member who is getting attention from senior leadership.",
+      "primaryDimension": "selfAwareness",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Find ways to highlight their mistakes to balance perception", "scores": {"selfAwareness": 1, "empathy": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Recognize your insecurity and choose to mentor them instead", "scores": {"selfAwareness": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Compete harder to prove your own value", "scores": {"selfAwareness": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Distance yourself from them to protect your position", "scores": {"selfAwareness": 1, "socialSkills": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "sa_l_004",
+      "scenario": "You have been avoiding a difficult conversation with an underperforming team member for three weeks.",
+      "primaryDimension": "selfAwareness",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Hope the problem resolves itself without intervention", "scores": {"selfAwareness": 1, "selfRegulation": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Explore what fear or discomfort is driving your avoidance", "scores": {"selfAwareness": 5, "selfRegulation": 3}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Delegate the conversation to HR or your manager", "scores": {"selfAwareness": 2, "socialSkills": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Schedule the conversation and prepare talking points", "scores": {"selfAwareness": 4, "selfRegulation": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sa_l_005",
+      "scenario": "You realize you have different standards for different team members - you are harder on some and make excuses for others.",
+      "primaryDimension": "selfAwareness",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Continue since different people need different management styles", "scores": {"selfAwareness": 2, "empathy": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Examine your biases and establish consistent criteria for everyone", "scores": {"selfAwareness": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Be harder on everyone to appear fair", "scores": {"selfAwareness": 1, "empathy": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Ask your manager if they notice your inconsistency", "scores": {"selfAwareness": 3, "socialSkills": 3}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "sa_l_006",
+      "scenario": "You feel a rush of excitement when a competitor fails, even though it does not directly help your company.",
+      "primaryDimension": "selfAwareness",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Celebrate privately - business is competitive", "scores": {"selfAwareness": 2, "empathy": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Notice that your joy comes from their pain, not your gain", "scores": {"selfAwareness": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Share the news with your team to boost morale", "scores": {"selfAwareness": 1, "empathy": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Use their failure as a learning opportunity for your team", "scores": {"selfAwareness": 3, "empathy": 3}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "sr_l_001",
+      "scenario": "Your team misses a critical deadline. You want to blame external factors but know you also made mistakes.",
+      "primaryDimension": "selfRegulation",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Present the failure as entirely due to circumstances beyond your control", "scores": {"selfRegulation": 1, "selfAwareness": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Acknowledge your part while also addressing systemic issues", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Take full blame publicly to show accountability", "scores": {"selfRegulation": 3, "socialSkills": 2}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Analyze what went wrong privately before discussing with stakeholders", "scores": {"selfRegulation": 4, "selfAwareness": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sr_l_002",
+      "scenario": "A board member publicly challenges your strategy in a meeting. You feel your authority being undermined.",
+      "primaryDimension": "selfRegulation",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Defend your strategy aggressively to reassert authority", "scores": {"selfRegulation": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Regulate your defensive reaction and engage with their concerns", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Defer to their experience and change your strategy immediately", "scores": {"selfRegulation": 2, "selfAwareness": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Schedule a private meeting to understand their concerns better", "scores": {"selfRegulation": 4, "socialSkills": 4}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sr_l_003",
+      "scenario": "You receive anonymous negative feedback about your leadership style. You suspect who wrote it and feel angry.",
+      "primaryDimension": "selfRegulation",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Confront the person you suspect and demand an explanation", "scores": {"selfRegulation": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Process your anger and look for any truth in the feedback", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Dismiss it as anonymous cowardice", "scores": {"selfRegulation": 2, "selfAwareness": 1}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Send a team-wide message inviting direct feedback", "scores": {"selfRegulation": 3, "socialSkills": 3}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "sr_l_004",
+      "scenario": "Your company is going through layoffs. You know information that would calm your team but have been told to keep it confidential.",
+      "primaryDimension": "selfRegulation",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Hint at the good news to reduce your team's anxiety", "scores": {"selfRegulation": 1, "socialSkills": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Maintain confidentiality while supporting your team through uncertainty", "scores": {"selfRegulation": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Tell your team everything to build trust", "scores": {"selfRegulation": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Push back on leadership to allow earlier communication", "scores": {"selfRegulation": 4, "socialSkills": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sr_l_005",
+      "scenario": "A key investor is pressuring you to make an unethical short-term decision that would harm your team long-term.",
+      "primaryDimension": "selfRegulation",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Comply to keep the investor happy and your company funded", "scores": {"selfRegulation": 1, "selfAwareness": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Stand firm on your values while seeking alternative solutions", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Find a compromise that partially satisfies both sides", "scores": {"selfRegulation": 3, "socialSkills": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Delay the decision hoping the investor changes their mind", "scores": {"selfRegulation": 2, "selfAwareness": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "sr_l_006",
+      "scenario": "Your team is celebrating a win but you know there were serious ethical shortcuts taken to achieve it.",
+      "primaryDimension": "selfRegulation",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Join the celebration and address the issues later", "scores": {"selfRegulation": 1, "selfAwareness": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Pause the celebration to address what went wrong", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Celebrate publicly but privately investigate the shortcuts", "scores": {"selfRegulation": 3, "socialSkills": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Report the shortcuts to compliance without telling your team", "scores": {"selfRegulation": 2, "socialSkills": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "em_l_001",
+      "scenario": "A team member is consistently underperforming. Other team members are picking up the slack and resenting it.",
+      "primaryDimension": "empathy",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Focus on the impact to the team and terminate them quickly", "scores": {"empathy": 1, "socialSkills": 2}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Explore what might be causing the underperformance before taking action", "scores": {"empathy": 5, "socialSkills": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Ignore it and hope the team works it out themselves", "scores": {"empathy": 2, "socialSkills": 1}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Reassign their work to others permanently", "scores": {"empathy": 2, "socialSkills": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "em_l_002",
+      "scenario": "A high performer on your team asks for a raise you cannot approve due to budget constraints.",
+      "primaryDimension": "empathy",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Reject the request and tell them to be grateful for their job", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Validate their worth and explore alternative forms of recognition", "scores": {"empathy": 5, "socialSkills": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Promise to advocate for them in the next budget cycle", "scores": {"empathy": 3, "socialSkills": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Suggest they look for other offers to benchmark their value", "scores": {"empathy": 2, "socialSkills": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "em_l_003",
+      "scenario": "During a restructuring, you need to choose between two equally qualified employees for one remaining position.",
+      "primaryDimension": "empathy",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Make the decision purely on metrics without considering personal impact", "scores": {"empathy": 1, "socialSkills": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Consider both business needs and individual circumstances transparently", "scores": {"empathy": 5, "socialSkills": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Let them compete for the role to make it fair", "scores": {"empathy": 2, "socialSkills": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Delegate the decision to avoid personal responsibility", "scores": {"empathy": 2, "selfAwareness": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "em_l_004",
+      "scenario": "A team member shares they are experiencing burnout but there is critical work that only they can do.",
+      "primaryDimension": "empathy",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Tell them to push through until the critical work is done", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Take their burnout seriously and redistribute work immediately", "scores": {"empathy": 5, "socialSkills": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Offer them a long weekend after the critical work is complete", "scores": {"empathy": 3, "selfRegulation": 2}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Suggest they see a doctor to get a medical leave note", "scores": {"empathy": 2, "socialSkills": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "em_l_005",
+      "scenario": "You notice that your team is divided into two factions that barely communicate with each other.",
+      "primaryDimension": "empathy",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Let them self-organize since they are adults", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Seek to understand each faction's perspective and bridge the divide", "scores": {"empathy": 5, "socialSkills": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Force them to work together on a high-pressure project", "scores": {"empathy": 2, "socialSkills": 2}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Reorganize the teams to separate the factions", "scores": {"empathy": 3, "socialSkills": 3}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "em_l_006",
+      "scenario": "An employee confides in you about a personal crisis affecting their work. You have a tight deadline approaching.",
+      "primaryDimension": "empathy",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Focus on the deadline and suggest they use PTO if they cannot perform", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Support them while also being transparent about business needs", "scores": {"empathy": 5, "socialSkills": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Cover for them and pick up their work yourself", "scores": {"empathy": 3, "selfRegulation": 2}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Refer them to HR and focus on your own responsibilities", "scores": {"empathy": 2, "socialSkills": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "ss_l_001",
+      "scenario": "Your team is demotivated after a series of setbacks. Energy is low and cynicism is high.",
+      "primaryDimension": "socialSkills",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Tell them to toughen up and focus on the work", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Acknowledge the difficulty and co-create a path forward with the team", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Bring in motivational speakers to pump up the team", "scores": {"socialSkills": 2, "empathy": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Share your own struggles to show vulnerability", "scores": {"socialSkills": 4, "selfAwareness": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "ss_l_002",
+      "scenario": "You need to implement an unpopular policy change that comes from senior leadership.",
+      "primaryDimension": "socialSkills",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Present it as non-negotiable and enforce compliance", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Explain the why behind it and create space for feedback within constraints", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Blame senior leadership to maintain your popularity", "scores": {"socialSkills": 1, "selfAwareness": 1}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Delay implementation hoping leadership changes their mind", "scores": {"socialSkills": 2, "selfRegulation": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "ss_l_003",
+      "scenario": "A talented team member wants to leave for another opportunity. You could make a counteroffer but are not sure if you should.",
+      "primaryDimension": "socialSkills",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Let them go immediately since they are disloyal", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Have an honest conversation about their growth and whether you can meet it", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Make a counteroffer without discussing their underlying needs", "scores": {"socialSkills": 2, "empathy": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Ask them to stay as a personal favor to you", "scores": {"socialSkills": 2, "empathy": 3}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "ss_l_004",
+      "scenario": "Two of your strongest performers are in conflict that is affecting the whole team.",
+      "primaryDimension": "socialSkills",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Tell them to resolve it themselves or face consequences", "scores": {"socialSkills": 1, "empathy": 2}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Facilitate a mediated conversation to understand and resolve the root cause", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Separate them onto different projects to avoid future conflict", "scores": {"socialSkills": 3, "empathy": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Pick a side based on who is more valuable to the team", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "aggressive"}
+      ]
+    },
+    {
+      "id": "ss_l_005",
+      "scenario": "You need to build buy-in for a strategic shift that many on your team resist.",
+      "primaryDimension": "socialSkills",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Announce the decision and expect compliance", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Involve key influencers early and address concerns transparently", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Gradually implement changes hoping people adapt over time", "scores": {"socialSkills": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Find early wins to demonstrate the value of the shift", "scores": {"socialSkills": 4, "empathy": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "ss_l_006",
+      "scenario": "You are new to an organization and need to establish credibility with a team that has seen three leaders in two years.",
+      "primaryDimension": "socialSkills",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Make quick changes to show you are different from previous leaders", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Listen extensively before acting and acknowledge their history of instability", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Promise you will stay longer than the others did", "scores": {"socialSkills": 2, "empathy": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Focus on delivering early results to build trust quickly", "scores": {"socialSkills": 4, "selfRegulation": 3}, "emotionalTone": "neutral"}
+      ]
+    }
+  ]
+}

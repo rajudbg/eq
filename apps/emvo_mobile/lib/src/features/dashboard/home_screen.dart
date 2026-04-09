@@ -8,6 +8,7 @@ import 'package:emvo_ui/emvo_ui.dart';
 import '../../providers/assessment_providers.dart';
 import '../../providers/daily_checkin_provider.dart';
 import '../../providers/eq_action_plan_provider.dart';
+import '../../providers/eq_pulse_provider.dart';
 import '../../providers/upcoming_situations_provider.dart';
 import '../../providers/action_plan_celebration_provider.dart';
 import '../../providers/retake_banner_snooze_provider.dart';
@@ -16,6 +17,11 @@ import '../../routing/routing.dart';
 import 'action_plan_unlock_dialog.dart';
 import 'dashboard_home_inputs_provider.dart';
 import 'dashboard_home_state.dart';
+import 'emotion_vocabulary.dart';
+import 'emotion_wheel_sheet.dart';
+import 'eq_micro_lessons.dart';
+import 'eq_pulse_sheet.dart';
+import 'eq_challenges.dart';
 import '../../widgets/emvo_app_bar_title.dart';
 import '../../widgets/eq_action_plan_widgets.dart';
 import '../../widgets/upcoming_situations_card.dart';
@@ -284,7 +290,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(
+              child: EmvoLoadingIndicator(
+                message: 'Loading your dashboard…',
+              ),
+            ),
             error: (_, __) => SingleChildScrollView(
               padding: EmvoDimensions.paddingScreen,
               child: latestResultAsync.when(
@@ -302,7 +312,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ],
                       )
                     : _buildNoDataCard(context),
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(
+                  child: EmvoLoadingIndicator(
+                    message: 'Loading your dashboard…',
+                  ),
+                ),
                 error: (_, __) => _buildNoDataCard(context),
               ),
             ),
@@ -352,6 +366,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             UpcomingSituationsCard(
               emphasizeEmptyGuidance: emphasizeSituationDiscovery,
             ),
+          );
+        case HomeDashboardSection.microLearning:
+          addGap();
+          widgets.add(
+            const _MicroLearningCard(),
+          );
+        case HomeDashboardSection.eqChallenge:
+          addGap();
+          widgets.add(
+            const _EqChallengeCard(),
+          );
+        case HomeDashboardSection.weeklyPulse:
+          addGap();
+          widgets.add(
+            const _WeeklyPulseCard(),
           );
         case HomeDashboardSection.scoreSnapshot:
           if (result == null) {
@@ -514,14 +543,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Column(
       children: [
         EqRadarChart(
-          selfAwareness: result.dimensionScores[EQDimension.selfAwareness] ?? 0,
-          selfManagement:
-              result.dimensionScores[EQDimension.selfRegulation] ?? 0,
-          socialAwareness:
-              result.dimensionScores[EQDimension.socialSkills] ?? 0,
-          relationshipManagement:
-              result.dimensionScores[EQDimension.empathy] ?? 0,
-        ), // Radar chart defines its own internal entry animation now
+          values: [
+            result.dimensionScores[EQDimension.selfAwareness] ?? 0,
+            result.dimensionScores[EQDimension.selfRegulation] ?? 0,
+            result.dimensionScores[EQDimension.empathy] ?? 0,
+            result.dimensionScores[EQDimension.socialSkills] ?? 0,
+          ],
+        ),
         const SizedBox(height: 16),
         GlassContainer(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -561,10 +589,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           onPressed: () {
             Share.share(
               'I just scored ${result.overallScore.toInt()} on my EQ Assessment in Emvo! 🚀\n\n'
-              '🧠 Self Awareness: ${result.dimensionScores[EQDimension.selfAwareness]?.toInt() ?? 0}\n'
-              '🛡️ Self Management: ${result.dimensionScores[EQDimension.selfRegulation]?.toInt() ?? 0}\n'
-              '🤝 Social Awareness: ${result.dimensionScores[EQDimension.socialSkills]?.toInt() ?? 0}\n'
-              '❤️ Relationship Management: ${result.dimensionScores[EQDimension.empathy]?.toInt() ?? 0}\n\n'
+              '🧠 Self-Awareness: ${result.dimensionScores[EQDimension.selfAwareness]?.toInt() ?? 0}\n'
+              '🛡️ Self-Regulation: ${result.dimensionScores[EQDimension.selfRegulation]?.toInt() ?? 0}\n'
+              '🤝 Empathy: ${result.dimensionScores[EQDimension.empathy]?.toInt() ?? 0}\n'
+              '❤️ Social Skills: ${result.dimensionScores[EQDimension.socialSkills]?.toInt() ?? 0}\n\n'
               'Can you beat my score?',
             );
           },
@@ -895,10 +923,24 @@ class _DailyCheckInCard extends ConsumerStatefulWidget {
 class _DailyCheckInCardState extends ConsumerState<_DailyCheckInCard> {
   final _noteController = TextEditingController();
 
-  Future<void> _submitDailyCheckIn(String label) async {
+  Future<void> _submitDailyCheckIn(String broadLabel) async {
+    // Step 2: Show emotion wheel for the selected broad category.
+    final category = MoodCategory.values.firstWhere(
+      (c) => c.label == broadLabel,
+      orElse: () => MoodCategory.okay,
+    );
+
+    final specificEmotion = await showEmotionWheelSheet(
+      context,
+      category: category,
+    );
+
+    // User dismissed without picking — don’t log.
+    if (specificEmotion == null || !mounted) return;
+
     final note = _noteController.text.trim();
     await ref.read(dailyCheckInProvider.notifier).recordMood(
-          label,
+          specificEmotion,
           note: note.isEmpty ? null : note,
         );
 
@@ -911,7 +953,7 @@ class _DailyCheckInCardState extends ConsumerState<_DailyCheckInCard> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Saved as “$label”. Your coach will use this in replies.',
+          'Saved as “$specificEmotion”. Your coach will use this in replies.',
         ),
         behavior: SnackBarBehavior.floating,
       ),
@@ -1235,5 +1277,486 @@ class _QuickActionCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// ── Micro-Learning Card ────────────────────────────────────────────────────
+
+class _MicroLearningCard extends StatefulWidget {
+  const _MicroLearningCard();
+
+  @override
+  State<_MicroLearningCard> createState() => _MicroLearningCardState();
+}
+
+class _MicroLearningCardState extends State<_MicroLearningCard> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final lesson = lessonForDate(DateTime.now());
+    final scheme = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      onTap: () => setState(() => _expanded = !_expanded),
+      child: GlassContainer(
+        padding: const EdgeInsets.all(EmvoDimensions.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: EmvoColors.secondary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(lesson.emoji, style: const TextStyle(fontSize: 20)),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '60-SECOND EQ LESSON',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: EmvoColors.secondary,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.2,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        lesson.title,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  _expanded
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  color: context.emvoOnSurface(0.4),
+                ),
+              ],
+            ),
+            AnimatedCrossFade(
+              duration: EmvoAnimations.normal,
+              crossFadeState: _expanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              firstChild: Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Text(
+                  lesson.body.split('.').take(2).join('.') + '.',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: context.emvoOnSurface(0.65),
+                        height: 1.4,
+                      ),
+                ),
+              ),
+              secondChild: Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      lesson.body,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: context.emvoOnSurface(0.78),
+                            height: 1.5,
+                          ),
+                    ),
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: scheme.primary.withValues(alpha: 0.08),
+                        borderRadius:
+                            BorderRadius.circular(EmvoDimensions.radiusMd),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.lightbulb_outline,
+                            size: 18,
+                            color: scheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              lesson.takeaway,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium
+                                  ?.copyWith(
+                                    color: scheme.primary,
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.3,
+                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ).animate().fadeIn(duration: 350.ms).slideY(begin: 0.03, duration: 350.ms);
+  }
+}
+
+// ── Weekly EQ Pulse Card ──────────────────────────────────────────────────
+
+class _WeeklyPulseCard extends ConsumerWidget {
+  const _WeeklyPulseCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pulseState = ref.watch(eqPulseProvider);
+
+    // If already completed, show a compact summary.
+    if (pulseState.completedThisWeek && pulseState.latestPulse != null) {
+      return const SizedBox.shrink();
+    }
+
+    return GlassContainer(
+      color: EmvoColors.tertiary.withValues(alpha: 0.08),
+      padding: const EdgeInsets.all(EmvoDimensions.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: EmvoColors.tertiary.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.bolt_rounded,
+                  color: EmvoColors.tertiary,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Weekly EQ Pulse',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '3 quick questions \u2022 90 seconds',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: context.emvoOnSurface(0.55),
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Track how your EQ shifts week to week without a full assessment.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: context.emvoOnSurface(0.65),
+                  height: 1.4,
+                ),
+          ),
+          const SizedBox(height: 14),
+          AnimatedButton(
+            text: 'Take Pulse',
+            onPressed: () async {
+              final result = await showEqPulseSheet(context);
+              if (result != null && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Pulse recorded! Check your progress tab.'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
+            },
+            width: double.infinity,
+          ),
+        ],
+      ),
+    ).animate().fadeIn(duration: 350.ms).slideY(begin: 0.04, duration: 350.ms);
+  }
+}
+
+
+// ── Monthly EQ Challenge Card ──────────────────────────────────────────────
+
+class _EqChallengeCard extends ConsumerWidget {
+  const _EqChallengeCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(challengeProvider);
+    final active = state.active;
+    final scheme = Theme.of(context).colorScheme;
+
+    // Active challenge — show progress and daily check-off.
+    if (active != null) {
+      final ch = active.challenge;
+      if (ch == null) return const SizedBox.shrink();
+
+      final todayDone = active.completedDays.contains(active.currentDay);
+
+      return GlassContainer(
+        padding: const EdgeInsets.all(EmvoDimensions.lg),
+        color: EmvoColors.success.withValues(alpha: 0.06),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(ch.emoji, style: const TextStyle(fontSize: 24)),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        ch.title,
+                        style:
+                            Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Day ${active.currentDay + 1} of ${active.totalDays}',
+                        style:
+                            Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: context.emvoOnSurface(0.55),
+                                ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (state.completedCount > 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: EmvoColors.success.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '${state.completedCount} done',
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelSmall
+                          ?.copyWith(
+                            color: EmvoColors.success,
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Progress dots
+            Row(
+              children: List.generate(active.totalDays, (i) {
+                final done = active.completedDays.contains(i);
+                final isCurrent = i == active.currentDay;
+                return Expanded(
+                  child: Container(
+                    height: 6,
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    decoration: BoxDecoration(
+                      color: done
+                          ? EmvoColors.success
+                          : isCurrent
+                              ? scheme.primary.withValues(alpha: 0.4)
+                              : scheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                );
+              }),
+            ),
+            const SizedBox(height: 12),
+
+            // Daily action
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                borderRadius:
+                    BorderRadius.circular(EmvoDimensions.radiusMd),
+              ),
+              child: Text(
+                ch.dailyAction,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      height: 1.3,
+                    ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            Row(
+              children: [
+                Expanded(
+                  child: AnimatedButton(
+                    text: todayDone ? 'Done today \u2713' : 'I did it today',
+                    onPressed: todayDone
+                        ? null
+                        : () {
+                            ref.read(challengeProvider.notifier).checkOffToday();
+                            if (active.completedDays.length + 1 >= active.totalDays) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    '\U0001F3C6 Challenge complete! Amazing work.',
+                                  ),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            }
+                          },
+                    width: double.infinity,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: () =>
+                      ref.read(challengeProvider.notifier).abandon(),
+                  icon: Icon(
+                    Icons.close,
+                    size: 20,
+                    color: context.emvoOnSurface(0.4),
+                  ),
+                  tooltip: 'Leave challenge',
+                ),
+              ],
+            ),
+          ],
+        ),
+      ).animate().fadeIn(duration: 350.ms).slideY(begin: 0.03, duration: 350.ms);
+    }
+
+    // No active challenge — show this month's featured challenge.
+    final featured = challengeForMonth(DateTime.now());
+    return GlassContainer(
+      padding: const EdgeInsets.all(EmvoDimensions.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: EmvoColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.emoji_events_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'MONTHLY CHALLENGE',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: scheme.primary,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.2,
+                          ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${featured.emoji} ${featured.title}',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              if (state.completedCount > 0)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: EmvoColors.success.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.check_circle, color: EmvoColors.success, size: 14),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${state.completedCount}',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: EmvoColors.success,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            featured.subtitle,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: context.emvoOnSurface(0.65),
+                  height: 1.4,
+                ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            featured.description,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: context.emvoOnSurface(0.55),
+                  height: 1.4,
+                ),
+          ),
+          const SizedBox(height: 14),
+          AnimatedButton(
+            text: 'Start Challenge',
+            onPressed: () =>
+                ref.read(challengeProvider.notifier).startChallenge(featured),
+            width: double.infinity,
+          ),
+        ],
+      ),
+    ).animate().fadeIn(duration: 350.ms).slideY(begin: 0.04, duration: 350.ms);
   }
 }

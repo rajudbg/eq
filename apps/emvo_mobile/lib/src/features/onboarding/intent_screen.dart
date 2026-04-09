@@ -134,7 +134,7 @@ class _IntentScreenState extends ConsumerState<IntentScreen> {
                         ),
                       ),
                       Text(
-                        'Takes about 8 minutes · No account required',
+                        'Takes about 10 minutes · No account required',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: context.emvoOnSurface(

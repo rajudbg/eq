@@ -13,6 +13,7 @@ export 'src/widgets/base/animated_button.dart';
 export 'src/widgets/base/emvo_logo.dart';
 export 'src/widgets/base/glass_container.dart';
 export 'src/widgets/base/emvo_ambient_background.dart';
+export 'src/widgets/base/emvo_loading_indicator.dart';
 
 // Animated widgets
 export 'src/widgets/animated/animated_option_card.dart';

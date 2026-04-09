@@ -1,32 +1,62 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import '../../theme/emvo_colors.dart';
-import '../../theme/emvo_text_theme.dart';
-import '../../theme/emvo_theme_context.dart';
-import '../base/glass_container.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../../theme/emvo_colors.dart';
+import '../../theme/emvo_theme_context.dart';
+import '../base/glass_container.dart';
+
+/// Axis order matches [EQDimension.values] in `emvo_assessment` (mobile builds this list):
+/// 0 Self-Awareness, 1 Self-Regulation, 2 Empathy, 3 Social Skills.
+enum EqRadarChartStyle {
+  /// Glass card, header, and glow (dashboard).
+  dashboard,
+
+  /// Chart only — for embedding on results / other screens.
+  compact,
+}
+
 class EqRadarChart extends StatelessWidget {
-  final double selfAwareness;
-  final double selfManagement;
-  final double socialAwareness;
-  final double relationshipManagement;
-  final double? prevSelfAwareness;
-  final double? prevSelfManagement;
-  final double? prevSocialAwareness;
-  final double? prevRelationshipManagement;
+  /// Length 4: self-awareness, self-regulation, empathy, social skills.
+  final List<double> values;
+
+  /// Optional previous assessment (same order as [values]).
+  final List<double>? previousValues;
+
+  final EqRadarChartStyle style;
+
+  final double chartHeight;
+
+  /// When true, draws a second polygon at 50 (mid-scale reference), matching results UX.
+  final bool showMidpointBaseline;
 
   const EqRadarChart({
-    Key? key,
-    required this.selfAwareness,
-    required this.selfManagement,
-    required this.socialAwareness,
-    required this.relationshipManagement,
-    this.prevSelfAwareness,
-    this.prevSelfManagement,
-    this.prevSocialAwareness,
-    this.prevRelationshipManagement,
-  }) : super(key: key);
+    super.key,
+    required this.values,
+    this.previousValues,
+    this.style = EqRadarChartStyle.dashboard,
+    this.chartHeight = 250,
+    this.showMidpointBaseline = false,
+  })  : assert(values.length == 4),
+        assert(previousValues == null || previousValues.length == 4);
+
+  static const List<String> _axisLabels = [
+    'Self-Awareness',
+    'Self-Regulation',
+    'Empathy',
+    'Social Skills',
+  ];
+
+  static String _axisTitleText(int index) {
+    final s = _axisLabels[index];
+    return s.contains(' ') ? s.replaceAll(' ', '\n') : s;
+  }
+
+  /// fl_chart rotates titles with the spoke; the bottom label (index 2) reads inverted without this.
+  static double _titleAngleDegrees(int index, double baseTitleAngleDeg) {
+    if (index == 2) return baseTitleAngleDeg + 180;
+    return baseTitleAngleDeg;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,38 +64,116 @@ class EqRadarChart extends StatelessWidget {
     final primaryColor = EmvoColors.primary;
     final previousColor = isDark ? Colors.white38 : Colors.black26;
 
-    final showPrevious = prevSelfAwareness != null &&
-        prevSelfManagement != null &&
-        prevSocialAwareness != null &&
-        prevRelationshipManagement != null;
+    final showPrevious = previousValues != null;
 
     final dataSets = <RadarDataSet>[
       if (showPrevious)
         RadarDataSet(
-          dataEntries: [
-            RadarEntry(value: prevSelfAwareness!),
-            RadarEntry(value: prevSelfManagement!),
-            RadarEntry(value: prevSocialAwareness!),
-            RadarEntry(value: prevRelationshipManagement!),
-          ],
-          fillColor: previousColor.withOpacity(0.1),
+          dataEntries: previousValues!
+              .map((v) => RadarEntry(value: v))
+              .toList(growable: false),
+          fillColor: previousColor.withValues(alpha: 0.1),
           borderColor: previousColor,
           entryRadius: 0,
           borderWidth: 1.5,
         ),
       RadarDataSet(
-        dataEntries: [
-          RadarEntry(value: selfAwareness),
-          RadarEntry(value: selfManagement),
-          RadarEntry(value: socialAwareness),
-          RadarEntry(value: relationshipManagement),
-        ],
-        fillColor: primaryColor.withOpacity(0.3),
+        dataEntries:
+            values.map((v) => RadarEntry(value: v)).toList(growable: false),
+        fillColor: primaryColor.withValues(alpha: 0.3),
         borderColor: primaryColor,
-        entryRadius: 4,
-        borderWidth: 2.5,
+        entryRadius: style == EqRadarChartStyle.compact ? 5 : 4,
+        borderWidth: style == EqRadarChartStyle.compact ? 2 : 2.5,
       ),
+      if (showMidpointBaseline)
+        RadarDataSet(
+          fillColor: Colors.transparent,
+          borderColor: Theme.of(context)
+              .colorScheme
+              .onSurface
+              .withValues(alpha: 0.18),
+          entryRadius: 0,
+          dataEntries: List.generate(
+            4,
+            (_) => const RadarEntry(value: 50),
+            growable: false,
+          ),
+          borderWidth: 1,
+        ),
     ];
+
+    final chart = SizedBox(
+      height: chartHeight,
+      child: RadarChart(
+        RadarChartData(
+          dataSets: dataSets,
+          radarBackgroundColor: Colors.transparent,
+          radarBorderData: style == EqRadarChartStyle.compact
+              ? BorderSide(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.12),
+                )
+              : BorderSide.none,
+          radarShape: RadarShape.polygon,
+          tickCount: style == EqRadarChartStyle.compact ? 4 : 5,
+          ticksTextStyle: const TextStyle(
+            color: Colors.transparent,
+            fontSize: 10,
+          ),
+          tickBorderData: style == EqRadarChartStyle.compact
+              ? BorderSide(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.06),
+                )
+              : BorderSide.none,
+          gridBorderData: BorderSide(
+            color: style == EqRadarChartStyle.compact
+                ? Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.12)
+                : (isDark ? Colors.white12 : Colors.black12),
+            width: 1,
+          ),
+          borderData: style == EqRadarChartStyle.compact
+              ? FlBorderData(show: false)
+              : null,
+          titleTextStyle: style == EqRadarChartStyle.compact
+              ? Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.7),
+                    fontWeight: FontWeight.w500,
+                  )
+              : Theme.of(context).textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : Colors.black54,
+                  ),
+          titlePositionPercentageOffset: 0.2,
+          getTitle: (index, angle) {
+            if (index < 0 || index >= 4) {
+              return const RadarChartTitle(text: '', angle: 0);
+            }
+            return RadarChartTitle(
+              text: _axisTitleText(index),
+              angle: _titleAngleDegrees(index, angle),
+              positionPercentageOffset: 0.2,
+            );
+          },
+        ),
+        swapAnimationDuration: const Duration(milliseconds: 600),
+        swapAnimationCurve: Curves.easeInOut,
+      ),
+    );
+
+    if (style == EqRadarChartStyle.compact) {
+      return chart;
+    }
 
     return GlassContainer(
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
@@ -84,7 +192,6 @@ class EqRadarChart extends StatelessWidget {
           Stack(
             alignment: Alignment.center,
             children: [
-              // Subtle animated background glow
               Container(
                 width: 120,
                 height: 120,
@@ -100,62 +207,21 @@ class EqRadarChart extends StatelessWidget {
                 ),
               )
                   .animate(
-                      onPlay: (controller) => controller.repeat(reverse: true))
+                    onPlay: (controller) => controller.repeat(reverse: true),
+                  )
                   .scale(
-                      begin: const Offset(0.9, 0.9),
-                      end: const Offset(1.1, 1.1),
-                      duration: 3.seconds)
+                    begin: const Offset(0.9, 0.9),
+                    end: const Offset(1.1, 1.1),
+                    duration: 3.seconds,
+                  )
                   .fade(begin: 0.6, end: 1.0),
-
-              SizedBox(
-                height: 250,
-                child: RadarChart(
-                  RadarChartData(
-                    dataSets: dataSets,
-                    radarBackgroundColor: Colors.transparent,
-                    radarBorderData: BorderSide.none,
-                    radarShape: RadarShape.polygon,
-                    tickCount: 5,
-                    ticksTextStyle: const TextStyle(
-                        color: Colors.transparent, fontSize: 10),
-                    tickBorderData: BorderSide.none,
-                    gridBorderData: BorderSide(
-                      color: isDark ? Colors.white12 : Colors.black12,
-                      width: 1,
-                    ),
-                    titleTextStyle:
-                        Theme.of(context).textTheme.labelMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.white70 : Colors.black54,
-                            ),
-                    getTitle: (index, angle) {
-                      switch (index) {
-                        case 0:
-                          return const RadarChartTitle(
-                              text: 'Self-Awareness', angle: 0);
-                        case 1:
-                          return const RadarChartTitle(
-                              text: 'Self-Management', angle: 0);
-                        case 2:
-                          return const RadarChartTitle(
-                              text: 'Social Awareness', angle: 0);
-                        case 3:
-                          return const RadarChartTitle(
-                              text: 'Relationship Mgmt', angle: 0);
-                        default:
-                          return const RadarChartTitle(text: '', angle: 0);
-                      }
-                    },
-                  ),
-                  swapAnimationDuration: const Duration(milliseconds: 600),
-                  swapAnimationCurve: Curves.easeInOut,
-                ),
-              )
+              chart
                   .animate()
                   .scale(
-                      delay: 200.ms,
-                      curve: Curves.easeOutQuart,
-                      duration: 800.ms)
+                    delay: 200.ms,
+                    curve: Curves.easeOutQuart,
+                    duration: 800.ms,
+                  )
                   .fadeIn(),
             ],
           ),

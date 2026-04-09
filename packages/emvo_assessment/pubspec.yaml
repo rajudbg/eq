@@ -22,6 +22,10 @@ dependencies:
 flutter:
   assets:
     - lib/src/data/questions.json
+    - lib/src/data/work.json
+    - lib/src/data/reactions.json
+    - lib/src/data/leadership.json
+    - lib/src/data/growth.json
 
 dev_dependencies:
   build_runner: ^2.4.7

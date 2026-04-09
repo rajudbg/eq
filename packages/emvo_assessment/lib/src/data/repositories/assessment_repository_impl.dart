@@ -10,6 +10,10 @@ import '../../domain/repositories/assessment_repository.dart';
 
 const _kAssessmentHistoryKey = 'emvo.assessment_history.v1';
 
+/// Whether a dimension's score contribution comes from a question whose
+/// [primaryDimension] matches (primary) or from a different question (cross).
+enum _Role { primary, cross }
+
 class AssessmentRepositoryImpl implements AssessmentRepository {
   AssessmentRepositoryImpl();
 
@@ -51,17 +55,23 @@ class AssessmentRepositoryImpl implements AssessmentRepository {
     await prefs.setString(_kAssessmentHistoryKey, encoded);
   }
 
+  /// Weight given to primary-dimension questions when computing the final
+  /// normalized score.  The remaining `1 - primaryWeight` comes from cross-
+  /// dimension contributions.
+  ///
+  /// An 80/20 split is the sweet-spot recommended by construct-based SJT
+  /// literature: it keeps each dimension anchored to its own items while still
+  /// rewarding holistic emotional intelligence shown in other scenarios.
+  static const double primaryWeight = 0.80;
+
   @override
   AssessmentResult calculateResult({
     required Map<String, String> answers,
     required List<Question> questions,
   }) {
-    final Map<EQDimension, double> dimensionScores = {
-      EQDimension.selfAwareness: 0,
-      EQDimension.selfRegulation: 0,
-      EQDimension.empathy: 0,
-      EQDimension.socialSkills: 0,
-    };
+    // ── 1. Accumulate raw points split by primary vs cross ──────────────
+    final primaryRaw = {for (final d in EQDimension.values) d: 0.0};
+    final crossRaw = {for (final d in EQDimension.values) d: 0.0};
 
     for (final entry in answers.entries) {
       final questionMatch = questions.where((q) => q.id == entry.key);
@@ -73,25 +83,40 @@ class AssessmentRepositoryImpl implements AssessmentRepository {
       final selectedOption = optionMatch.first;
 
       for (final scoreEntry in selectedOption.scores.entries) {
-        dimensionScores[scoreEntry.key] =
-            (dimensionScores[scoreEntry.key] ?? 0) + scoreEntry.value;
+        final dim = scoreEntry.key;
+        final pts = scoreEntry.value.toDouble();
+        if (dim == question.primaryDimension) {
+          primaryRaw[dim] = (primaryRaw[dim] ?? 0) + pts;
+        } else {
+          crossRaw[dim] = (crossRaw[dim] ?? 0) + pts;
+        }
       }
     }
 
-    final maxRawByDimension = _maxAchievableRawByDimension(
-      questions,
-      answers.keys.toSet(),
-    );
-    final normalizedScores = dimensionScores.map((dimension, raw) {
-      final maxRaw = maxRawByDimension[dimension] ?? 0.0;
-      if (maxRaw <= 0) {
-        return MapEntry(dimension, 0.0);
-      }
-      return MapEntry(
-        dimension,
-        (raw / maxRaw * 100).clamp(0.0, 100.0).toDouble(),
-      );
-    });
+    // ── 2. Compute ceilings (best-achievable) split the same way ────────
+    final answeredIds = answers.keys.toSet();
+    final primaryMax = _maxRawByRole(questions, answeredIds, _Role.primary);
+    final crossMax = _maxRawByRole(questions, answeredIds, _Role.cross);
+
+    // ── 3. Normalize & blend ────────────────────────────────────────────
+    final normalizedScores = <EQDimension, double>{};
+    for (final d in EQDimension.values) {
+      final pMax = primaryMax[d] ?? 0.0;
+      final cMax = crossMax[d] ?? 0.0;
+
+      final pNorm =
+          pMax > 0 ? ((primaryRaw[d] ?? 0) / pMax * 100).clamp(0.0, 100.0) : 0.0;
+      final cNorm =
+          cMax > 0 ? ((crossRaw[d] ?? 0) / cMax * 100).clamp(0.0, 100.0) : 0.0;
+
+      // If there are no cross-scored items for this dimension (e.g. a very
+      // small question bank), fall back to 100 % primary.
+      final blend = cMax > 0
+          ? pNorm * primaryWeight + cNorm * (1 - primaryWeight)
+          : pNorm;
+
+      normalizedScores[d] = blend.clamp(0.0, 100.0).toDouble();
+    }
 
     final overallScore = normalizedScores.values.reduce((a, b) => a + b) / 4;
 
@@ -109,24 +134,38 @@ class AssessmentRepositoryImpl implements AssessmentRepository {
     );
   }
 
-  /// Sum of best-possible raw points per dimension across answered questions.
+  // ── Helpers for ceiling calculation ──────────────────────────────────────
+
+  /// Sum of best-possible raw points per dimension, split by primary/cross
+  /// role, across only the [answeredQuestionIds].
   static Map<EQDimension, double> maxAchievableRawByDimensionForAnswers({
     required List<Question> questions,
     required Set<String> answeredQuestionIds,
   }) {
-    return _maxAchievableRawByDimension(questions, answeredQuestionIds);
+    // Public API returns the *total* ceiling (primary + cross) for backwards
+    // compatibility with any callers that inspect overall headroom.
+    final p = _maxRawByRole(questions, answeredQuestionIds, _Role.primary);
+    final c = _maxRawByRole(questions, answeredQuestionIds, _Role.cross);
+    return {
+      for (final d in EQDimension.values) d: (p[d] ?? 0) + (c[d] ?? 0),
+    };
   }
 
-  static Map<EQDimension, double> _maxAchievableRawByDimension(
+  /// Best-achievable score per dimension filtered by [role].
+  static Map<EQDimension, double> _maxRawByRole(
     List<Question> questions,
     Set<String> answeredQuestionIds,
+    _Role role,
   ) {
-    final maxes = {
-      for (final d in EQDimension.values) d: 0.0,
-    };
+    final maxes = {for (final d in EQDimension.values) d: 0.0};
     for (final q in questions) {
       if (!answeredQuestionIds.contains(q.id)) continue;
       for (final d in EQDimension.values) {
+        // Skip dimensions that don't match the requested role for this Q.
+        final isPrimary = d == q.primaryDimension;
+        if (role == _Role.primary && !isPrimary) continue;
+        if (role == _Role.cross && isPrimary) continue;
+
         var best = 0.0;
         for (final o in q.options) {
           final v = (o.scores[d] ?? 0).toDouble();

@@ -310,6 +310,23 @@ class SettingsScreen extends ConsumerWidget {
                   children: [
                     ListTile(
                       leading: Icon(
+                        Icons.auto_stories_outlined,
+                        color: scheme.primary,
+                      ),
+                      title: const Text('The four EQ dimensions'),
+                      subtitle: const Text(
+                        'What Self-Awareness, Regulation, Empathy & Social Skills mean here',
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () =>
+                          context.push('${Routes.eqIntro}?review=1'),
+                    ),
+                    Divider(
+                      height: 1,
+                      color: scheme.outline.withValues(alpha: 0.2),
+                    ),
+                    ListTile(
+                      leading: Icon(
                         Icons.privacy_tip_outlined,
                         color: scheme.primary,
                       ),

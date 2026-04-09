@@ -77,11 +77,13 @@ class _NotificationScheduleSyncState
       firebaseAuthUserProvider,
       (_, next) => _applyFirebaseCoachContext(next),
     );
-    ref.listen<UserIntent?>(userIntentProvider, (prev, next) {
-      if (next == null) return;
-      ref.read(coachingRepositoryProvider).applyCoachingContext({
-        'userIntent': next.id,
-        'userIntentLabel': next.label,
+    ref.listen<AsyncValue<UserIntent?>>(userIntentProvider, (prev, next) {
+      next.whenData((intent) {
+        if (intent == null) return;
+        ref.read(coachingRepositoryProvider).applyCoachingContext({
+          'userIntent': intent.id,
+          'userIntentLabel': intent.label,
+        });
       });
     });
     ref.listen<AsyncValue<AssessmentResult?>>(

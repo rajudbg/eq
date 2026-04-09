@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../widgets/base/emvo_loading_indicator.dart';
+
 /// Widget that prevents unnecessary repaints.
 class RepaintBoundaryWrapper extends StatelessWidget {
   final Widget child;
@@ -79,7 +81,12 @@ class CachedWidget<T> extends ConsumerWidget {
     return asyncValue.when(
       data: (data) => builder(context, data),
       loading: () =>
-          loading ?? const Center(child: CircularProgressIndicator()),
+          loading ??
+          const Center(
+            child: EmvoLoadingIndicator(
+              message: 'Loading…',
+            ),
+          ),
       error: (err, stack) =>
           error?.call(err, stack) ?? Center(child: Text('Error: $err')),
     );

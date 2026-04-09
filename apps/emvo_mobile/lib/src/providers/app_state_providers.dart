@@ -94,3 +94,38 @@ class AuthNotifier extends StateNotifier<bool> {
 final authProvider = StateNotifierProvider<AuthNotifier, bool>((ref) {
   return AuthNotifier();
 });
+
+const _kEqDimensionsIntroSeen = 'onboarding.eq_dimensions_intro_seen';
+
+/// First-run primer for the four EQ dimensions (Welcome → intro → Intent).
+class EqDimensionsIntroNotifier extends StateNotifier<bool> {
+  EqDimensionsIntroNotifier() : super(false) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final v = prefs.getBool(_kEqDimensionsIntroSeen) ?? false;
+    if (state != v) state = v;
+  }
+
+  Future<void> markSeen() async {
+    if (state) return;
+    state = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kEqDimensionsIntroSeen, true);
+  }
+
+  /// Cleared when the user abandons the assessment before completion
+  /// (same moment as [OnboardingNotifier.reset]).
+  Future<void> reset() async {
+    state = false;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_kEqDimensionsIntroSeen);
+  }
+}
+
+final eqDimensionsIntroSeenProvider =
+    StateNotifierProvider<EqDimensionsIntroNotifier, bool>((ref) {
+  return EqDimensionsIntroNotifier();
+});

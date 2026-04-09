@@ -32,7 +32,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       body: SafeArea(
         child: plansAsync.when(
           data: _buildContent,
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const Center(
+            child: EmvoLoadingIndicator(
+              message: 'Loading plans…',
+            ),
+          ),
           error: (_, __) => Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

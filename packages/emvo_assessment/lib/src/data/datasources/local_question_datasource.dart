@@ -5,11 +5,18 @@ import 'package:flutter/services.dart';
 import '../../domain/entities/question.dart';
 import '../models/question_model.dart';
 
-/// Loads bundled [questions.json]; falls back to the first four scenarios if the
-/// asset cannot be read (e.g. tests without assets, misconfigured build).
+/// Loads a bundled assessment JSON (`questions` array). Defaults to
+/// [defaultAssetPath]; falls back to embedded scenarios if the asset cannot be read
+/// (e.g. tests without assets, misconfigured build).
 class LocalQuestionDataSource {
-  static const String _assetPath =
+  LocalQuestionDataSource({String? assetPath})
+      : _assetPath = assetPath ?? defaultAssetPath;
+
+  /// Standard 16-question bank when no intent-specific pack is selected.
+  static const String defaultAssetPath =
       'packages/emvo_assessment/lib/src/data/questions.json';
+
+  final String _assetPath;
 
   Future<List<Question>> getQuestions() async {
     try {

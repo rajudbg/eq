@@ -71,7 +71,7 @@ class EqResultShareSnapshot extends StatelessWidget {
           _dimRow('Self-Awareness', sa),
           _dimRow('Self-Regulation', sr),
           _dimRow('Empathy', em),
-          _dimRow('Social skills', ss),
+          _dimRow('Social Skills', ss),
         ],
       ),
     );

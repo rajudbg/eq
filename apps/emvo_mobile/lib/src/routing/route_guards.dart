@@ -33,6 +33,7 @@ class RouteGuards {
 
     // Skip guards for auth-related routes to prevent redirect loops
     final isAuthRoute = location == Routes.welcome ||
+        location == Routes.eqIntro ||
         location == Routes.intent ||
         location == Routes.onboarding ||
         location.startsWith('/login');

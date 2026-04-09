@@ -6,7 +6,6 @@ import 'package:emvo_ui/emvo_ui.dart';
 
 import '../../providers/app_state_providers.dart';
 import '../../routing/routing.dart';
-import '../../providers/user_intent_provider.dart';
 import 'welcome_animated_logo.dart';
 
 class WelcomeScreen extends ConsumerStatefulWidget {
@@ -38,10 +37,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     });
 
     final scheme = context.emvoScheme;
-    final subtle = context.emvoOnSurface(0.72);
     final bodyStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
           height: 1.48,
           color: context.emvoOnSurface(0.82),
+          fontWeight: FontWeight.w500,
+        );
+    final bulletStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+          fontSize: 13,
+          height: 1.38,
+          color: context.emvoOnSurface(0.78),
           fontWeight: FontWeight.w500,
         );
 
@@ -62,14 +66,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       Center(
                         child: WelcomeAnimatedLogo(
                           emphasize: _emphasizeLogo,
-                          size: 192,
+                          size: 152,
                         ),
                       ),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 18),
                       if (_emphasizeLogo)
                         ShaderMask(
                           shaderCallback: (bounds) => LinearGradient(
@@ -92,12 +96,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             textAlign: TextAlign.center,
                             style: Theme.of(context)
                                 .textTheme
-                                .headlineMedium
+                                .headlineSmall
                                 ?.copyWith(
                                   fontWeight: FontWeight.w900,
                                   height: 1.15,
                                   color: Colors.white,
-                                  letterSpacing: -0.8,
+                                  letterSpacing: -0.6,
                                 ),
                           ),
                         )
@@ -111,76 +115,81 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                               duration: 550.ms,
                               curve: Curves.easeOutCubic,
                             ),
-                      if (_emphasizeLogo) const SizedBox(height: 32),
+                      if (_emphasizeLogo) const SizedBox(height: 20),
                       if (_emphasizeLogo)
                         _StaggerLine(
                           delayMs: 40,
-                          child: _BulletText(
-                            text: 'But sometimes you say the wrong thing.',
-                            style: bodyStyle,
+                          child: _BulletLine(
+                            text: 'Sometimes the wrong words slip out.',
+                            style: bulletStyle,
                           ),
                         ),
                       if (_emphasizeLogo)
                         _StaggerLine(
                           delayMs: 110,
-                          child: _BulletText(
-                            text: 'Sometimes you shut down when it matters.',
-                            style: bodyStyle,
+                          child: _BulletLine(
+                            text:
+                                'Sometimes you go quiet when it matters most.',
+                            style: bulletStyle,
                           ),
                         ),
                       if (_emphasizeLogo)
                         _StaggerLine(
                           delayMs: 180,
-                          child: _BulletText(
+                          child: _BulletLine(
                             text:
-                                'Sometimes you wonder why relationships\nat work feel so draining.',
-                            style: bodyStyle,
+                                'And sometimes… people just feel exhausting.',
+                            style: bulletStyle,
                           ),
                         ),
-                      if (_emphasizeLogo) const SizedBox(height: 24),
+                      if (_emphasizeLogo) const SizedBox(height: 12),
                       if (_emphasizeLogo)
                         _StaggerLine(
                           delayMs: 250,
                           child: Center(
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 16,
+                                horizontal: 16,
+                                vertical: 12,
                               ),
                               decoration: BoxDecoration(
                                 color: scheme.surface.withValues(alpha: 0.4),
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(14),
                                 border: Border.all(
                                   color: scheme.primary.withValues(alpha: 0.15),
                                 ),
                               ),
                               child: Text(
-                                "It's not about trying harder.\n"
-                                "It's about understanding yourself better.",
+                                "It's not about trying harder—it's about "
+                                'understanding yourself better.',
                                 textAlign: TextAlign.center,
                                 style: bodyStyle?.copyWith(
                                   fontWeight: FontWeight.w700,
                                   color: scheme.primary,
-                                  fontSize: (bodyStyle.fontSize ?? 16) + 1,
+                                  fontSize: (bodyStyle.fontSize ?? 16) * 0.94,
+                                  height: 1.35,
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      if (_emphasizeLogo) const SizedBox(height: 28),
+                      if (_emphasizeLogo) const SizedBox(height: 14),
                       if (_emphasizeLogo)
                         GlassContainer(
                           margin: EdgeInsets.zero,
-                          padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
+                          padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               AnimatedButton(
-                                text: 'Take the EQ Assessment',
+                                text: 'Discover your EQ',
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
                                   ref.read(mascotProvider.notifier).encourage();
-                                  context.go(Routes.intent);
+                                  final seen = ref.read(eqDimensionsIntroSeenProvider);
+                                  context.go(
+                                    seen ? Routes.intent : Routes.eqIntro,
+                                  );
                                 },
                                 width: double.infinity,
                               )
@@ -195,33 +204,51 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                                     duration: 420.ms,
                                     curve: Curves.easeOutCubic,
                                   ),
-                              const SizedBox(height: 10),
+                              const SizedBox(height: 6),
                               Text(
-                                'Takes about 8 minutes · Completely free',
+                                'EQ profile & growth plan · ~10 min · Free',
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context)
                                     .textTheme
-                                    .bodySmall
-                                    ?.copyWith(color: subtle, height: 1.35),
+                                    .labelMedium
+                                    ?.copyWith(
+                                      color: context.emvoOnSurface(0.72),
+                                      height: 1.3,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ).animate().fadeIn(
-                                    delay: 360.ms,
+                                    delay: 340.ms,
                                     duration: 450.ms,
                                   ),
-                              const SizedBox(height: 18),
-                              AnimatedButton(
-                                text: 'I already have an account',
-                                onPressed: () {
-                                  final hasLocalIntent =
-                                      ref.read(userIntentProvider) != null;
-                                  final signedIn = ref.read(authProvider);
-                                  if (signedIn || hasLocalIntent) {
-                                    context.go(Routes.assessment);
-                                  } else {
-                                    context.go(Routes.intent);
-                                  }
-                                },
-                                isSecondary: true,
-                                width: double.infinity,
+                              const SizedBox(height: 12),
+                              Center(
+                                child: TextButton(
+                                  onPressed: () {
+                                    HapticFeedback.lightImpact();
+                                    context.go(Routes.login);
+                                  },
+                                  style: TextButton.styleFrom(
+                                    foregroundColor:
+                                        context.emvoOnSurface(0.55),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    minimumSize: Size.zero,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  child: Text(
+                                    'I already have an account',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelLarge
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 0.15,
+                                        ),
+                                  ),
+                                ),
                               )
                                   .animate()
                                   .fadeIn(
@@ -229,23 +256,36 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                                     duration: 400.ms,
                                   )
                                   .slideY(
-                                    begin: 0.06,
+                                    begin: 0.04,
                                     delay: 380.ms,
                                     duration: 400.ms,
                                     curve: Curves.easeOutCubic,
                                   ),
-                              const SizedBox(height: 14),
                               TextButton(
-                                onPressed: () => context.go(Routes.login),
+                                onPressed: () {
+                                  HapticFeedback.lightImpact();
+                                  context.go(Routes.login);
+                                },
+                                style: TextButton.styleFrom(
+                                  foregroundColor:
+                                      context.emvoOnSurface(0.45),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  minimumSize: Size.zero,
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
                                 child: Text(
-                                  'Sign in with Google, Apple, Facebook, or email',
+                                  'Google, Apple, Facebook, or email',
                                   textAlign: TextAlign.center,
                                   style: Theme.of(context)
                                       .textTheme
-                                      .labelLarge
+                                      .labelSmall
                                       ?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: scheme.primary,
+                                        fontWeight: FontWeight.w500,
+                                        height: 1.25,
                                       ),
                                 ),
                               )
@@ -261,7 +301,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                               duration: 480.ms,
                               curve: Curves.easeOutCubic,
                             ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 8),
                     ],
                   ),
                 ),
@@ -286,7 +326,7 @@ class _StaggerLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: 10),
       child: child
           .animate()
           .fadeIn(
@@ -304,50 +344,36 @@ class _StaggerLine extends StatelessWidget {
   }
 }
 
-class _BulletText extends StatelessWidget {
-  const _BulletText({required this.text, this.style});
+class _BulletLine extends StatelessWidget {
+  const _BulletLine({required this.text, this.style});
+
   final String text;
   final TextStyle? style;
 
   @override
   Widget build(BuildContext context) {
     final scheme = context.emvoScheme;
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 320),
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 2),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 8),
-                width: 6,
-                height: 6,
-                decoration: BoxDecoration(
-                  color: scheme.primary.withValues(alpha: 0.7),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: scheme.primary.withValues(alpha: 0.3),
-                      blurRadius: 4,
-                      spreadRadius: 1,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  text,
-                  style: style,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
+    final bulletColor = scheme.primary;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Icon(
+            Icons.fiber_manual_record,
+            size: 10,
+            color: bulletColor,
           ),
         ),
-      ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            text,
+            style: style,
+            textAlign: TextAlign.left,
+          ),
+        ),
+      ],
     );
   }
 }

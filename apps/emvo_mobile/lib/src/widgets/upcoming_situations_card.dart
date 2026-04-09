@@ -282,6 +282,31 @@ class _SituationTile extends ConsumerWidget {
                         ref
                             .read(coachingRepositoryProvider)
                             .applyCoachingContext({
+                          'situationRehearsal': {
+                            'mode': 'roleplay',
+                            'title': situation.title,
+                            'at': situation.at.toIso8601String(),
+                            if (situation.note != null &&
+                                situation.note!.isNotEmpty)
+                              'note': situation.note,
+                            'instruction':
+                                'The user wants to practice/rehearse this '
+                                    'upcoming situation. Simulate a realistic '
+                                    'conversation as the other party and give '
+                                    'real-time EQ feedback on the user\'s '
+                                    'responses. Start by setting the scene.',
+                          },
+                        });
+                        context.go(Routes.coach);
+                      },
+                      icon: const Icon(Icons.theater_comedy, size: 18),
+                      label: const Text('Practice this'),
+                    ),
+                    TextButton.icon(
+                      onPressed: () {
+                        ref
+                            .read(coachingRepositoryProvider)
+                            .applyCoachingContext({
                           'situationPrep': {
                             'title': situation.title,
                             'at': situation.at.toIso8601String(),

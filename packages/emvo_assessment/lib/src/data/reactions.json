@@ -1,0 +1,319 @@
+{
+  "version": "2.0.0-reactions",
+  "intent": "reactions",
+  "description": "Focus on emotional triggers, stress responses, and impulse control",
+  "questions": [
+    {
+      "id": "sa_r_001",
+      "scenario": "You feel a sudden tightness in your chest when checking your phone and seeing a message from a specific person.",
+      "primaryDimension": "selfAwareness",
+      "context": "personal",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Open the message immediately to get it over with", "scores": {"selfAwareness": 1, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Notice the physical sensation and name the emotion before opening", "scores": {"selfAwareness": 5, "selfRegulation": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Ignore the message until you feel less anxious", "scores": {"selfAwareness": 2, "selfRegulation": 3}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Delete the message without reading it", "scores": {"selfAwareness": 1, "selfRegulation": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "sa_r_002",
+      "scenario": "You are watching a movie and suddenly feel tears forming during an unexpected scene. You are with friends.",
+      "primaryDimension": "selfAwareness",
+      "context": "social",
+      "difficulty": 1,
+      "options": [
+        {"id": "a", "text": "Suppress the tears and make a joke to deflect", "scores": {"selfAwareness": 2, "selfRegulation": 3}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Allow the emotion and wonder what specifically triggered it", "scores": {"selfAwareness": 5, "selfRegulation": 3}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Leave the room until you compose yourself", "scores": {"selfAwareness": 3, "selfRegulation": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Pretend you have something in your eye", "scores": {"selfAwareness": 1, "selfRegulation": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "sa_r_003",
+      "scenario": "You notice you have been checking social media every 10 minutes for the past hour without conscious decision.",
+      "primaryDimension": "selfAwareness",
+      "context": "personal",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Continue scrolling since you are already distracted", "scores": {"selfAwareness": 1, "selfRegulation": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Pause and identify what emotion you are avoiding or seeking", "scores": {"selfAwareness": 5, "selfRegulation": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Set a timer to limit future social media use", "scores": {"selfAwareness": 3, "selfRegulation": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Delete the apps immediately to remove temptation", "scores": {"selfAwareness": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "sa_r_004",
+      "scenario": "You wake up at 3 AM with your mind racing about an unresolved conflict from yesterday.",
+      "primaryDimension": "selfAwareness",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Try to force yourself back to sleep by suppressing the thoughts", "scores": {"selfAwareness": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Identify the specific emotion beneath the racing thoughts", "scores": {"selfAwareness": 5, "selfRegulation": 3}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Get up and start planning your response to the conflict", "scores": {"selfAwareness": 2, "selfRegulation": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Write down the thoughts to process them tomorrow", "scores": {"selfAwareness": 4, "selfRegulation": 4}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sa_r_005",
+      "scenario": "You feel an inexplicable urge to eat something sweet after a stressful phone call, even though you are not hungry.",
+      "primaryDimension": "selfAwareness",
+      "context": "personal",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Eat the sweet thing since you deserve it after stress", "scores": {"selfAwareness": 1, "selfRegulation": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Notice the urge and ask what emotion the sweetness would soothe", "scores": {"selfAwareness": 5, "selfRegulation": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Find a healthier snack to satisfy the urge", "scores": {"selfAwareness": 3, "selfRegulation": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Drink water to suppress the craving", "scores": {"selfAwareness": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "sa_r_006",
+      "scenario": "You feel your mood shift dramatically when entering a specific room in your house, but you cannot explain why.",
+      "primaryDimension": "selfAwareness",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Avoid that room when possible", "scores": {"selfAwareness": 1, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Explore what memory or association might be triggered by the space", "scores": {"selfAwareness": 5, "selfRegulation": 3}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Redecorate the room to change its energy", "scores": {"selfAwareness": 2, "selfRegulation": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Assume it is just random and ignore it", "scores": {"selfAwareness": 1, "selfRegulation": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "sr_r_001",
+      "scenario": "Someone cuts in front of you in a long line after you have been waiting 20 minutes. You feel rage surge.",
+      "primaryDimension": "selfRegulation",
+      "context": "social",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Confront them immediately about cutting the line", "scores": {"selfRegulation": 1, "socialSkills": 2}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Notice the rage and choose whether saying something serves you", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Say nothing but stew in resentment for the rest of the wait", "scores": {"selfRegulation": 2, "selfAwareness": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Make a loud comment to the person behind you about line-cutters", "scores": {"selfRegulation": 1, "socialSkills": 1}, "emotionalTone": "aggressive"}
+      ]
+    },
+    {
+      "id": "sr_r_002",
+      "scenario": "You receive a text that triggers you immediately - your hands shake and you want to fire back a harsh response.",
+      "primaryDimension": "selfRegulation",
+      "context": "personal",
+      "difficulty": 1,
+      "options": [
+        {"id": "a", "text": "Type and send your immediate reaction to get it off your chest", "scores": {"selfRegulation": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Put the phone down and wait until your hands stop shaking", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Type a draft but do not send it yet", "scores": {"selfRegulation": 3, "selfAwareness": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Ignore the text and pretend you did not see it", "scores": {"selfRegulation": 2, "socialSkills": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "sr_r_003",
+      "scenario": "You are about to make an expensive impulse purchase online. Your finger hovers over the buy button.",
+      "primaryDimension": "selfRegulation",
+      "context": "personal",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Buy it now before you talk yourself out of it", "scores": {"selfRegulation": 1, "selfAwareness": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Pause and ask what emotion you are trying to buy away", "scores": {"selfRegulation": 5, "selfAwareness": 5}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Add it to cart and sleep on it overnight", "scores": {"selfRegulation": 4, "selfAwareness": 3}, "emotionalTone": "positive"},
+        {"id": "d", "text": "Buy it but set a rule to return it if unused in 30 days", "scores": {"selfRegulation": 3, "selfAwareness": 2}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "sr_r_004",
+      "scenario": "You are in an argument and the other person says something that hits exactly your insecurity. You want to hurt them back.",
+      "primaryDimension": "selfRegulation",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Say the hurtful thing you know will wound them equally", "scores": {"selfRegulation": 1, "empathy": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Notice your hurt and choose not to escalate, even if you need to step away", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Shut down and stop responding to end the argument", "scores": {"selfRegulation": 3, "empathy": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Tell them they hit below the belt and you are done talking", "scores": {"selfRegulation": 2, "socialSkills": 2}, "emotionalTone": "aggressive"}
+      ]
+    },
+    {
+      "id": "sr_r_005",
+      "scenario": "You have been sober for three months and suddenly feel an intense craving at a social event where others are drinking.",
+      "primaryDimension": "selfRegulation",
+      "context": "social",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Have just one drink to take the edge off", "scores": {"selfRegulation": 1, "selfAwareness": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Leave the event immediately and call your support person", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Stay but obsessively focus on resisting the craving", "scores": {"selfRegulation": 3, "selfAwareness": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Tell everyone about your struggle to get their support", "scores": {"selfRegulation": 2, "socialSkills": 3}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "sr_r_006",
+      "scenario": "You are on a diet and someone offers you your favorite food that you have been avoiding for weeks.",
+      "primaryDimension": "selfRegulation",
+      "context": "social",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Take it since you have been good and deserve a treat", "scores": {"selfRegulation": 1, "selfAwareness": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Check in with your body to see if you are actually hungry", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Take a small portion to be polite", "scores": {"selfRegulation": 3, "socialSkills": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Refuse and explain your diet in detail", "scores": {"selfRegulation": 4, "socialSkills": 2}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "em_r_001",
+      "scenario": "You see a stranger crying on a park bench. You feel an urge to help but also feel awkward about intruding.",
+      "primaryDimension": "empathy",
+      "context": "social",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Walk past and respect their privacy", "scores": {"empathy": 2, "socialSkills": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Sit nearby and quietly ask if they need someone to talk to", "scores": {"empathy": 5, "socialSkills": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Offer them a tissue without saying anything", "scores": {"empathy": 4, "socialSkills": 3}, "emotionalTone": "positive"},
+        {"id": "d", "text": "Tell them it will be okay and keep walking", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "em_r_002",
+      "scenario": "Your friend is telling a story and you realize they are embellishing details to make themselves look better.",
+      "primaryDimension": "empathy",
+      "context": "social",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Call them out on the inaccuracies in front of others", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Wonder what insecurity might be driving their need to embellish", "scores": {"empathy": 5, "selfAwareness": 3}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Correct the story with the real version", "scores": {"empathy": 2, "socialSkills": 2}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Let it go since it does not harm anyone", "scores": {"empathy": 3, "socialSkills": 3}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "em_r_003",
+      "scenario": "A child is having a tantrum in a store and their parent looks overwhelmed and embarrassed.",
+      "primaryDimension": "empathy",
+      "context": "social",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Judge the parent for not controlling their child", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Offer a kind word or helping hand to the parent", "scores": {"empathy": 5, "socialSkills": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Ignore the situation completely", "scores": {"empathy": 2, "socialSkills": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Give the parent a knowing look of solidarity", "scores": {"empathy": 4, "socialSkills": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "em_r_004",
+      "scenario": "Your partner is anxious about an upcoming event and keeps asking for reassurance. You are starting to feel frustrated.",
+      "primaryDimension": "empathy",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Tell them to stop worrying and just deal with it", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Recognize their anxiety is real to them even if it frustrates you", "scores": {"empathy": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Give the same reassurance again even though you are tired of repeating it", "scores": {"empathy": 3, "socialSkills": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Suggest they talk to someone else about it", "scores": {"empathy": 2, "socialSkills": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "em_r_005",
+      "scenario": "You are watching a news story about a tragedy in a country you have never visited. You feel numb and switch channels.",
+      "primaryDimension": "empathy",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Keep switching - you cannot help everyone", "scores": {"empathy": 1, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Notice your numbness and allow yourself to feel the tragedy briefly", "scores": {"empathy": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Donate to a related cause to take action", "scores": {"empathy": 4, "selfRegulation": 3}, "emotionalTone": "positive"},
+        {"id": "d", "text": "Tell yourself it is too far away to be real", "scores": {"empathy": 1, "selfAwareness": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "em_r_006",
+      "scenario": "A friend shares a problem you solved easily last year. You feel impatient with their struggle.",
+      "primaryDimension": "empathy",
+      "context": "social",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Tell them exactly how to fix it based on your experience", "scores": {"empathy": 2, "socialSkills": 2}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Remember that their journey is different from yours and listen", "scores": {"empathy": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Change the subject to avoid your impatience", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Share your story to show them it gets better", "scores": {"empathy": 3, "socialSkills": 3}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "ss_r_001",
+      "scenario": "You are at a family dinner and two relatives start arguing about politics. The tension is escalating.",
+      "primaryDimension": "socialSkills",
+      "context": "social",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Join the argument with your own strong opinion", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Redirect by asking about a shared interest or changing the subject", "scores": {"socialSkills": 5, "selfRegulation": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Stay silent and hope it blows over", "scores": {"socialSkills": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Suggest agreeing to disagree and moving on", "scores": {"socialSkills": 4, "empathy": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "ss_r_002",
+      "scenario": "You need to tell a friend that their new partner makes you uncomfortable, but you do not want to damage the friendship.",
+      "primaryDimension": "socialSkills",
+      "context": "social",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Be direct and tell them you do not like their partner", "scores": {"socialSkills": 1, "empathy": 2}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Share your specific observations without making it about your dislike", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Say nothing and avoid spending time with them as a couple", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Ask if they have noticed any concerning behaviors", "scores": {"socialSkills": 4, "empathy": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "ss_r_003",
+      "scenario": "You are at a party where you do not know anyone. You have been standing alone for 10 minutes.",
+      "primaryDimension": "socialSkills",
+      "context": "social",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Stay on your phone to look busy until someone approaches", "scores": {"socialSkills": 1, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Find someone else alone and introduce yourself", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Leave early since you are not enjoying yourself", "scores": {"socialSkills": 1, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Join a group conversation and listen until you find an entry point", "scores": {"socialSkills": 4, "empathy": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "ss_r_004",
+      "scenario": "Your neighbor plays loud music late at night regularly. You need your sleep but want to maintain good relations.",
+      "primaryDimension": "socialSkills",
+      "context": "social",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Bang on the wall or call the police to file a complaint", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Visit them at a calm time and explain your situation collaboratively", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Buy earplugs and suffer in silence", "scores": {"socialSkills": 1, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Leave a passive-aggressive note on their door", "scores": {"socialSkills": 2, "empathy": 1}, "emotionalTone": "aggressive"}
+      ]
+    },
+    {
+      "id": "ss_r_005",
+      "scenario": "A friend asks you to be a reference for a job you do not think they are qualified for.",
+      "primaryDimension": "socialSkills",
+      "context": "social",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Give a lukewarm reference that hints at your reservations", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Have an honest conversation about your concerns before agreeing", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Lie and give a glowing reference to preserve the friendship", "scores": {"socialSkills": 1, "empathy": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Decline by saying you are not the right person to reference them", "scores": {"socialSkills": 4, "empathy": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "ss_r_006",
+      "scenario": "You are in a group project and one member is not contributing. The deadline is approaching.",
+      "primaryDimension": "socialSkills",
+      "context": "social",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Do their work yourself to ensure quality", "scores": {"socialSkills": 1, "empathy": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Check in with them privately to understand what is blocking their contribution", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Call them out in the group chat to pressure them", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Report them to the project lead without talking to them first", "scores": {"socialSkills": 2, "empathy": 1}, "emotionalTone": "avoidant"}
+      ]
+    }
+  ]
+}

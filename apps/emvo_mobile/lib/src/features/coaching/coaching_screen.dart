@@ -237,7 +237,11 @@ class _CoachingScreenState extends ConsumerState<CoachingScreen> {
                     if (cached != null) {
                       return _buildMessageList(cached);
                     }
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(
+                      child: EmvoLoadingIndicator(
+                        message: 'Opening coach…',
+                      ),
+                    );
                   },
                   error: (_, __) => Center(
                     child: Padding(

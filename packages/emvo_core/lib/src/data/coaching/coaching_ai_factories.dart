@@ -12,7 +12,7 @@ CoachingAiGateway createCoachingAiGateway() {
   );
   const model = String.fromEnvironment(
     'OPENROUTER_MODEL',
-    defaultValue: 'stepfun/step-3.5-flash:free',
+    defaultValue: 'openai/gpt-oss-20b:free',
   );
   if (apiKey.isEmpty) {
     return LocalContextCoachingAiGateway();

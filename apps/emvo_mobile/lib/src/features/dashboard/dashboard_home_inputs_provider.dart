@@ -4,6 +4,7 @@ import 'package:emvo_core/emvo_core.dart';
 
 import '../../providers/assessment_providers.dart';
 import '../../providers/daily_checkin_provider.dart';
+import '../../providers/eq_pulse_provider.dart';
 import '../../providers/profile_display_name_provider.dart';
 import '../../providers/retake_banner_snooze_provider.dart';
 import '../../providers/upcoming_situations_provider.dart';
@@ -54,6 +55,7 @@ final dashboardHomeDerivedProvider =
     retakeDue: result != null && isAssessmentRetakeDue(result),
     retakeSnoozed: _retakeSnoozed(ref.watch(retakeBannerSnoozeProvider)),
     isPremium: ref.watch(isPremiumProvider),
+    pulseCompletedThisWeek: ref.watch(eqPulseProvider).completedThisWeek,
   );
 
   return AsyncValue.data(

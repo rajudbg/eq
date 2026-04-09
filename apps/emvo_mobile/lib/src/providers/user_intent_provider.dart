@@ -42,30 +42,29 @@ enum UserIntent {
   }
 }
 
-class UserIntentNotifier extends StateNotifier<UserIntent?> {
-  UserIntentNotifier() : super(null) {
-    _load();
-  }
-
-  Future<void> _load() async {
+/// Hydrates [UserIntent] from disk. While [AsyncLoading], consumers must not
+/// start flows that depend on intent (e.g. assessment question packs).
+class UserIntentNotifier extends AsyncNotifier<UserIntent?> {
+  @override
+  Future<UserIntent?> build() async {
     final prefs = await SharedPreferences.getInstance();
-    state = UserIntent.fromId(prefs.getString(_kUserIntent));
+    return UserIntent.fromId(prefs.getString(_kUserIntent));
   }
 
   Future<void> setIntent(UserIntent intent) async {
-    state = intent;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_kUserIntent, intent.id);
+    state = AsyncValue.data(intent);
   }
 
   Future<void> clear() async {
-    state = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_kUserIntent);
+    state = const AsyncValue.data(null);
   }
 }
 
 final userIntentProvider =
-    StateNotifierProvider<UserIntentNotifier, UserIntent?>((ref) {
-  return UserIntentNotifier();
-});
+    AsyncNotifierProvider<UserIntentNotifier, UserIntent?>(
+  UserIntentNotifier.new,
+);

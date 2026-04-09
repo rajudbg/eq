@@ -9,6 +9,7 @@ import 'package:emvo_ui/emvo_ui.dart';
 
 import '../../providers/app_state_providers.dart';
 import '../../providers/assessment_providers.dart';
+import '../../providers/user_intent_provider.dart';
 import '../../routing/routing.dart';
 
 class AssessmentScreen extends ConsumerStatefulWidget {
@@ -25,19 +26,43 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
   /// Prevents double-taps while a transition animation / delay runs.
   bool _interactionBusy = false;
 
-  @override
-  void initState() {
-    super.initState();
-    Future<void>.delayed(Duration.zero, () {
-      ref.read(onboardingProvider.notifier).completeOnboarding();
-      ref.read(assessmentNotifierProvider.notifier).loadQuestions();
-      ref.read(mascotProvider.notifier).listen();
+  bool _scheduledInitialKickoff = false;
+
+  void _kickoffAssessmentIfReady(AssessmentKickoffDeps deps) {
+    final (ia, status) = deps;
+    if (status != AssessmentStatus.initial) return;
+    ia.whenData((intent) {
+      if (intent == null) return;
+      Future<void>.microtask(() async {
+        if (!mounted) return;
+        if (ref.read(assessmentNotifierProvider).status !=
+            AssessmentStatus.initial) {
+          return;
+        }
+        ref.read(onboardingProvider.notifier).completeOnboarding();
+        await ref.read(assessmentNotifierProvider.notifier).loadQuestions();
+        ref.read(mascotProvider.notifier).listen();
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final intentAsync = ref.watch(userIntentProvider);
     final state = ref.watch(assessmentNotifierProvider);
+
+    if (!_scheduledInitialKickoff) {
+      _scheduledInitialKickoff = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _kickoffAssessmentIfReady(ref.read(assessmentKickoffDepsProvider));
+      });
+    }
+
+    ref.listen<AssessmentKickoffDeps>(
+      assessmentKickoffDepsProvider,
+      (prev, next) => _kickoffAssessmentIfReady(next),
+    );
     final isPremium = ref.watch(isPremiumProvider);
     final history =
         ref.watch(assessmentHistoryProvider).valueOrNull ?? const [];
@@ -98,27 +123,101 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
       );
     }
 
+    return intentAsync.when(
+      loading: () => _intentPhaseScaffold(
+        context,
+        child: const EmvoLoadingPanel(
+          message: 'Setting up your session…',
+        ),
+      ),
+      error: (e, st) => _intentPhaseScaffold(
+        context,
+        child: Padding(
+          padding: EmvoDimensions.paddingScreen,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: EmvoColors.error),
+              const SizedBox(height: 16),
+              Text(
+                'Could not load your preferences',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 12),
+              AnimatedButton(
+                text: 'Try again',
+                onPressed: () =>
+                    ref.invalidate(userIntentProvider),
+                width: double.infinity,
+              ),
+            ],
+          ),
+        ),
+      ),
+      data: (intent) {
+        if (intent == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) context.go(Routes.intent);
+          });
+          return _intentPhaseScaffold(
+            context,
+            child: const EmvoLoadingPanel(
+              message: 'Taking you to focus selection…',
+            ),
+          );
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            title: state.status == AssessmentStatus.inProgress
+                ? Text(
+                    'Question ${state.currentQuestionIndex + 1} of ${state.questions.length}',
+                  )
+                : const Text('Assessment'),
+            leading: IconButton(
+              icon: const Icon(Icons.close),
+              tooltip: 'Leave assessment',
+              onPressed: () async {
+                ref.read(assessmentNotifierProvider.notifier).reset();
+                if (!ref.read(assessmentCompletionProvider)) {
+                  await ref.read(onboardingProvider.notifier).reset();
+                  await ref.read(eqDimensionsIntroSeenProvider.notifier).reset();
+                }
+                if (!context.mounted) return;
+                context.go(Routes.welcome);
+              },
+            ),
+          ),
+          body: EmvoAmbientBackground(
+            child: _buildBody(state),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _intentPhaseScaffold(BuildContext context, {required Widget child}) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: state.status == AssessmentStatus.inProgress
-            ? Text(
-                'Question ${state.currentQuestionIndex + 1} of ${state.questions.length}',
-              )
-            : const Text('Assessment'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close),
-          tooltip: 'Leave assessment',
+          tooltip: 'Leave',
           onPressed: () async {
             ref.read(assessmentNotifierProvider.notifier).reset();
             if (!ref.read(assessmentCompletionProvider)) {
               await ref.read(onboardingProvider.notifier).reset();
+              await ref.read(eqDimensionsIntroSeenProvider.notifier).reset();
             }
             if (!context.mounted) return;
             context.go(Routes.welcome);
           },
         ),
       ),
-      body: _buildBody(state),
+      body: EmvoAmbientBackground(child: SafeArea(child: child)),
     );
   }
 
@@ -126,7 +225,11 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
     switch (state.status) {
       case AssessmentStatus.initial:
       case AssessmentStatus.loading:
-        return const Center(child: CircularProgressIndicator());
+        return const Center(
+          child: EmvoLoadingPanel(
+            message: 'Loading your scenarios…',
+          ),
+        );
 
       case AssessmentStatus.error:
         return Center(
@@ -155,7 +258,11 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
         return _buildQuestion(state);
 
       case AssessmentStatus.completed:
-        return const Center(child: CircularProgressIndicator());
+        return const Center(
+          child: EmvoLoadingPanel(
+            message: 'Scoring your responses…',
+          ),
+        );
     }
   }
 
@@ -176,7 +283,7 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Typical session is about 8 minutes — you are almost there.',
+              'Most people finish in about 10 minutes — you are almost there.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: context.emvoOnSurface(0.55),
@@ -331,6 +438,9 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
     if (current.isLastQuestion) {
       await notifier.calculateResult();
       if (!mounted) return;
+      // [FutureProvider] caches the first fetch; Home often loads history while empty.
+      ref.invalidate(assessmentHistoryProvider);
+      ref.invalidate(latestResultProvider);
       await ref
           .read(assessmentCompletionProvider.notifier)
           .completeAssessment();

@@ -1,0 +1,319 @@
+{
+  "version": "2.0.0-work",
+  "intent": "work",
+  "description": "Workplace and career-focused EQ assessment",
+  "questions": [
+    {
+      "id": "sa_w_001",
+      "scenario": "You are presenting to senior leadership and suddenly notice your voice is shaky and your palms are sweating. You have five minutes left.",
+      "primaryDimension": "selfAwareness",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Push through and ignore the physical sensations", "scores": {"selfAwareness": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Acknowledge internally that you are anxious and focus on your breathing", "scores": {"selfAwareness": 5, "selfRegulation": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Apologize for being nervous to the audience", "scores": {"selfAwareness": 3, "socialSkills": 2}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Speed up to finish faster and escape the situation", "scores": {"selfAwareness": 1, "selfRegulation": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "sa_w_002",
+      "scenario": "Your manager gives you vague feedback: 'You need to be more strategic.' You feel confused and defensive but are not sure why.",
+      "primaryDimension": "selfAwareness",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Ask for examples immediately to prove them wrong", "scores": {"selfAwareness": 2, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Notice your defensiveness and explore what 'strategic' means to you", "scores": {"selfAwareness": 5, "selfRegulation": 3}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Agree vaguely and hope the issue goes away", "scores": {"selfAwareness": 1, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Research what strategic thinking means before responding", "scores": {"selfAwareness": 4, "selfRegulation": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sa_w_003",
+      "scenario": "You have been passed over for a promotion you expected. You tell everyone you are fine, but you find yourself avoiding the person who got the role.",
+      "primaryDimension": "selfAwareness",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Keep telling yourself you are fine and act professionally", "scores": {"selfAwareness": 1, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Admit to yourself that you feel disappointment and possibly envy", "scores": {"selfAwareness": 5, "selfRegulation": 3}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Confront your manager about the unfair decision", "scores": {"selfAwareness": 2, "selfRegulation": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Ask the promoted colleague how they prepared for the role", "scores": {"selfAwareness": 3, "socialSkills": 4}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "sa_w_004",
+      "scenario": "You are working on a project you initially loved, but now dread opening your laptop each morning. You cannot pinpoint what changed.",
+      "primaryDimension": "selfAwareness",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Push through assuming it is just a phase", "scores": {"selfAwareness": 1, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Journal about when the dread started and what shifted", "scores": {"selfAwareness": 5, "selfRegulation": 3}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Blame external factors like a difficult client", "scores": {"selfAwareness": 2, "selfRegulation": 1}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Schedule a vacation to reset your energy", "scores": {"selfAwareness": 3, "selfRegulation": 3}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "sa_w_005",
+      "scenario": "During a performance review, you realize you have been interrupting your manager when they give critical feedback.",
+      "primaryDimension": "selfAwareness",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Continue interrupting to clarify your perspective", "scores": {"selfAwareness": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Notice the pattern and consciously listen without interrupting", "scores": {"selfAwareness": 5, "selfRegulation": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Shut down and stop participating in the review", "scores": {"selfAwareness": 2, "selfRegulation": 1}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Ask if you can respond after they finish each point", "scores": {"selfAwareness": 4, "socialSkills": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sa_w_006",
+      "scenario": "You feel a surge of excitement about a new idea in a meeting, but notice your teammates seem skeptical.",
+      "primaryDimension": "selfAwareness",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Push harder to convince them with more enthusiasm", "scores": {"selfAwareness": 1, "socialSkills": 2}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Pause to notice if your excitement is masking uncertainty", "scores": {"selfAwareness": 5, "selfRegulation": 3}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Abandon the idea since they do not share your excitement", "scores": {"selfAwareness": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Ask what concerns they have about the idea", "scores": {"selfAwareness": 3, "empathy": 4}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sr_w_001",
+      "scenario": "You receive an email at 11 PM from your boss asking for changes to a presentation by 8 AM. You feel immediate rage.",
+      "primaryDimension": "selfRegulation",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Reply immediately expressing how unreasonable this is", "scores": {"selfRegulation": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Wait until morning, then assess if the request is truly urgent", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Do the work resentfully while complaining to a colleague", "scores": {"selfRegulation": 2, "socialSkills": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Set boundaries about after-hours requests in your reply", "scores": {"selfRegulation": 4, "socialSkills": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sr_w_002",
+      "scenario": "A colleague takes credit for your idea in a meeting with executives. You feel your face flush with anger.",
+      "primaryDimension": "selfRegulation",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Interrupt immediately to correct the record", "scores": {"selfRegulation": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Take a breath and decide the best moment to clarify", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Say nothing but harbor resentment toward them", "scores": {"selfRegulation": 2, "socialSkills": 1}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Privately message your manager to set the record straight", "scores": {"selfRegulation": 3, "socialSkills": 3}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "sr_w_003",
+      "scenario": "Your project deadline is moved up by two weeks. You feel panic and want to tell your team it is impossible.",
+      "primaryDimension": "selfRegulation",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Immediately tell leadership the deadline is impossible", "scores": {"selfRegulation": 1, "socialSkills": 2}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Regulate your panic and create options before responding", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Accept the deadline and work yourself to exhaustion", "scores": {"selfRegulation": 2, "selfAwareness": 1}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Ask what can be deprioritized to meet the new date", "scores": {"selfRegulation": 4, "socialSkills": 4}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sr_w_004",
+      "scenario": "You are in a high-stakes negotiation and the other party just made a personal comment about your experience level.",
+      "primaryDimension": "selfRegulation",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Respond with a personal comment about their track record", "scores": {"selfRegulation": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Notice your triggered feeling and refocus on the business issue", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Shut down and let your colleague take over the negotiation", "scores": {"selfRegulation": 2, "socialSkills": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Call a break to collect yourself before continuing", "scores": {"selfRegulation": 4, "socialSkills": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sr_w_005",
+      "scenario": "You have been working 60-hour weeks for a month. A minor technical glitch makes you want to throw your laptop.",
+      "primaryDimension": "selfRegulation",
+      "context": "workplace",
+      "difficulty": 1,
+      "options": [
+        {"id": "a", "text": "Express your frustration loudly so others know your stress", "scores": {"selfRegulation": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Recognize your exhaustion and take a 10-minute walk", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Power through and fix the glitch despite your frustration", "scores": {"selfRegulation": 3, "selfAwareness": 2}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Complain to a colleague about your workload", "scores": {"selfRegulation": 2, "socialSkills": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "sr_w_006",
+      "scenario": "Your peer wins an award you were also nominated for. You feel a mix of happiness for them and disappointment for yourself.",
+      "primaryDimension": "selfRegulation",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Avoid the celebration event to process your feelings", "scores": {"selfRegulation": 2, "socialSkills": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Attend and authentically celebrate while acknowledging your own disappointment", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Attend but make comments about how the selection process works", "scores": {"selfRegulation": 1, "socialSkills": 2}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Send a congratulatory message but skip the event", "scores": {"selfRegulation": 3, "socialSkills": 3}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "em_w_001",
+      "scenario": "A usually talkative direct report has been silent in your last three one-on-ones, giving short answers.",
+      "primaryDimension": "empathy",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Assume they are just busy and stick to your agenda", "scores": {"empathy": 1, "socialSkills": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Ask directly if something is affecting their engagement", "scores": {"empathy": 5, "socialSkills": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Tell them they need to be more participative in meetings", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Ask other team members if they know what is going on", "scores": {"empathy": 2, "socialSkills": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "em_w_002",
+      "scenario": "A client is being unusually difficult in a meeting, making demands that seem irrational. You notice their voice is strained.",
+      "primaryDimension": "empathy",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Push back firmly on their unreasonable demands", "scores": {"empathy": 1, "socialSkills": 2}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Acknowledge they seem under pressure and ask what is driving the urgency", "scores": {"empathy": 5, "socialSkills": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Give in to their demands to end the uncomfortable meeting", "scores": {"empathy": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Suggest rescheduling when they have had time to prepare", "scores": {"empathy": 3, "socialSkills": 3}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "em_w_003",
+      "scenario": "Your colleague is presenting and you notice their hands are shaking and they keep losing their place.",
+      "primaryDimension": "empathy",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Do nothing - it is not your place to intervene", "scores": {"empathy": 2, "socialSkills": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Ask a clarifying question to give them a moment to regroup", "scores": {"empathy": 5, "socialSkills": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Take over the presentation to help them out", "scores": {"empathy": 2, "socialSkills": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Tell them afterwards they seemed nervous", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "aggressive"}
+      ]
+    },
+    {
+      "id": "em_w_004",
+      "scenario": "A team member from a different cultural background seems offended by something you said, but you are not sure what.",
+      "primaryDimension": "empathy",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Assume they are too sensitive and move on", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Ask if you said something that landed differently than intended", "scores": {"empathy": 5, "socialSkills": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Avoid them to prevent further miscommunication", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Research their culture later to understand what happened", "scores": {"empathy": 3, "selfAwareness": 3}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "em_w_005",
+      "scenario": "Your manager seems unusually short-tempered in a meeting, snapping at small issues that normally would not bother them.",
+      "primaryDimension": "empathy",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Assume they are a bad manager and document the behavior", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Consider they might be under pressure and check in privately", "scores": {"empathy": 5, "socialSkills": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Ignore it and avoid them until they normalize", "scores": {"empathy": 2, "socialSkills": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Ask colleagues if they know what is going on with the manager", "scores": {"empathy": 2, "socialSkills": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "em_w_006",
+      "scenario": "A junior employee shares an idea in a meeting that you tried two years ago and know will not work.",
+      "primaryDimension": "empathy",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Immediately explain why it will not work based on your experience", "scores": {"empathy": 1, "socialSkills": 2}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Ask questions to understand their thinking before sharing your experience", "scores": {"empathy": 5, "socialSkills": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Stay silent and let them learn from their mistake", "scores": {"empathy": 2, "socialSkills": 1}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Privately tell them later about your previous attempt", "scores": {"empathy": 3, "socialSkills": 3}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "ss_w_001",
+      "scenario": "Two team members are in open conflict during a project meeting, disagreeing on approach and raising voices.",
+      "primaryDimension": "socialSkills",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Let them work it out while you continue the meeting", "scores": {"socialSkills": 1, "empathy": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Acknowledge the tension and suggest a structured problem-solving approach", "scores": {"socialSkills": 5, "selfRegulation": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Take sides with the person you agree with", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Schedule a separate meeting for them to resolve this", "scores": {"socialSkills": 3, "selfRegulation": 3}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "ss_w_002",
+      "scenario": "You need to give critical feedback to a high-performing employee who has been missing deadlines recently.",
+      "primaryDimension": "socialSkills",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Send an email to document the issue formally", "scores": {"socialSkills": 2, "empathy": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Have a private conversation focused on impact and support", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Mention it casually in a team meeting so they get the message", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Wait to see if the pattern continues before saying anything", "scores": {"socialSkills": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "ss_w_003",
+      "scenario": "You are new to a team and need to build relationships quickly to be effective in your role.",
+      "primaryDimension": "socialSkills",
+      "context": "workplace",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Focus on your work output first - relationships will follow", "scores": {"socialSkills": 2, "empathy": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Schedule brief one-on-ones to learn about each colleague's role and goals", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Join group lunches and dominate the conversation to show your expertise", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Wait for others to reach out and welcome you", "scores": {"socialSkills": 1, "selfRegulation": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "ss_w_004",
+      "scenario": "Your team needs to make a decision where you have strong expertise, but others have different opinions based on gut feeling.",
+      "primaryDimension": "socialSkills",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Insist on your approach since you have the data to back it up", "scores": {"socialSkills": 1, "empathy": 2}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Share your data while validating their perspectives and finding common ground", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Let them decide and prepare to say I told you so later", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Propose a pilot test to compare approaches", "scores": {"socialSkills": 4, "selfRegulation": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "ss_w_005",
+      "scenario": "You need to decline a request from a senior leader that would derail your team's priorities.",
+      "primaryDimension": "socialSkills",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Say yes and figure out how to manage the overload later", "scores": {"socialSkills": 1, "selfRegulation": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Explain your current priorities and ask what should be deprioritized", "scores": {"socialSkills": 5, "selfRegulation": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Simply say no and cite your full workload", "scores": {"socialSkills": 2, "selfRegulation": 2}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Delegate the request to a team member without explaining why", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "ss_w_006",
+      "scenario": "A cross-functional project is failing because departments are not communicating. You are not the official lead.",
+      "primaryDimension": "socialSkills",
+      "context": "workplace",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Document the communication failures and escalate to leadership", "scores": {"socialSkills": 2, "empathy": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Convene an informal session to align on goals and establish communication rhythms", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Focus only on your part and let the official lead handle it", "scores": {"socialSkills": 1, "empathy": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Publicly call out the communication gaps in the next meeting", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "aggressive"}
+      ]
+    }
+  ]
+}

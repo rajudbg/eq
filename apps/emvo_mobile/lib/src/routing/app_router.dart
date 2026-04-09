@@ -7,6 +7,7 @@ import '../features/coaching/coaching_screen.dart';
 import '../features/dashboard/dashboard_shell.dart';
 import '../features/dashboard/home_screen.dart';
 import '../features/progress/progress_screen.dart';
+import '../features/onboarding/eq_dimensions_intro_screen.dart';
 import '../features/onboarding/intent_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/results/results_screen.dart';
@@ -40,6 +41,11 @@ class AppRouter {
         builder: (context, state) => LoginScreen(
           initialRegister: state.uri.queryParameters['mode'] == 'register',
         ),
+      ),
+      GoRoute(
+        path: '/eq-intro',
+        name: 'eq-intro',
+        builder: (context, state) => const EqDimensionsIntroScreen(),
       ),
       GoRoute(
         path: '/intent',
@@ -158,6 +164,7 @@ class AppRouter {
 class Routes {
   static const String welcome = '/welcome';
   static const String login = '/login';
+  static const String eqIntro = '/eq-intro';
   static const String intent = '/intent';
   static const String onboarding = '/onboarding';
   static const String assessment = '/assessment';

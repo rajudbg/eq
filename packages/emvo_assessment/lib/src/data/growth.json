@@ -1,0 +1,319 @@
+{
+  "version": "2.0.0-growth",
+  "intent": "growth",
+  "description": "Focus on personal development, therapy, intimate relationships, and inner work",
+  "questions": [
+    {
+      "id": "sa_g_001",
+      "scenario": "You are journaling and realize you have described the same relationship problem three times over six months with no change.",
+      "primaryDimension": "selfAwareness",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Continue journaling hoping clarity will eventually emerge", "scores": {"selfAwareness": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Ask yourself what fear or benefit keeps you stuck in this pattern", "scores": {"selfAwareness": 5, "selfRegulation": 3}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Stop journaling about it since it is not helping", "scores": {"selfAwareness": 1, "selfRegulation": 1}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Share your journal entries with a friend for external perspective", "scores": {"selfAwareness": 4, "socialSkills": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sa_g_002",
+      "scenario": "You feel a familiar sense of emptiness on Sunday evenings that you used to blame on work anxiety, but it persists even after changing jobs.",
+      "primaryDimension": "selfAwareness",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Plan more activities to fill the Sunday evening time", "scores": {"selfAwareness": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Explore what the emptiness might be telling you about unmet needs", "scores": {"selfAwareness": 5, "selfRegulation": 3}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Accept it as normal and distract yourself until Monday", "scores": {"selfAwareness": 1, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Schedule therapy to understand the pattern", "scores": {"selfAwareness": 4, "selfRegulation": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sa_g_003",
+      "scenario": "You notice you feel most alive when helping others with their problems, but depleted when focusing on your own life.",
+      "primaryDimension": "selfAwareness",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Focus on helping others since that is where you find meaning", "scores": {"selfAwareness": 1, "empathy": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Investigate what you are avoiding in your own life through this pattern", "scores": {"selfAwareness": 5, "selfRegulation": 3}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Set boundaries on helping others to preserve energy", "scores": {"selfAwareness": 3, "selfRegulation": 4}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Find a career in helping professions to align passion with work", "scores": {"selfAwareness": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "sa_g_004",
+      "scenario": "You keep dating people who need fixing, then resent them for not changing. This is your fourth such relationship.",
+      "primaryDimension": "selfAwareness",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Accept that you attract broken people and try to help them better", "scores": {"selfAwareness": 1, "empathy": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Explore what need in you is met by being the fixer", "scores": {"selfAwareness": 5, "selfRegulation": 3}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Commit to dating only people who have their lives together", "scores": {"selfAwareness": 3, "selfRegulation": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Take a break from dating to focus on yourself", "scores": {"selfAwareness": 4, "selfRegulation": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sa_g_005",
+      "scenario": "You realize you have been telling yourself a story about your childhood that casts you as the victim, but now see your parents' perspective too.",
+      "primaryDimension": "selfAwareness",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Reject this new perspective since your pain was real", "scores": {"selfAwareness": 1, "empathy": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Hold both perspectives - your experience and their limitations", "scores": {"selfAwareness": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Confront your parents about how they failed you", "scores": {"selfAwareness": 2, "selfRegulation": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Focus on the present rather than re-examining the past", "scores": {"selfAwareness": 3, "selfRegulation": 3}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "sa_g_006",
+      "scenario": "You feel a rush of satisfaction when someone fails at something you warned them about, even though you care about them.",
+      "primaryDimension": "selfAwareness",
+      "context": "personal",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Suppress the feeling since it is unkind to enjoy others' failures", "scores": {"selfAwareness": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Get curious about whether this connects to feeling unheard or powerless", "scores": {"selfAwareness": 5, "selfRegulation": 3}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Tell them you told them so to reinforce your wisdom", "scores": {"selfAwareness": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Apologize for warning them and offer to help now", "scores": {"selfAwareness": 3, "empathy": 3}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "sr_g_001",
+      "scenario": "You committed to a daily meditation practice but have skipped five days in a row due to work stress. You feel guilty.",
+      "primaryDimension": "selfRegulation",
+      "context": "personal",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Abandon the practice since you have proven you cannot stick with it", "scores": {"selfRegulation": 1, "selfAwareness": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Start again today without self-judgment for the missed days", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Punish yourself by meditating twice as long today", "scores": {"selfRegulation": 2, "selfAwareness": 2}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Set a reminder system to prevent future skips", "scores": {"selfRegulation": 4, "selfAwareness": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sr_g_002",
+      "scenario": "During a therapy session, you feel intense anger toward your therapist for challenging a belief you hold dear.",
+      "primaryDimension": "selfRegulation",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Shut down and end the session early to avoid saying something hurtful", "scores": {"selfRegulation": 2, "selfAwareness": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Express your anger and explore what the challenge activated in you", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Attack their credentials to defend your position", "scores": {"selfRegulation": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Agree with them outwardly while internally dismissing their point", "scores": {"selfRegulation": 2, "selfAwareness": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "sr_g_003",
+      "scenario": "You feel an urge to text your ex after three months of no contact, knowing it would reopen old wounds.",
+      "primaryDimension": "selfRegulation",
+      "context": "personal",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Send the text since you need closure and deserve to express yourself", "scores": {"selfRegulation": 1, "selfAwareness": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Sit with the urge and journal about what need you are trying to meet", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Write the text but delete it without sending", "scores": {"selfRegulation": 3, "selfAwareness": 3}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Ask a friend to hide your phone until the urge passes", "scores": {"selfRegulation": 2, "socialSkills": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "sr_g_004",
+      "scenario": "You are in a support group and feel tears coming during someone else's share, but you worry about being seen as weak.",
+      "primaryDimension": "selfRegulation",
+      "context": "personal",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Leave the room until you compose yourself", "scores": {"selfRegulation": 2, "selfAwareness": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Allow yourself to feel the emotion without judging it", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Force yourself to think of something funny to stop crying", "scores": {"selfRegulation": 1, "selfAwareness": 1}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Share that you are struggling without explaining why", "scores": {"selfRegulation": 4, "socialSkills": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sr_g_005",
+      "scenario": "Your partner points out a recurring behavior that hurts them. Your first instinct is to defend yourself.",
+      "primaryDimension": "selfRegulation",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "List all the ways they also hurt you to balance the conversation", "scores": {"selfRegulation": 1, "selfAwareness": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Pause your defensive reaction and get curious about their experience", "scores": {"selfRegulation": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Apologize quickly to end the uncomfortable conversation", "scores": {"selfRegulation": 2, "empathy": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Ask for time to process before continuing the discussion", "scores": {"selfRegulation": 4, "socialSkills": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "sr_g_006",
+      "scenario": "You realize you have been emotionally eating for weeks to cope with anxiety about an upcoming life change.",
+      "primaryDimension": "selfRegulation",
+      "context": "personal",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Start a strict diet tomorrow to regain control", "scores": {"selfRegulation": 1, "selfAwareness": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Address the underlying anxiety while showing yourself compassion", "scores": {"selfRegulation": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Hide the behavior from others to avoid judgment", "scores": {"selfRegulation": 1, "socialSkills": 1}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Replace eating with a healthier habit like walking", "scores": {"selfRegulation": 3, "selfAwareness": 3}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "em_g_001",
+      "scenario": "Your friend shares that they are struggling with infertility. You have never wanted children and cannot relate to their grief.",
+      "primaryDimension": "empathy",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Point out the bright side - they can travel and have more freedom", "scores": {"empathy": 1, "selfAwareness": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Listen without trying to fix and acknowledge their pain is real", "scores": {"empathy": 5, "socialSkills": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Share that you never wanted kids anyway to normalize their situation", "scores": {"empathy": 2, "selfAwareness": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Ask questions to understand what this loss means to them", "scores": {"empathy": 4, "socialSkills": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "em_g_002",
+      "scenario": "Your sibling is making life choices you strongly disagree with, and you can see the train wreck coming.",
+      "primaryDimension": "empathy",
+      "context": "personal",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Stage an intervention with family to force them to see reason", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Express your concern once, then trust their autonomy to choose their path", "scores": {"empathy": 5, "selfRegulation": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Say nothing but distance yourself to avoid watching the fallout", "scores": {"empathy": 2, "socialSkills": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Ask permission to share your perspective before offering it", "scores": {"empathy": 4, "socialSkills": 3}, "emotionalTone": "positive"}
+      ]
+    },
+    {
+      "id": "em_g_003",
+      "scenario": "Your partner is upset about something that seems trivial to you - they burned dinner and are crying.",
+      "primaryDimension": "empathy",
+      "context": "personal",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Tell them it is just dinner and they can order takeout", "scores": {"empathy": 1, "selfAwareness": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Recognize the dinner represents something deeper and offer comfort", "scores": {"empathy": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Fix the problem by cooking something yourself", "scores": {"empathy": 3, "socialSkills": 2}, "emotionalTone": "neutral"},
+        {"id": "d", "text": "Give them space to cry it out alone", "scores": {"empathy": 2, "socialSkills": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "em_g_004",
+      "scenario": "A friend is venting about their boss, but you actually think they are in the wrong based on what they have shared.",
+      "primaryDimension": "empathy",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Point out their role in the conflict to give them perspective", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Validate their feelings while gently asking if they see another angle", "scores": {"empathy": 5, "socialSkills": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Nod along to avoid conflict even though you disagree", "scores": {"empathy": 2, "socialSkills": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Change the subject to avoid taking sides", "scores": {"empathy": 2, "socialSkills": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "em_g_005",
+      "scenario": "Your parent is aging and becoming more dependent, which triggers resentment about old childhood wounds.",
+      "primaryDimension": "empathy",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Focus only on their current needs and suppress your resentment", "scores": {"empathy": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Hold space for your own pain while still showing them compassion", "scores": {"empathy": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Use their vulnerability to finally confront them about the past", "scores": {"empathy": 1, "selfRegulation": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Delegate their care to avoid dealing with the complex emotions", "scores": {"empathy": 2, "socialSkills": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "em_g_006",
+      "scenario": "Your friend just had a miscarriage, and you do not know what to say.",
+      "primaryDimension": "empathy",
+      "context": "personal",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Avoid bringing it up in case you say the wrong thing", "scores": {"empathy": 1, "socialSkills": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Show up and admit you do not have words, but you are here", "scores": {"empathy": 5, "socialSkills": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Share stories of other people who went on to have healthy babies", "scores": {"empathy": 2, "selfAwareness": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Send a card with a generic sympathy message", "scores": {"empathy": 3, "socialSkills": 2}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "ss_g_001",
+      "scenario": "You need to tell your best friend that their new partner makes you uncomfortable, but you risk damaging the friendship.",
+      "primaryDimension": "socialSkills",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Keep it to yourself since it is not your place to judge", "scores": {"socialSkills": 2, "selfAwareness": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Share your observations gently, focusing on your concern for them", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Tell them directly that their partner is bad news", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Wait until they ask for your opinion to share it", "scores": {"socialSkills": 3, "empathy": 2}, "emotionalTone": "neutral"}
+      ]
+    },
+    {
+      "id": "ss_g_002",
+      "scenario": "A family member keeps asking when you will have children, not knowing you are struggling with infertility.",
+      "primaryDimension": "socialSkills",
+      "context": "personal",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Snap at them for being insensitive and invasive", "scores": {"socialSkills": 1, "selfRegulation": 1}, "emotionalTone": "aggressive"},
+        {"id": "b", "text": "Set a boundary kindly while deciding how much to disclose", "scores": {"socialSkills": 5, "selfRegulation": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Smile and change the subject to avoid awkwardness", "scores": {"socialSkills": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Tell them it is none of their business and walk away", "scores": {"socialSkills": 2, "selfRegulation": 2}, "emotionalTone": "aggressive"}
+      ]
+    },
+    {
+      "id": "ss_g_003",
+      "scenario": "You are in a new relationship and need to communicate that you need more alone time than your partner.",
+      "primaryDimension": "socialSkills",
+      "context": "personal",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Just start taking space without explanation and hope they notice", "scores": {"socialSkills": 1, "selfAwareness": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Explain your needs clearly while reassuring them it is not about them", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Wait until they complain about your distance to have the conversation", "scores": {"socialSkills": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Force yourself to spend more time together to avoid conflict", "scores": {"socialSkills": 1, "selfRegulation": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "ss_g_004",
+      "scenario": "Two of your close friends are in conflict and both want you to take their side.",
+      "primaryDimension": "socialSkills",
+      "context": "personal",
+      "difficulty": 3,
+      "options": [
+        {"id": "a", "text": "Choose the friend you have known longer and support them fully", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Refuse to take sides while supporting both in finding resolution", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Tell them you cannot be friends with either until they resolve it", "scores": {"socialSkills": 1, "empathy": 2}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Agree with whoever you are talking to in the moment", "scores": {"socialSkills": 2, "selfAwareness": 1}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "ss_g_005",
+      "scenario": "You need to ask your roommate to move out because their lifestyle no longer aligns with yours.",
+      "primaryDimension": "socialSkills",
+      "context": "personal",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Start looking for a new place yourself without telling them", "scores": {"socialSkills": 1, "selfAwareness": 1}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Have an honest conversation giving them reasonable notice", "scores": {"socialSkills": 5, "empathy": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Make the environment uncomfortable so they choose to leave", "scores": {"socialSkills": 1, "empathy": 1}, "emotionalTone": "aggressive"},
+        {"id": "d", "text": "Ask a mutual friend to deliver the message for you", "scores": {"socialSkills": 2, "empathy": 2}, "emotionalTone": "avoidant"}
+      ]
+    },
+    {
+      "id": "ss_g_006",
+      "scenario": "You have been in therapy for months and your partner asks how it is going. You are not sure how much to share.",
+      "primaryDimension": "socialSkills",
+      "context": "personal",
+      "difficulty": 2,
+      "options": [
+        {"id": "a", "text": "Say it is fine and change the subject to protect your privacy", "scores": {"socialSkills": 2, "selfAwareness": 2}, "emotionalTone": "avoidant"},
+        {"id": "b", "text": "Share what feels comfortable while explaining your boundaries", "scores": {"socialSkills": 5, "selfAwareness": 4}, "emotionalTone": "positive"},
+        {"id": "c", "text": "Tell them everything since they asked and you have nothing to hide", "scores": {"socialSkills": 2, "selfRegulation": 2}, "emotionalTone": "avoidant"},
+        {"id": "d", "text": "Ask why they are asking before deciding what to share", "scores": {"socialSkills": 4, "selfAwareness": 3}, "emotionalTone": "positive"}
+      ]
+    }
+  ]
+}

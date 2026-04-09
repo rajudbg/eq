@@ -45,7 +45,11 @@ class ProgressScreen extends ConsumerWidget {
         child: SafeArea(
           child: historyAsync.when(
             data: (history) => _buildContent(context, ref, history),
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(
+              child: EmvoLoadingIndicator(
+                message: 'Loading your progress…',
+              ),
+            ),
             error: (_, __) => Center(
               child: Padding(
                 padding: EmvoDimensions.paddingScreen,

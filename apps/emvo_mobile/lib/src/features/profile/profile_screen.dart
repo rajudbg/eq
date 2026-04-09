@@ -18,7 +18,8 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final name = ref.watch(effectiveProfileDisplayNameProvider);
     final notifications = ref.watch(notificationsEnabledProvider);
-    final intent = ref.watch(userIntentProvider);
+    final intentAsync = ref.watch(userIntentProvider);
+    final intent = intentAsync.valueOrNull;
     final latest = ref.watch(latestResultProvider).valueOrNull;
     final firebaseLinked = ref.watch(firebaseSignedInWithProviderProvider);
     final scheme = Theme.of(context).colorScheme;

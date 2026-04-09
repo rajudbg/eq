@@ -1,4 +1,3 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -16,7 +15,8 @@ import '../assessment/assessment_ai_bridge.dart';
 import '../assessment/assessment_ai_providers.dart';
 import 'results_account_nudge.dart';
 import 'results_notification_nudge.dart';
-import '../../widgets/share_eq_result_card.dart';
+import '../../widgets/eq_profile_share_card.dart';
+import 'eq_benchmarks.dart';
 
 class ResultsScreen extends ConsumerStatefulWidget {
   const ResultsScreen({super.key});
@@ -67,8 +67,16 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     if (viewingPast) {
       final historyAsync = ref.watch(assessmentHistoryProvider);
       return historyAsync.when(
-        loading: () => const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
+        loading: () => Scaffold(
+          body: EmvoAmbientBackground(
+            child: SafeArea(
+              child: Center(
+                child: EmvoLoadingPanel(
+                  message: 'Loading results…',
+                ),
+              ),
+            ),
+          ),
         ),
         error: (_, __) => Scaffold(
           body: Center(
@@ -188,9 +196,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     AssessmentResult result, {
     required String? narrativeResultId,
   }) {
-    final appBarTitle = narrativeResultId != null
-        ? 'Assessment · ${_fmtShortDate(result.completedAt)}'
-        : 'Your EQ Profile';
+    final fromHistory = narrativeResultId != null;
 
     return Scaffold(
       body: EmvoAmbientBackground(
@@ -198,41 +204,93 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
           child: CustomScrollView(
             slivers: [
               SliverAppBar(
-                expandedHeight: 200,
+                expandedHeight: fromHistory ? 228 : 200,
                 floating: false,
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
-                  title: Text(appBarTitle),
+                  // Keep short — long titles stack on the hero and overlap the score.
+                  expandedTitleScale: 1.0,
+                  titlePadding: const EdgeInsetsDirectional.only(
+                    start: 16,
+                    bottom: 14,
+                  ),
+                  centerTitle: false,
+                  title: const Text(
+                    'Your EQ Profile',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 17,
+                      shadows: [
+                        Shadow(
+                          color: Color(0x66000000),
+                          blurRadius: 8,
+                          offset: Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                  ),
                   background: Container(
                     decoration: const BoxDecoration(
                       gradient: EmvoColors.primaryGradient,
                     ),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 40),
-                          Text(
-                            result.overallScore.toInt().toString(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .displayLarge
-                                ?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                          Text(
-                            'Overall EQ Score',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge
-                                ?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.9),
-                                ),
-                          ),
-                        ],
-                      ),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              top: 8,
+                              bottom: 52,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    result.overallScore.toInt().toString(),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .displayLarge
+                                        ?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          height: 1.05,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Overall EQ Score',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          color: Colors.white
+                                              .withValues(alpha: 0.92),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
+                                  if (fromHistory) ...[
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Completed ${_fmtShortDate(result.completedAt)}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium
+                                          ?.copyWith(
+                                            color: Colors.white
+                                                .withValues(alpha: 0.72),
+                                            fontWeight: FontWeight.w500,
+                                            letterSpacing: 0.2,
+                                          ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -245,11 +303,23 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                     children: [
                       const SizedBox(height: 16),
                       Center(
-                        child: SizedBox(
-                          height: 280,
-                          child: _buildRadarChart(result),
+                        child: EqRadarChart(
+                          style: EqRadarChartStyle.compact,
+                          chartHeight: 280,
+                          showMidpointBaseline: true,
+                          values: [
+                            result.dimensionScores[EQDimension.selfAwareness] ??
+                                0,
+                            result.dimensionScores[EQDimension.selfRegulation] ??
+                                0,
+                            result.dimensionScores[EQDimension.empathy] ?? 0,
+                            result.dimensionScores[EQDimension.socialSkills] ??
+                                0,
+                          ],
                         ),
                       ),
+                      const SizedBox(height: 24),
+                      _BenchmarkSection(result: result),
                       const SizedBox(height: 28),
                       Text(
                         'Your Strengths & Growth Areas',
@@ -439,12 +509,8 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                         width: double.infinity,
                       ),
                       if (!kIsWeb) ...[
-                        const SizedBox(height: 12),
-                        TextButton.icon(
-                          onPressed: () => shareEqResultAsPng(context, result),
-                          icon: const Icon(Icons.ios_share_outlined, size: 20),
-                          label: const Text('Share score as image'),
-                        ),
+                        const SizedBox(height: 20),
+                        _ShareProfileCta(result: result),
                       ],
                       const SizedBox(height: 32),
                     ],
@@ -480,69 +546,6 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     return '$d days';
   }
 
-  Widget _buildRadarChart(AssessmentResult result) {
-    final dimensions = EQDimension.values.toList();
-    final entries = dimensions
-        .map((d) => RadarEntry(value: result.dimensionScores[d] ?? 0))
-        .toList();
-
-    return RadarChart(
-      RadarChartData(
-        dataSets: [
-          RadarDataSet(
-            fillColor: EmvoColors.primary.withValues(alpha: 0.3),
-            borderColor: EmvoColors.primary,
-            entryRadius: 5,
-            dataEntries: entries,
-            borderWidth: 2,
-          ),
-          RadarDataSet(
-            fillColor: Colors.transparent,
-            borderColor:
-                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.18),
-            entryRadius: 0,
-            dataEntries: List.generate(
-              dimensions.length,
-              (_) => const RadarEntry(value: 50),
-            ),
-            borderWidth: 1,
-          ),
-        ],
-        radarBackgroundColor: Colors.transparent,
-        borderData: FlBorderData(show: false),
-        radarBorderData: BorderSide(
-          color:
-              Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12),
-        ),
-        titlePositionPercentageOffset: 0.2,
-        getTitle: (index, angle) {
-          final dimension = dimensions[index];
-          return RadarChartTitle(
-            text: dimension.displayName.split(' ').join('\n'),
-            angle: angle,
-            positionPercentageOffset: 0.2,
-          );
-        },
-        titleTextStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurface
-                  .withValues(alpha: 0.7),
-              fontWeight: FontWeight.w500,
-            ),
-        tickCount: 4,
-        ticksTextStyle: const TextStyle(color: Colors.transparent),
-        tickBorderData: BorderSide(
-          color:
-              Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06),
-        ),
-        gridBorderData: BorderSide(
-          color:
-              Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12),
-        ),
-      ),
-    );
-  }
 }
 
 /// Shown while [assessmentNarrativeProvider] loads — reads as “AI composing,” not a generic bar.
@@ -979,5 +982,243 @@ class _RecommendationCard extends StatelessWidget {
           delay: Duration(milliseconds: index * 100),
         )
         .slideX(begin: 0.1);
+  }
+}
+
+
+
+class _BenchmarkSection extends StatelessWidget {
+  const _BenchmarkSection({required this.result});
+
+  final AssessmentResult result;
+
+  @override
+  Widget build(BuildContext context) {
+    final benchmarks = EqBenchmarks(result);
+    final scheme = Theme.of(context).colorScheme;
+    final strongest = benchmarks.strongestBenchmark;
+
+    return GlassContainer(
+      padding: const EdgeInsets.all(EmvoDimensions.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.leaderboard_rounded, color: scheme.primary, size: 22),
+              const SizedBox(width: 10),
+              Text(
+                'Where You Stand',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Compared to general population EQ norms.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurface.withValues(alpha: 0.55),
+                  height: 1.3,
+                ),
+          ),
+          const SizedBox(height: 16),
+
+          // Overall badge
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  scheme.primary.withValues(alpha: 0.12),
+                  scheme.primary.withValues(alpha: 0.04),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(EmvoDimensions.radiusMd),
+              border: Border.all(
+                color: scheme.primary.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: scheme.primary.withValues(alpha: 0.15),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${benchmarks.overall.percentile}',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            color: scheme.primary,
+                          ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        benchmarks.overall.label,
+                        style:
+                            Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Better than ${benchmarks.overall.percentile}% of people',
+                        style:
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color:
+                                      scheme.onSurface.withValues(alpha: 0.65),
+                                ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // Per-dimension chips
+          ...benchmarks.dimensions.entries.map((entry) {
+            final dim = entry.key;
+            final bench = entry.value;
+            final isStrongest = dim == strongest.key;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 110,
+                    child: Text(
+                      dim.displayName,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Stack(
+                        children: [
+                          Container(
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: scheme.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          FractionallySizedBox(
+                            widthFactor:
+                                (bench.percentile / 100).clamp(0.0, 1.0),
+                            child: Container(
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: isStrongest
+                                    ? scheme.primary
+                                    : scheme.primary.withValues(alpha: 0.55),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    width: 40,
+                    child: Text(
+                      bench.label == 'Top ${100 - bench.percentile}%'
+                          ? bench.label
+                          : '${bench.percentile}%',
+                      textAlign: TextAlign.right,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: isStrongest
+                                ? scheme.primary
+                                : scheme.onSurface.withValues(alpha: 0.7),
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    ).animate().fadeIn(duration: 350.ms).slideY(begin: 0.04, duration: 350.ms);
+  }
+}
+
+class _ShareProfileCta extends StatelessWidget {
+  const _ShareProfileCta({required this.result});
+
+  final AssessmentResult result;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: () => shareEqProfileCard(context, result),
+      child: GlassContainer(
+        padding: const EdgeInsets.all(EmvoDimensions.md),
+        color: scheme.primary.withValues(alpha: 0.06),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                gradient: EmvoColors.primaryGradient,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.share_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Share Your EQ Profile',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'A designed card with your scores, radar, and EQ superpower.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurface.withValues(alpha: 0.6),
+                          height: 1.3,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: scheme.primary.withValues(alpha: 0.6),
+            ),
+          ],
+        ),
+      ),
+    ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05);
   }
 }

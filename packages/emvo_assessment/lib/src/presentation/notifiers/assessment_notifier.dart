@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/assessment_result.dart';
@@ -47,14 +49,16 @@ class AssessmentState {
     Map<String, String>? answers,
     AssessmentResult? result,
     String? errorMessage,
+    bool clearError = false,
+    bool clearAnswersAndResult = false,
   }) {
     return AssessmentState(
       status: status ?? this.status,
       questions: questions ?? this.questions,
       currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
-      answers: answers ?? this.answers,
-      result: result ?? this.result,
-      errorMessage: errorMessage ?? this.errorMessage,
+      answers: clearAnswersAndResult ? const {} : (answers ?? this.answers),
+      result: clearAnswersAndResult ? null : (result ?? this.result),
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 
@@ -75,7 +79,12 @@ class AssessmentNotifier extends StateNotifier<AssessmentState> {
   final AssessmentRepository _assessmentRepository;
 
   Future<void> loadQuestions() async {
-    state = state.copyWith(status: AssessmentStatus.loading);
+    if (state.status == AssessmentStatus.loading) return;
+
+    state = state.copyWith(
+      status: AssessmentStatus.loading,
+      clearError: true,
+    );
 
     final result = await _questionRepository.getQuestions();
 
@@ -84,11 +93,15 @@ class AssessmentNotifier extends StateNotifier<AssessmentState> {
         status: AssessmentStatus.error,
         errorMessage: failure.message,
       ),
-      (questions) => state = state.copyWith(
-        status: AssessmentStatus.inProgress,
-        questions: questions,
-        currentQuestionIndex: 0,
-      ),
+      (questions) {
+        final shuffled = List<Question>.from(questions)..shuffle(Random());
+        state = state.copyWith(
+          status: AssessmentStatus.inProgress,
+          questions: shuffled,
+          currentQuestionIndex: 0,
+          clearAnswersAndResult: true,
+        );
+      },
     );
   }
 

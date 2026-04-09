@@ -9,6 +9,7 @@ import 'package:emvo_ui/emvo_ui.dart';
 import 'flavors.dart';
 import 'src/app.dart';
 import 'src/bootstrap/emvo_bootstrap.dart';
+import 'src/providers/intent_question_repository.dart';
 import 'src/services/emvo_notification_service.dart';
 import 'src/services/firebase_bootstrap.dart';
 
@@ -21,8 +22,8 @@ Future<void> main() async {
       onBootstrapComplete: _bootstrapBeforeFirstFrame,
       app: ProviderScope(
         overrides: [
-          questionRepositoryProvider.overrideWithValue(
-            QuestionRepositoryImpl(LocalQuestionDataSource()),
+          questionRepositoryProvider.overrideWith(
+            (ref) => IntentAwareQuestionRepository(ref),
           ),
           assessmentRepositoryProvider.overrideWithValue(
             AssessmentRepositoryImpl(),
