@@ -25,7 +25,7 @@ import 'eq_challenges.dart';
 import '../../widgets/emvo_app_bar_title.dart';
 import '../../widgets/eq_action_plan_widgets.dart';
 import '../../widgets/upcoming_situations_card.dart';
-import 'package:share_plus/share_plus.dart';
+import '../../widgets/eq_profile_share_card.dart';
 import 'package:in_app_review/in_app_review.dart';
 
 int _dailyStreakFromHistory(List<AssessmentResult> history) {
@@ -586,16 +586,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         const SizedBox(height: 16),
         AnimatedButton(
           text: 'Share My EQ',
-          onPressed: () {
-            Share.share(
-              'I just scored ${result.overallScore.toInt()} on my EQ Assessment in Emvo! 🚀\n\n'
-              '🧠 Self-Awareness: ${result.dimensionScores[EQDimension.selfAwareness]?.toInt() ?? 0}\n'
-              '🛡️ Self-Regulation: ${result.dimensionScores[EQDimension.selfRegulation]?.toInt() ?? 0}\n'
-              '🤝 Empathy: ${result.dimensionScores[EQDimension.empathy]?.toInt() ?? 0}\n'
-              '❤️ Social Skills: ${result.dimensionScores[EQDimension.socialSkills]?.toInt() ?? 0}\n\n'
-              'Can you beat my score?',
-            );
-          },
+          icon: Icons.ios_share_outlined,
+          onPressed: () => shareEqProfileCard(context, result),
           width: double.infinity,
         ),
       ],
